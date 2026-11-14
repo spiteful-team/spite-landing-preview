@@ -1084,16 +1084,16 @@ const CONFIG = {
     const items = [], places = [];
     for (const a of agents) {
       if (!driving(a)) continue;
-      items.push({ key: a.x + a.y + .6, draw: (g) => agentCube(g, ...P([a.x, a.y, hill(a.x, a.y) + 1])) });
+      items.push({ key: a.x + a.y + .6, at: [a.x, a.y], draw: (g) => agentCube(g, ...P([a.x, a.y, hill(a.x, a.y) + 1])) });
       if (a.state === "place") places.push([a, placePose(a)]);
     }
     slot.forEach((st, n) => {
       if (st.state === "loose") {
         const [i, j] = st.cell, b = st.landed < .6 ? s * .35 * Math.exp(-7 * st.landed) * Math.abs(Math.sin(12 * st.landed)) : 0;
-        items.push({ key: i + j + .5, draw: (g) => { const [x, y] = iso(i, j, hill(i, j) + 1); markCube(g, n, x, y - b, SLOTS[n].k, true); } });
+        items.push({ key: i + j + .5, at: [i, j], draw: (g) => { const [x, y] = iso(i, j, hill(i, j) + 1); markCube(g, n, x, y - b, SLOTS[n].k, true); } });
       } else if (st.state === "roll") {
         const r = rollStep(st), [i, j] = st.at, colors = n === LIT ? LIT_RGB : SLOT_RGB[n];
-        items.push({ key: i + j + (r ? (r.e[0] + r.e[1]) * r.u : 0) + .5, draw: (g) => solid(g, [i, j, hill(i, j)], SLOTS[n].k, colors, r && { e: r.e, a: Math.PI / 2 * ease(r.u) }) });
+        items.push({ key: i + j + (r ? (r.e[0] + r.e[1]) * r.u : 0) + .5, at: [i, j], draw: (g) => solid(g, [i, j, hill(i, j)], SLOTS[n].k, colors, r && { e: r.e, a: Math.PI / 2 * ease(r.u) }) });
       }
     });
     items.sort((p, q) => p.key - q.key);
@@ -1147,6 +1147,24 @@ const CONFIG = {
     while (d < items.length) items[d++].draw(ctx);
 
     drawBlocks(ctx);
+    // A block's left end is painted over the field, so whatever stands in front of that end,
+    // an agent driving to the garage and the floor it lifts, is drawn again over it.
+    for (const b of blocks) {
+      const xs = b.side.map((q) => q[0]), ys = b.side.map((q) => q[1]), box = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+      const ahead = ([i, j]) => j - .5 >= b.jL - .01 || i - .5 >= b.I - .01;
+      const over = ([x, y], r) => x + r > box[0] && x - r < box[2] && y + r > box[1] && y - 2 * r < box[3];
+      const near = items.filter((it) => ahead(it.at) && over(P([it.at[0], it.at[1], 0]), 2.4 * s));
+      if (!near.length) continue;
+      ctx.save(); poly(ctx, b.side); ctx.clip();
+      let q = 0;
+      for (const e of list) {
+        if (!ahead([e.c.i, e.c.j]) || !over(iso(e.c.i, e.c.j, 0), 2 * s)) continue;
+        while (q < near.length && near[q].key < e.c.d) near[q++].draw(ctx);
+        drawCell(ctx, e.c, e.top);
+      }
+      while (q < near.length) near[q++].draw(ctx);
+      ctx.restore();
+    }
     const drawDoors = (g) => { for (const a of doors) (a.state === "exit" ? drawExit : drawEnter)(g, a); };
     drawDoors(ctx);
 

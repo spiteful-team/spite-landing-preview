@@ -84,6 +84,8 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
 .wordmark { text-shadow: 0.87px -0.50px 0 #3a3633, 1.74px -1.00px 0 #373330, 2.61px -1.50px 0 #34312e, 3.48px -2.00px 0 #312e2b, 4.35px -2.50px 0 #2e2b29, 5.22px -3.00px 0 #2b2826, 6.09px -3.50px 0 #292624, 6.96px -4.00px 0 #262321, 7.83px -4.50px 0 #23201f, 8.70px -5.00px 0 #201d1c, 9.57px -5.50px 0 #1d1b1a, 10.44px -6.00px 0 #1a1817; }
 .slogan { display: inline-block; font: 600 clamp(22px, 2.6vw, 30px)/1.25 var(--display); margin: 0; padding: 14px 20px 16px; background: var(--panel); border: 1px solid var(--border); text-wrap: balance; }
 .slogan .lead-in { color: var(--text-muted); }
+/* one line on wide screens, so the block hugs the text */
+@media (min-width: 901px) { .slogan { white-space: nowrap; } }
 .sub { margin: 0; color: var(--text-muted); max-width: 46ch; }
 
 /* install panel */

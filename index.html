@@ -105,7 +105,7 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
    45 degree shear. */
 .roof { display: none; }
 .scene .install { position: relative; }
-.scene .roof { position: absolute; left: -1px; bottom: calc(100% + 1px); width: calc(100% + 2px); height: var(--roof, 70px); transform: skewX(45deg); transform-origin: 0 100%; display: flex; align-items: center; justify-content: flex-end; padding: 0 16px; pointer-events: none; }
+.scene .roof { position: absolute; left: -1px; bottom: calc(100% + 1px); width: calc(100% + 2px); height: var(--roof, 70px); transform: skewX(45deg); transform-origin: 0 100%; display: flex; align-items: center; justify-content: center; padding: 0 16px; pointer-events: none; }
 .roof-btn { pointer-events: auto; display: inline-flex; align-items: stretch; min-width: 0; max-width: 100%; height: 46px; padding: 0; border: 1px solid var(--border-strong); border-radius: 2px; background: var(--raised); color: var(--text); cursor: pointer; box-shadow: 3px 3px 0 var(--ground); transition: transform .06s, box-shadow .06s, border-color .1s; }
 .roof-btn:hover { border-color: var(--accent); }
 .roof-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ground); }
@@ -214,7 +214,7 @@ footer a:hover { color: var(--text); }
         <div class="roof" id="roof">
           <button class="roof-btn" id="roof-copy" type="button">
             <span class="roof-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="9" y="9" width="12" height="12"/><path d="M5 15V3h12"/></svg><span class="roof-idle"><span class="en">Get in touch</span><span class="ru">Связаться</span></span><span class="roof-done"><span class="en">Copied</span><span class="ru">Скопировано</span></span></span>
-            <span class="roof-text" id="roof-text"><span class="en">Hello World</span><span class="ru">Hello World</span></span>
+            <span class="roof-text" id="roof-text"><span class="en">hello@spite-engine.com</span><span class="ru">hello@spite-engine.ru</span></span>
           </button>
         </div>
         <p class="sub"><span class="en">One command installs the engine, the editor and the SDK.</span><span class="ru">Одна команда устанавливает движок, редактор и SDK.</span></p>

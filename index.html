@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap">
 <style>
 /* SPITE Forge (doc-52, assets/ui/forge/tokens.json), dark theme.
-   Layout: quiet left column over a live meshlet terrain where a sweeping frustum selects the clusters it keeps; below, statement + claim list.
+   Layout: quiet left column over a live field of mark-style cubes that agent cubes rearrange; below, statement + claim list.
    Rules kept: accent only for interactive and selected; square panels and tabs; 2px radius on buttons and fields; hard offset shadows; uppercase only in display and code styles. */
 :root {
   --ground: #0d0c0b;
@@ -50,15 +50,18 @@ html[data-lang="en"] .ru, html[data-lang="ru"] .en { display: none !important; }
 .section-title { font: 700 12px/16px var(--display); letter-spacing: .08em; text-transform: uppercase; }
 .code { font: 500 10px/12px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--text-faint); }
 
-/* hero with terrain */
+/* hero with the agent field */
 .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
-#terrain { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
-  -webkit-mask-image: linear-gradient(90deg, transparent 18%, #000 62%); mask-image: linear-gradient(90deg, transparent 18%, #000 62%); }
+#field { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  -webkit-mask-image: linear-gradient(90deg, transparent 22%, #000 64%), linear-gradient(180deg, transparent 4%, #000 26%, #000 80%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 22%, #000 64%), linear-gradient(180deg, transparent 4%, #000 26%, #000 80%, transparent 100%);
+  mask-composite: intersect; }
 .legend { position: absolute; right: max(28px, env(safe-area-inset-right, 0px)); bottom: 20px; display: flex; gap: 16px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 8px; height: 8px; }
-.legend .on i { background: var(--accent); }
-.legend .off i { border: 1px solid var(--text-faint); }
+.legend .on i { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.legend .cmd-l i { width: 16px; height: 0; border-top: 1px dashed var(--agent); }
 
 .bar { display: flex; justify-content: space-between; align-items: center; padding-block: 18px; }
 .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; font: 700 18px/22px var(--display); letter-spacing: .02em; }
@@ -125,8 +128,8 @@ footer a { color: var(--text-faint); }
 footer a:hover { color: var(--text); }
 
 @media (max-width: 900px) {
-  #terrain { -webkit-mask-image: linear-gradient(180deg, transparent 30%, #000 85%); mask-image: linear-gradient(180deg, transparent 30%, #000 85%); opacity: .7; }
-  .hero-body { padding-block: 36px 120px; }
+  #field { -webkit-mask-image: linear-gradient(180deg, transparent 40%, #000 72%, #000 92%, transparent 100%); mask-image: linear-gradient(180deg, transparent 40%, #000 72%, #000 92%, transparent 100%); -webkit-mask-composite: source-over; mask-composite: add; opacity: .8; }
+  .hero-body { padding-block: 36px 240px; }
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
 }
 @media (max-width: 520px) {
@@ -141,8 +144,8 @@ footer a:hover { color: var(--text); }
 </head>
 <body>
 <section class="hero">
-  <canvas id="terrain" aria-hidden="true"></canvas>
-  <div class="legend code" aria-hidden="true"><span class="on"><i></i><span class="en">Drawn</span><span class="ru">Рисуется</span></span><span class="off"><i></i><span class="en">Culled on GPU</span><span class="ru">Отсечено на GPU</span></span></div>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div class="legend code" aria-hidden="true"><span class="on"><i></i><span class="en">Agent</span><span class="ru">Агент</span></span><span class="cmd-l"><i></i><span class="en">Agent command</span><span class="ru">Команда агента</span></span></div>
   <header class="wrap bar">
     <a class="brand" href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 314 64" role="img" aria-label="SPITE Engine"><rect width="314" height="64" rx="0" fill="none"/><svg x="0" y="0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="64" height="64"><defs><filter id="glow-logo" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="7"/></filter></defs><path d="M102.8,72L64.7,94L64.7,50L102.8,28ZM26.6,72L26.6,28L64.7,50L64.7,94ZM64.7,6L102.8,28L64.7,50L26.6,28Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,68.9L70.1,84.8L70.1,53.1L97.5,37.2Z" fill="#45413e"/><path d="M32,68.9L32,37.2L59.4,53.1L59.4,84.8Z" fill="#6f6a65"/><path d="M64.7,12.2L92.2,28L64.7,43.8L37.3,28Z" fill="#a9a39f"/><path d="M140.9,94L102.8,116L102.8,72L140.9,50ZM64.7,94L64.7,50L102.8,72L102.8,116ZM102.8,28L140.9,50L102.8,72L64.7,50Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M135.6,90.9L108.2,106.8L108.2,75.1L135.6,59.2Z" fill="#45413e"/><path d="M70.1,90.9L70.1,59.2L97.5,75.1L97.5,106.8Z" fill="#6f6a65"/><path d="M102.8,34.2L130.3,50L102.8,65.8L75.4,50Z" fill="#a9a39f"/><path d="M179.1,116L140.9,138L140.9,94L179.1,72ZM102.8,116L102.8,72L140.9,94L140.9,138ZM140.9,50L179.1,72L140.9,94L102.8,72Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M173.7,112.9L146.3,128.8L146.3,97.1L173.7,81.2Z" fill="#45413e"/><path d="M108.2,112.9L108.2,81.2L135.6,97.1L135.6,128.8Z" fill="#6f6a65"/><path d="M140.9,56.2L168.4,72L140.9,87.8L113.5,72Z" fill="#a9a39f"/><path d="M217.2,138L179.1,160L179.1,116L217.2,94ZM140.9,138L140.9,94L179.1,116L179.1,160ZM179.1,72L217.2,94L179.1,116L140.9,94Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M211.8,134.9L184.4,150.8L184.4,119.1L211.8,103.2Z" fill="#45413e"/><path d="M146.3,134.9L146.3,103.2L173.7,119.1L173.7,150.8Z" fill="#6f6a65"/><path d="M179.1,78.2L206.5,94L179.1,109.8L151.6,94Z" fill="#a9a39f"/><path d="M255.3,160L217.2,182L217.2,138L255.3,116ZM179.1,160L179.1,116L217.2,138L217.2,182ZM217.2,94L255.3,116L217.2,138L179.1,116Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M249.9,156.9L222.5,172.8L222.5,141.1L249.9,125.2Z" fill="#45413e"/><path d="M184.4,156.9L184.4,125.2L211.8,141.1L211.8,172.8Z" fill="#6f6a65"/><path d="M217.2,100.2L244.6,116L217.2,131.8L189.7,116Z" fill="#a9a39f"/><path d="M293.4,182L255.3,204L255.3,160L293.4,138ZM217.2,182L217.2,138L255.3,160L255.3,204ZM255.3,116L293.4,138L255.3,160L217.2,138Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M288,178.9L260.6,194.8L260.6,163.1L288,147.2Z" fill="#35322f"/><path d="M222.5,178.9L222.5,147.2L249.9,163.1L249.9,194.8Z" fill="#5a5551"/><path d="M255.3,122.2L282.7,138L255.3,153.8L227.8,138Z" fill="#8a847f"/><path d="M255.3,204L217.2,226L217.2,182L255.3,160ZM179.1,204L179.1,160L217.2,182L217.2,226ZM217.2,138L255.3,160L217.2,182L179.1,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M249.9,200.9L222.5,216.8L222.5,185.1L249.9,169.2Z" fill="#35322f"/><path d="M184.4,200.9L184.4,169.2L211.8,185.1L211.8,216.8Z" fill="#5a5551"/><path d="M217.2,144.2L244.6,160L217.2,175.8L189.7,160Z" fill="#8a847f"/><path d="M217.2,226L179.1,248L179.1,204L217.2,182ZM140.9,226L140.9,182L179.1,204L179.1,248ZM179.1,160L217.2,182L179.1,204L140.9,182Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M211.8,222.9L184.4,238.8L184.4,207.1L211.8,191.2Z" fill="#35322f"/><path d="M146.3,222.9L146.3,191.2L173.7,207.1L173.7,238.8Z" fill="#5a5551"/><path d="M179.1,166.2L206.5,182L179.1,197.8L151.6,182Z" fill="#8a847f"/><path d="M179.1,248L140.9,270L140.9,226L179.1,204ZM102.8,248L102.8,204L140.9,226L140.9,270ZM140.9,182L179.1,204L140.9,226L102.8,204Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M173.7,244.9L146.3,260.8L146.3,229.1L173.7,213.2Z" fill="#35322f"/><path d="M108.2,244.9L108.2,213.2L135.6,229.1L135.6,260.8Z" fill="#5a5551"/><path d="M140.9,188.2L168.4,204L140.9,219.8L113.5,204Z" fill="#8a847f"/><path d="M140.9,270L102.8,292L102.8,248L140.9,226ZM64.7,270L64.7,226L102.8,248L102.8,292ZM102.8,204L140.9,226L102.8,248L64.7,226Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M135.6,266.9L108.2,282.8L108.2,251.1L135.6,235.2Z" fill="#35322f"/><path d="M70.1,266.9L70.1,235.2L97.5,251.1L97.5,282.8Z" fill="#5a5551"/><path d="M102.8,210.2L130.3,226L102.8,241.8L75.4,226Z" fill="#8a847f"/><path d="M102.8,292L64.7,314L64.7,270L102.8,248ZM26.6,292L26.6,248L64.7,270L64.7,314ZM64.7,226L102.8,248L64.7,270L26.6,248Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,288.9L70.1,304.8L70.1,273.1L97.5,257.2Z" fill="#2a2725"/><path d="M32,288.9L32,257.2L59.4,273.1L59.4,304.8Z" fill="#45413e"/><path d="M64.7,232.2L92.2,248L64.7,263.8L37.3,248Z" fill="#6f6a65"/><path d="M102.8,248L64.7,270L64.7,226L102.8,204ZM26.6,248L26.6,204L64.7,226L64.7,270ZM64.7,182L102.8,204L64.7,226L26.6,204Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,244.9L70.1,260.8L70.1,229.1L97.5,213.2Z" fill="#2a2725"/><path d="M32,244.9L32,213.2L59.4,229.1L59.4,260.8Z" fill="#45413e"/><path d="M64.7,188.2L92.2,204L64.7,219.8L37.3,204Z" fill="#6f6a65"/><path d="M102.8,204L64.7,226L64.7,182L102.8,160ZM26.6,204L26.6,160L64.7,182L64.7,226ZM64.7,138L102.8,160L64.7,182L26.6,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,200.9L70.1,216.8L70.1,185.1L97.5,169.2Z" fill="#2a2725"/><path d="M32,200.9L32,169.2L59.4,185.1L59.4,216.8Z" fill="#45413e"/><path d="M64.7,144.2L92.2,160L64.7,175.8L37.3,160Z" fill="#6f6a65"/><path d="M102.8,160L64.7,182L64.7,138L102.8,116ZM26.6,160L64.7,138L64.7,182ZM26.6,160L26.6,116L64.7,138ZM64.7,94L102.8,116L64.7,138L26.6,116Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,156.9L70.1,172.8L70.1,142L97.5,126.2ZM70.1,142L70.1,141.1L97.5,125.2L97.5,126.2Z" fill="#2a2725"/><path d="M59.4,148.2L59.4,172.8L38.1,160.5ZM32,156.9L32,125.2L59.4,141.1L59.4,148.2L38.1,160.5Z" fill="#45413e"/><path d="M91.3,116.5L64.7,131.8L37.3,116L63.9,100.6Z" fill="#6f6a65"/><path d="M102.8,116L64.7,138L64.7,94ZM26.6,116L64.7,94L64.7,138ZM26.6,116L26.6,72L64.7,94Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M91.3,116.5L70.1,128.8L70.1,104.2Z" fill="#2a2725"/><path d="M59.4,104.2L59.4,128.8L38.1,116.5ZM32,112.9L32,82.2L59.4,98L59.4,104.2L38.1,116.5Z" fill="#45413e"/><path d="M179.7,189.7L128.2,219.4L128.2,160L179.7,130.3ZM76.8,189.7L76.8,130.3L128.2,160L128.2,219.4ZM128.2,100.6L179.7,130.3L128.2,160L76.8,130.3Z" fill="#ff6a4d" filter="url(#glow-logo)"/><path d="M179.7,189.7L128.2,219.4L128.2,160L179.7,130.3ZM76.8,189.7L76.8,130.3L128.2,160L128.2,219.4ZM128.2,100.6L179.7,130.3L128.2,160L76.8,130.3Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M172.5,185.5L135.4,206.9L135.4,164.2L172.5,142.8Z" fill="#9e4230"/><path d="M84,185.5L84,142.8L121,164.2L121,206.9Z" fill="#cc3e25"/><path d="M128.2,108.9L165.3,130.3L128.2,151.7L91.2,130.3Z" fill="#ff4d2e"/></svg>
 <g transform="translate(78,19.5)"><g transform="translate(-1.79,25) scale(0.03571)" fill="#f2efed"><path transform="translate(0,0)" d="M50 -108V-208H184V-149L217 -116H424L458 -150V-266L425 -299H160L52 -407V-592L160 -700H476L584 -592V-491H450V-551L417 -584H219L186 -551V-448L219 -415H484L592 -307V-110L482 0H158Z"/><path transform="translate(657,0)" d="M65 -700H504L611 -592V-347L503 -238H201V0H65ZM442 -352 477 -387V-551L442 -586H201V-352Z"/><path transform="translate(1323,0)" d="M70 -700H206V0H70Z"/><path transform="translate(1619,0)" d="M224 -585H15V-700H569V-585H360V0H224Z"/><path transform="translate(2223,0)" d="M65 -700H571V-585H201V-408H542V-295H201V-115H571V0H65Z"/></g><g transform="translate(106.18,25) scale(0.03571)" fill="#a9a39f"><path transform="translate(0,0)" d="M65 -700H571V-585H201V-408H542V-295H201V-115H571V0H65Z"/><path transform="translate(626,0)" d="M65 -700H187L499 -225H501V-700H632V0H510L198 -474H196V0H65Z"/><path transform="translate(1343,0)" d="M55 -115V-585L170 -700H518L631 -587V-480H495V-537L448 -584H242L191 -533V-167L242 -116H450L499 -165V-274H349V-390H631V-115L516 0H170Z"/><path transform="translate(2039,0)" d="M70 -700H206V0H70Z"/><path transform="translate(2335,0)" d="M65 -700H187L499 -225H501V-700H632V0H510L198 -474H196V0H65Z"/><path transform="translate(3052,0)" d="M65 -700H571V-585H201V-408H542V-295H201V-115H571V0H65Z"/></g></g></svg></a>
@@ -202,7 +205,7 @@ footer a:hover { color: var(--text); }
         <span class="code"><span class="en">Core</span><span class="ru">Ядро</span></span>
         <div>
           <h3><span class="en">A core faster by orders of magnitude</span><span class="ru">Ядро быстрее на порядки</span></h3>
-          <p><span class="en">The core outperforms every competitor by several orders of magnitude. Data-oriented ECS and GPU-driven Vulkan rendering: the GPU culls and builds its own draws, as in the terrain above.</span><span class="ru">Ядро быстрее и производительнее любого конкурента на несколько порядков. Data-oriented ECS и GPU-driven рендеринг на Vulkan: GPU сам отсекает и собирает отрисовку, как на рельефе выше.</span></p>
+          <p><span class="en">The core outperforms every competitor by several orders of magnitude. Data-oriented ECS and GPU-driven Vulkan rendering: the GPU culls and builds its own draws, and a scene that isn't changing costs nothing.</span><span class="ru">Ядро быстрее и производительнее любого конкурента на несколько порядков. Data-oriented ECS и GPU-driven рендеринг на Vulkan: GPU сам отсекает и собирает отрисовку, а неизменная сцена ничего не стоит.</span></p>
         </div>
       </li>
       <li>
@@ -254,68 +257,234 @@ const CONFIG = {
   setLang(load("spite-lang") || (/^ru\b/i.test(navigator.language) ? "ru" : "en"));
 })();
 
-// Meshlet terrain: a triangulated ground plane grouped into 3x3-cell clusters.
-// A camera frustum sweeps across it; clusters inside are selected in the accent, the rest stay as faint outlines.
+// Agent field: an isometric field of cubes drawn like the SPITE mark. Orange agent cubes walk it,
+// lift a smooth hill under themselves, light their trail and swap cubes; every swap is an agent
+// command, shown as violet beams to both cubes and a dashed triangle between them.
 (() => {
-  const canvas = document.getElementById("terrain"), ctx = canvas.getContext("2d");
+  const canvas = document.getElementById("field"), ctx = canvas.getContext("2d");
   const css = getComputedStyle(document.documentElement);
-  const ACCENT = css.getPropertyValue("--accent").trim(), MUTED = css.getPropertyValue("--text-muted").trim();
-  const COLS = 36, ROWS = 26, X = 11, Z0 = 1.1, Z1 = 16, CAM_H = 1.7, CLUSTER = 3;
+  const AGENT = css.getPropertyValue("--agent").trim();
+  const SEAM = "#141312";
+  const ORANGE = [255, 77, 46];
+  const AGENT_CUBE = { top: "#ff4d2e", left: "#cc3e25", right: "#9e4230" };
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let W = 0, H = 0, f = 1, horizon = 0, cx = 0;
 
-  const jitter = [];
-  for (let j = 0; j <= ROWS; j++) for (let i = 0; i <= COLS; i++) {
-    const s = Math.sin(i * 12.9898 + j * 78.233) * 43758.5453;
-    jitter.push((s - Math.floor(s) - .5) * .5);
+  const N = 72, STEP = .34, WORK = 1.9, HILL = .62, HILL_R2 = 2.8;
+  const hex = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));
+  // Top-face colours: the mark's greys first, then the editor's data and mode hues for variety.
+  const MATERIALS = [["#a9a39f", 7], ["#8a847f", 5], ["#e6dfd0", 1.6], ["#9ccbff", 1.3], ["#b8c4d6", 1.3], ["#7fe3f0", .8], ["#5ccb8a", .7], ["#ffc93d", .5]]
+    .map(([h, w]) => ({ rgb: hex(h), w }));
+  const TOTAL = MATERIALS.reduce((n, m) => n + m.w, 0);
+
+  let seed = 7;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const mat = new Uint8Array(N * N), glow = new Float32Array(N * N), moving = new Uint8Array(N * N), inField = new Uint8Array(N * N);
+  for (let k = 0; k < N * N; k++) {
+    let r = rand() * TOTAL, m = 0;
+    while ((r -= MATERIALS[m].w) > 0) m++;
+    mat[k] = m;
   }
-  function resize() {
+
+  let W = 0, H = 0, s = 24, w = 20.8, ox = 0, oy = 0, cells = [], goals = [], agents = [], time = 0;
+  const id = (i, j) => i * N + j;
+  const iso = (i, j, h) => [ox + (i - j) * w, oy + (i + j) * s / 2 - h * s];
+  const ease = (t) => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+  function layout() {
     const dpr = Math.min(devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect();
     W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    horizon = H * .3; cx = W * (W > 900 ? .68 : .5);
-    f = (H - horizon) * Z0 / CAM_H * 1.15;
+    const wide = W > 900;
+    s = Math.max(16, Math.min(28, W / 46)); w = s * .866;
+    const cx = W * (wide ? .7 : .5), cy = H * (wide ? .52 : .7);
+    ox = cx; oy = cy - N * s / 2;
+    const x0 = wide ? W * .2 : -w, y0 = wide ? -2 * s : H * .22;
+    cells = []; goals = []; inField.fill(0);
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+      const [x, y] = iso(i, j, 0);
+      if (x < x0 - w || x > W + w || y < y0 || y > H + 2 * s) continue;
+      cells.push({ i, j, k: id(i, j), d: i + j });
+      inField[id(i, j)] = 1;
+      const inner = x > w * 2 && x < W - w * 3 && (wide ? x > W * .58 && y > H * .28 && y < H * .78 : y > H * .74 && y < H * .9);
+      if (inner) goals.push([i, j]);
+    }
+    cells.sort((a, b) => a.d - b.d || a.i - b.i);
+    if (!goals.length) goals = cells.map((c) => [c.i, c.j]);
+    const count = wide ? 4 : 3;
+    agents = agents.filter((a, n) => {
+      const keep = n < count && inField[id(...a.to)];
+      if (!keep && a.work) moving[id(...a.work.A)] = moving[id(...a.work.B)] = 0;
+      return keep;
+    });
+    while (agents.length < count) {
+      const c = pick(goals);
+      agents.push({ from: c, to: c, x: c[0], y: c[1], t: 1, goal: pick(goals), state: "walk", work: null, timer: 0 });
+    }
   }
-  function point(i, j, t) {
-    const x = -X + (2 * X * i) / COLS + jitter[j * (COLS + 1) + i];
-    const z = Z0 + (Z1 - Z0) * Math.pow(j / ROWS, 1.35);
-    const y = .55 * Math.sin(x * .45 + t * .5) * Math.cos(z * .38 - t * .35) + .25 * Math.sin(z * .9 + x * .2);
-    return { x, z, sx: cx + (x * f) / z, sy: horizon + ((CAM_H - y) * f) / z };
+
+  const taken = (c, self) => agents.some((a) => a !== self && ((a.to[0] === c[0] && a.to[1] === c[1]) || (a.from[0] === c[0] && a.from[1] === c[1])));
+  const free = (c, self) => c[0] >= 0 && c[1] >= 0 && c[0] < N && c[1] < N && inField[id(...c)] && !moving[id(...c)] && !taken(c, self);
+  const around = ([i, j]) => [[i + 1, j], [i - 1, j], [i, j + 1], [i, j - 1]].sort(() => Math.random() - .5);
+
+  function nextStep(a) {
+    const [i, j] = a.to, [gi, gj] = a.goal, toward = [];
+    if (gi !== i) toward.push([i + Math.sign(gi - i), j]);
+    if (gj !== j) toward.push([i, j + Math.sign(gj - j)]);
+    toward.sort(() => Math.random() - .5);
+    return toward.concat(around(a.to)).find((c) => free(c, a)) || null;
   }
-  function frame(ms) {
-    const t = ms / 1000;
+
+  function startWork(a) {
+    const A = around(a.to).find((c) => free(c, a));
+    const near = [];
+    for (let di = -3; di <= 3; di++) for (let dj = -3; dj <= 3; dj++) {
+      const c = [a.to[0] + di, a.to[1] + dj], dist = Math.abs(di) + Math.abs(dj);
+      if (dist >= 2 && dist <= 4 && free(c, a) && (!A || c[0] !== A[0] || c[1] !== A[1])) near.push(c);
+    }
+    if (!A || !near.length) { a.goal = pick(goals); return; }
+    const B = pick(near);
+    moving[id(...A)] = moving[id(...B)] = 1;
+    a.state = "work"; a.timer = 0; a.work = { A, B };
+  }
+
+  function finishWork(a) {
+    const { A, B } = a.work, ka = id(...A), kb = id(...B);
+    [mat[ka], mat[kb]] = [mat[kb], mat[ka]];
+    glow[ka] = glow[kb] = 1;
+    moving[ka] = moving[kb] = 0;
+    a.state = "walk"; a.work = null;
+    let g; do g = pick(goals); while (goals.length > 1 && Math.abs(g[0] - a.to[0]) + Math.abs(g[1] - a.to[1]) < 4 && Math.random() < .9);
+    a.goal = g;
+  }
+
+  function update(dt) {
+    time += dt;
+    const fade = Math.exp(-dt / 3.2);
+    for (const c of cells) glow[c.k] *= fade;
+    for (const a of agents) {
+      if (a.state === "walk") {
+        a.t = Math.min(1, a.t + dt / STEP);
+        const e = ease(a.t);
+        a.x = a.from[0] + (a.to[0] - a.from[0]) * e;
+        a.y = a.from[1] + (a.to[1] - a.from[1]) * e;
+        if (a.t < 1) continue;
+        glow[id(...a.to)] = 1;
+        if (a.to[0] === a.goal[0] && a.to[1] === a.goal[1]) { startWork(a); continue; }
+        const n = nextStep(a);
+        a.from = a.to;
+        if (n) { a.to = n; a.t = 0; } else a.goal = pick(goals);
+      } else if ((a.timer += dt) >= WORK) finishWork(a);
+    }
+  }
+
+  function hill(i, j) {
+    let h = 0;
+    for (const a of agents) { const di = i - a.x, dj = j - a.y; h += HILL * Math.exp(-(di * di + dj * dj) / HILL_R2); }
+    return h;
+  }
+
+  // Work timeline: beams reach out (0–.18), cubes rise, cross and land (.18–.82), beams fade (.82–1).
+  function workPose(a) {
+    const p = a.timer / WORK, q = ease(Math.min(1, Math.max(0, (p - .18) / .64)));
+    const lift = 1.25 * Math.sin(Math.PI * q);
+    const { A, B } = a.work;
+    const at = (P, Q) => { const i = P[0] + (Q[0] - P[0]) * q, j = P[1] + (Q[1] - P[1]) * q; return { i, j, h: hill(i, j) + lift }; };
+    return { reach: Math.min(1, p / .18), alpha: p > .82 ? (1 - p) / .18 : 1, a: at(A, B), b: at(B, A), ka: id(...A), kb: id(...B) };
+  }
+
+  const mix = (c, t, g) => c.map((v, n) => v + (t[n] - v) * g);
+  const rgb = (c, k) => `rgb(${c[0] * k | 0},${c[1] * k | 0},${c[2] * k | 0})`;
+
+  function quad(color, pts) {
+    let cx = 0, cy = 0;
+    for (const [x, y] of pts) { cx += x / 4; cy += y / 4; }
+    ctx.fillStyle = color; ctx.beginPath();
+    pts.forEach(([x, y], n) => { const px = cx + (x - cx) * .8, py = cy + (y - cy) * .8; n ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.fill();
+  }
+  function hexPath(x, y) {
+    const t = s / 2; ctx.beginPath();
+    ctx.moveTo(x, y - t); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + s); ctx.lineTo(x, y + t + s); ctx.lineTo(x - w, y + s); ctx.lineTo(x - w, y); ctx.closePath();
+  }
+  function cube(x, y, top, left, right) {
+    const t = s / 2;
+    ctx.fillStyle = SEAM; hexPath(x, y); ctx.fill();
+    quad(top, [[x, y - t], [x + w, y], [x, y + t], [x - w, y]]);
+    quad(left, [[x - w, y], [x, y + t], [x, y + t + s], [x - w, y + s]]);
+    quad(right, [[x, y + t], [x + w, y], [x + w, y + s], [x, y + t + s]]);
+  }
+  function fieldCube(i, j, h, k, raised) {
+    // Resting cubes stay dim and greyed; the hill and the trail bring their colour up.
+    const g = glow[k], up = Math.min(1, h / HILL), lit = Math.min(1, .26 + .74 * up + .3 * g + raised);
+    const raw = MATERIALS[mat[k]].rgb, grey = (raw[0] + raw[1] + raw[2]) / 3;
+    const base = mix([grey, grey, grey], raw, Math.min(1, .3 + .7 * up + g + raised)), top = mix(base, ORANGE, g * .6);
+    const [x, y] = iso(i, j, h);
+    cube(x, y, rgb(top, lit), rgb(mix(base, ORANGE, g * .45), lit * .66), rgb(mix(base, ORANGE, g * .35), lit * .42));
+  }
+  function agentCube(a) {
+    const h = hill(a.x, a.y) + 1, [x, y] = iso(a.x, a.y, h);
+    const r = s * 2.4, g = ctx.createRadialGradient(x, y + s / 2, 0, x, y + s / 2, r);
+    g.addColorStop(0, "rgba(255,106,77,.38)"); g.addColorStop(1, "rgba(255,106,77,0)");
+    ctx.fillStyle = g; ctx.fillRect(x - r, y + s / 2 - r, 2 * r, 2 * r);
+    cube(x, y, AGENT_CUBE.top, AGENT_CUBE.left, AGENT_CUBE.right);
+  }
+
+  function beams(a, pose) {
+    const [sx, sy] = iso(a.x, a.y, hill(a.x, a.y) + 1);
+    const ends = [pose.a, pose.b].map((c) => iso(c.i, c.j, c.h));
+    ctx.save(); ctx.strokeStyle = AGENT; ctx.lineCap = "round";
+    for (const [ex, ey] of ends) {
+      const tx = sx + (ex - sx) * pose.reach, ty = sy + (ey - sy) * pose.reach;
+      ctx.globalAlpha = pose.alpha * .25; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(tx, ty); ctx.stroke();
+      ctx.globalAlpha = pose.alpha; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(tx, ty); ctx.stroke();
+      if (pose.reach >= 1) { hexPath(ex, ey); ctx.lineWidth = 1.2; ctx.stroke(); }
+    }
+    if (pose.reach >= 1) {
+      ctx.globalAlpha = pose.alpha * .7; ctx.lineWidth = 1; ctx.setLineDash([4, 5]); ctx.lineDashOffset = -time * 24;
+      ctx.beginPath(); ctx.moveTo(...ends[0]); ctx.lineTo(...ends[1]); ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.fillStyle = AGENT; ctx.globalAlpha = pose.alpha;
+    ctx.beginPath(); ctx.arc(sx, sy, 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function draw() {
     ctx.clearRect(0, 0, W, H);
-    const pts = [];
-    for (let j = 0; j <= ROWS; j++) for (let i = 0; i <= COLS; i++) pts.push(point(i, j, t));
-    const at = (i, j) => pts[j * (COLS + 1) + i];
-    const aim = Math.sin(t * .32) * .55, half = .3;
-    const lit = new Path2D(), dim = new Path2D();
-    for (let cj = 0; cj < ROWS; cj += CLUSTER) for (let ci = 0; ci < COLS; ci += CLUSTER) {
-      const mid = at(Math.min(ci + 1, COLS), Math.min(cj + 1, ROWS));
-      const target = Math.abs(Math.atan2(mid.x, mid.z) - aim) < half && mid.z < Z1 * .82 ? lit : dim;
-      for (let j = cj; j < Math.min(cj + CLUSTER, ROWS); j++) for (let i = ci; i < Math.min(ci + CLUSTER, COLS); i++) {
-        const a = at(i, j), b = at(i + 1, j), c = at(i + 1, j + 1), d = at(i, j + 1);
-        for (const [p, q, r] of [[a, b, c], [a, c, d]]) {
-          target.moveTo(p.sx, p.sy); target.lineTo(q.sx, q.sy); target.lineTo(r.sx, r.sy); target.closePath();
-        }
-      }
+    const dyn = [], working = [];
+    for (const a of agents) {
+      dyn.push({ key: a.x + a.y + .6, draw: () => agentCube(a) });
+      if (a.state !== "work") continue;
+      const pose = workPose(a);
+      working.push([a, pose]);
+      for (const [c, k] of [[pose.a, pose.ka], [pose.b, pose.kb]]) dyn.push({ key: c.i + c.j + .3, draw: () => fieldCube(c.i, c.j, c.h, k, .35) });
     }
-    ctx.lineWidth = 1;
-    ctx.globalAlpha = .18; ctx.strokeStyle = MUTED; ctx.stroke(dim);
-    ctx.globalAlpha = .08; ctx.fillStyle = ACCENT; ctx.fill(lit);
-    ctx.globalAlpha = .8; ctx.strokeStyle = ACCENT; ctx.stroke(lit);
-    ctx.globalAlpha = .35; ctx.setLineDash([4, 6]);
-    ctx.beginPath();
-    for (const s of [-1, 1]) {
-      const ang = aim + s * half, z = Z1 * .82;
-      ctx.moveTo(cx, H + 40); ctx.lineTo(cx + Math.tan(ang) * f, horizon + (CAM_H * f) / z);
+    dyn.sort((p, q) => p.key - q.key);
+    let n = 0;
+    for (const c of cells) {
+      while (n < dyn.length && dyn[n].key < c.d) dyn[n++].draw();
+      if (!moving[c.k]) fieldCube(c.i, c.j, hill(c.i, c.j), c.k, 0);
     }
-    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
-    if (!still) requestAnimationFrame(frame);
+    while (n < dyn.length) dyn[n++].draw();
+    for (const [a, pose] of working) beams(a, pose);
   }
-  resize();
-  new ResizeObserver(() => { resize(); if (still) frame(0); }).observe(canvas);
-  still ? frame(0) : requestAnimationFrame(frame);
+
+  layout();
+  for (let k = 0; k < 150; k++) update(1 / 50);
+  draw();
+  new ResizeObserver(() => { layout(); draw(); }).observe(canvas);
+  if (still) return;
+
+  let last = performance.now(), running = true, raf = 0;
+  function frame(now) {
+    update(Math.min(.05, (now - last) / 1000)); last = now;
+    draw();
+    raf = running ? requestAnimationFrame(frame) : 0;
+  }
+  new IntersectionObserver(([e]) => {
+    running = e.isIntersecting;
+    if (running && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+  }).observe(canvas);
 })();
 </script>
 </body>

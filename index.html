@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap">
 <style>
 /* SPITE Forge (doc-52, assets/ui/forge/tokens.json), dark theme.
-   Layout: one isometric scene under the whole hero; the slogan and install panel are blocks standing on the cube field, agents leave through a door after "fly", rebuild the mark beside the title and dock in the install panel; below, statement + claim list.
+   Layout: one isometric scene under the whole hero; the slogan and install panel are blocks standing on the cube field, agents push out of the word "fly", rebuild the mark beside the blocks and drive into a garage in the install block; below, statement + claim list.
    Rules kept: accent only for interactive and selected; square panels and tabs; 2px radius on buttons and fields; hard offset shadows; uppercase only in display and code styles. */
 :root {
   --ground: #0d0c0b;
@@ -52,7 +52,8 @@ html[data-lang="en"] .ru, html[data-lang="ru"] .en { display: none !important; }
 
 /* hero with the agent field */
 .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
-#field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#field, #fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#fx { pointer-events: none; }
 .fly-word { transition: color .25s, text-shadow .25s; }
 .fly-word.spawn { color: var(--accent); text-shadow: 0 0 14px rgba(255, 77, 46, .7); transition: none; }
 .legend { position: absolute; right: max(28px, env(safe-area-inset-right, 0px)); bottom: 20px; display: flex; gap: 16px; }
@@ -86,7 +87,7 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
 .sub { margin: 0; color: var(--text-muted); max-width: 46ch; }
 
 /* install panel */
-.install { margin-top: 56px; background: var(--panel); border: 1px solid var(--border); transition: border-color .8s, box-shadow .8s; }
+.install { margin-top: calc(3.6 * clamp(15px, 1.852vw, 24px)); background: var(--panel); border: 1px solid var(--border); transition: border-color .8s, box-shadow .8s; }
 .install.dock { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 32px rgba(255, 77, 46, .3); transition: none; }
 .install .sub { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; max-width: none; }
 .tabs { display: flex; height: 36px; border-bottom: 1px solid var(--border); }
@@ -131,7 +132,7 @@ footer a { color: var(--text-faint); }
 footer a:hover { color: var(--text); }
 
 @media (max-width: 900px) {
-  .hero-body { padding-block: 36px 300px; }
+  .hero-body { padding-block: 36px 330px; }
   .slogan, .install { max-width: calc(100% - 64px); }
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
 }
@@ -186,6 +187,7 @@ footer a:hover { color: var(--text); }
       </div>
     </div>
   </div>
+  <canvas id="fx" aria-hidden="true"></canvas>
 </section>
 
 <main class="about" id="about">
@@ -260,18 +262,21 @@ const CONFIG = {
 })();
 
 // Agent scene: the hero is one isometric scene. The slogan, the install panel and the tag are
-// blocks standing on a field of mark-style cubes; the page draws their side and top faces.
-// The SPITE mark hangs to the right of the title. It wobbles and falls apart; agent cubes leave
-// through a door right after the word "fly", drop onto the field, carry the cubes back along
-// violet command beams, and drive into the install panel's door as soon as nothing is left.
+// blocks standing on a field of mark-style cubes; the page draws their top and side faces, and a
+// second canvas over the page redraws whatever stands in front of a block's face.
+// The SPITE mark hangs beside the blocks. It wobbles, caves in, and its cubes roll across the field.
+// Agent cubes push out of the word "fly" on the slogan's face, carry the cubes back along violet
+// command beams, and drive into the garage in the install block once no cube is left to take.
 (() => {
   const hero = document.querySelector(".hero"), panel = document.querySelector(".install");
   const field = document.getElementById("field"), ctx = field.getContext("2d");
+  const front = document.getElementById("fx"), fctx = front.getContext("2d");
   const base = document.createElement("canvas"), bctx = base.getContext("2d");
   const css = getComputedStyle(document.documentElement);
   const AGENT = css.getPropertyValue("--agent").trim();
   const SEAM = "#141312", ORANGE = [255, 77, 46];
-  const AGENT_FACES = ["#ff4d2e", "#cc3e25", "#9e4230"];
+  const AGENT_FACES = ["#ff4d2e", "#cc3e25", "#9e4230"], LIT_LYING = ["#b8452e", "#8f3b27", "#6a2f22"];
+  const BLOCK_LOOK = ["#232120", "#171615", "#45413e"], CHIP_LOOK = ["#2c2541", "#1d1830", "rgba(183,148,255,.45)"];
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.documentElement.classList.add("scene");
 
@@ -285,11 +290,14 @@ const CONFIG = {
     by0 = Math.min(by0, S.y + pts[q + 1]); by1 = Math.max(by1, S.y + pts[q + 1]);
   }
 
-  const N = 110, NN = N * N, STEP = .26, PLACE = 1.9, HILL = .62, HILL_R2 = 2.8, EXIT = .8, ENTER = .5;
+  // Times are seconds: STEP per cell driven, ROLL per cell rolled, PLACE per cube carried.
+  const N = 110, NN = N * N, STEP = .1, ROLL = .15, PLACE = .8, EXIT = .6, ENTER = .55, HILL = .62, HILL_R2 = 2.8;
+  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const hex = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));
   const MATERIALS = [["#a9a39f", 7], ["#8a847f", 5], ["#e6dfd0", 1.6], ["#9ccbff", 1.3], ["#b8c4d6", 1.3], ["#7fe3f0", .8], ["#5ccb8a", .7], ["#ffc93d", .5]]
     .map(([h, w]) => ({ rgb: hex(h), w }));
   const TOTAL = MATERIALS.reduce((n, m) => n + m.w, 0);
+  const AGENT_RGB = AGENT_FACES.map(hex), LIT_RGB = LIT_LYING.map(hex), SLOT_RGB = SLOTS.map((S) => S.c.map(hex));
   let seed = 7;
   const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -300,7 +308,7 @@ const CONFIG = {
   const lerp = (a, b, t) => a + (b - a) * t;
 
   const mat = new Uint8Array(NN), glow = new Float32Array(NN), dim = new Float32Array(NN);
-  const inField = new Uint8Array(NN), blocked = new Uint8Array(NN), hidden = new Uint8Array(NN), reserved = new Uint8Array(NN);
+  const inField = new Uint8Array(NN), blocked = new Uint8Array(NN), hidden = new Uint8Array(NN), reserved = new Uint8Array(NN), roomy = new Uint8Array(NN);
   const loose = new Int16Array(NN).fill(-1), cellRef = new Array(NN);
   for (let k = 0; k < NN; k++) {
     let r = rand() * TOTAL, m = 0;
@@ -309,15 +317,15 @@ const CONFIG = {
   }
 
   let W = 0, H = 0, dpr = 1, s = 22, w = 19, ox = 0, oy = 0, wide = true;
-  let logo = { x: 0, y: 0, sc: 1 }, blocks = [], exitDoor = null, dockDoor = null;
-  let cells = [], landing = [], agents = [], spawnQueue = [];
+  let logo = { x: 0, y: 0, sc: 1 }, logoBox = null, blocks = [], hatch = null, dock = null;
+  let cells = [], agents = [], spawnQueue = [];
   let time = 0, phase = "rest", phaseT = 0, restDur = 2.2;
   const glowing = new Set();
   const slot = SLOTS.map(() => ({ state: "set" }));
   const id = (i, j) => i * N + j;
   const cellOf = (k) => [Math.floor(k / N), k % N];
   const iso = (i, j, h) => [ox + (i - j) * w, oy + (i + j) * s / 2 - h * s];
-  const cellAt = (x, y) => { const a = (x - ox) / w, b = (y - oy) / (s / 2); return [Math.round((a + b) / 2), Math.round((b - a) / 2)]; };
+  const P = (p) => iso(p[0], p[1], p[2]);
   const visible = (sel) => [...document.querySelectorAll(sel)].find((e) => e.getClientRects().length);
   const rel = (el) => {
     if (!el) return null;
@@ -325,7 +333,7 @@ const CONFIG = {
     return { l: r.left - h.left, t: r.top - h.top, r: r.right - h.left, b: r.bottom - h.top, w: r.width, h: r.height };
   };
 
-  // ---------- geometry helpers for the page blocks
+  // ---------- 2D geometry for the page blocks
   function inPoly(x, y, pts) {
     let inside = false;
     for (let a = 0, b = pts.length - 1; a < pts.length; b = a++) {
@@ -343,58 +351,126 @@ const CONFIG = {
     }
     return best;
   }
+  // Does a cube standing on the ground point (x, y) touch the polygon on screen?
+  function spriteHits(x, y, pts) {
+    const top = y - 1.7 * s;
+    const corners = [[x, top - s / 2], [x + w, top], [x - w, top], [x + w, y], [x - w, y], [x, y + s / 2], [x, y]];
+    if (corners.some(([px, py]) => inPoly(px, py, pts))) return true;
+    return pts.some(([px, py]) => px > x - w && px < x + w && py > top - s / 2 && py < y + s / 2);
+  }
+
+  // ---------- 3D cubes. A point is [i, j, h] in field units; the viewer looks along -(1, 1, 1).
+  const FACES = [
+    [[0, 0, 1], [[-.5, -.5, 1], [.5, -.5, 1], [.5, .5, 1], [-.5, .5, 1]]],
+    [[0, 0, -1], [[-.5, -.5, 0], [.5, -.5, 0], [.5, .5, 0], [-.5, .5, 0]]],
+    [[1, 0, 0], [[.5, -.5, 0], [.5, .5, 0], [.5, .5, 1], [.5, -.5, 1]]],
+    [[-1, 0, 0], [[-.5, -.5, 0], [-.5, .5, 0], [-.5, .5, 1], [-.5, -.5, 1]]],
+    [[0, 1, 0], [[-.5, .5, 0], [.5, .5, 0], [.5, .5, 1], [-.5, .5, 1]]],
+    [[0, -1, 0], [[-.5, -.5, 0], [.5, -.5, 0], [.5, -.5, 1], [-.5, -.5, 1]]],
+  ];
+  // Tip a point over the cube's leading bottom edge (direction e, angle a); pivot 0 turns a normal.
+  function tip(p, { e, a }, pivot) {
+    const along = p[0] * e[0] + p[1] * e[1], r = along - pivot, c = Math.cos(a), sn = Math.sin(a);
+    const d = pivot + r * c + p[2] * sn - along;
+    return [p[0] + d * e[0], p[1] + d * e[1], -r * sn + p[2] * c];
+  }
+  // Keep the part of a polygon where a*i + b*j + c*h >= d.
+  function clipPoly(pts, [a, b, c, d]) {
+    const out = [], f = (p) => a * p[0] + b * p[1] + c * p[2] - d;
+    for (let q = 0; q < pts.length; q++) {
+      const p = pts[q], r = pts[(q + 1) % pts.length], fp = f(p), fr = f(r);
+      if (fp >= 0) out.push(p);
+      if ((fp >= 0) !== (fr >= 0)) { const t = fp / (fp - fr); out.push(p.map((v, z) => v + (r[z] - v) * t)); }
+    }
+    return out;
+  }
+  // colors: [top, +j face, +i face] as rgb; a tipped face blends them by where it points.
+  function shade(c, n) {
+    const wt = Math.max(n[2], 0) ** 2, wl = Math.max(n[1], 0) ** 2, wr = Math.max(n[0], 0) ** 2, sum = wt + wl + wr || 1;
+    return `rgb(${[0, 1, 2].map((q) => (c[0][q] * wt + c[1][q] * wl + c[2][q] * wr) / sum | 0).join(",")})`;
+  }
+  function solid(g, at, k, colors, roll, clip) {
+    for (const [n0, corners] of FACES) {
+      let n = n0, pts = corners.map(([a, b, c]) => [a * k, b * k, c * k]);
+      if (roll) { n = tip(n, roll, 0); pts = pts.map((p) => tip(p, roll, k / 2)); }
+      if (n[0] + n[1] + n[2] <= .001) continue;
+      pts = pts.map(([a, b, c]) => [a + at[0], b + at[1], c + at[2]]);
+      const m = [0, 1, 2].map((q) => (pts[0][q] + pts[1][q] + pts[2][q] + pts[3][q]) / 4);
+      let outer = pts, inner = pts.map((p) => p.map((v, q) => m[q] + (v - m[q]) * .8));
+      if (clip) { outer = clipPoly(outer, clip); inner = clipPoly(inner, clip); }
+      if (outer.length < 3) continue;
+      g.fillStyle = SEAM; poly(g, outer.map(P)); g.fill();
+      if (inner.length > 2) { g.fillStyle = shade(colors, n); poly(g, inner.map(P)); g.fill(); }
+    }
+  }
+
   // A block is the element's box (front face) pushed back along the field's -j axis (up and right).
-  function makeBlock(el, depth, look, door) {
+  // In field space its front face is the plane i + j = front and its right face the plane i = iR.
+  function makeBlock(el, depth, look) {
     const r = rel(el);
     if (!r) return null;
-    const dx = depth * .866, dy = depth * .5;
-    const b = {
-      r, look,
+    const dx = depth * .866, dy = depth * .5, u = (r.r - ox) / w, v = 2 * (r.b - oy) / s;
+    return {
+      r, look, front: v, iR: (u + v) / 2, jR: (v - u) / 2, D: depth / s,
       top: [[r.l, r.t], [r.l + dx, r.t - dy], [r.r + dx, r.t - dy], [r.r, r.t]],
       side: [[r.r, r.t], [r.r + dx, r.t - dy], [r.r + dx, r.b - dy], [r.r, r.b]],
       hull: [[r.l, r.b], [r.l, r.t], [r.l + dx, r.t - dy], [r.r + dx, r.t - dy], [r.r + dx, r.b - dy], [r.r, r.b]],
     };
-    if (door) {
-      // The door sits on the side face; "lift" raises its sill above the field.
-      const at = (p, up) => [r.r + dx * p, r.b - dy * p - up];
-      const hD = Math.min(r.h * .55, s * 1.35), lift = door.lift || 0;
-      b.door = { kind: door.kind, flash: 0, poly: [at(.2, lift), at(.78, lift), at(.78, lift + hD), at(.2, lift + hD)] };
-      const [mx, my] = at(.49, lift);
-      b.door.mouth = [mx, my - hD * .45];
-      b.door.cell = cellAt(mx + w * 1.7, my + s * .85 + lift);
+  }
+  const free = (k) => inField[k] && !blocked[k] && loose[k] < 0 && !reserved[k];
+  function nearestCell(x, y, ok) {
+    let best = null, bd = 1e9;
+    for (const c of cells) {
+      if (!ok(c.k)) continue;
+      const [cx, cy] = iso(c.i, c.j, 0), d = (cx - x) ** 2 + ((cy - y) * 1.5) ** 2;
+      if (d < bd) { bd = d; best = c; }
     }
-    return b;
+    return best;
   }
 
   // ---------- layout
   function layout(fresh) {
     const hr = hero.getBoundingClientRect();
     W = hr.width; H = hr.height; dpr = Math.min(devicePixelRatio || 1, 2);
-    for (const [c, g] of [[field, ctx], [base, bctx]]) { c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); }
+    for (const [c, g] of [[field, ctx], [front, fctx], [base, bctx]]) { c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); }
     wide = W > 900;
     s = clamp(W / 54, 15, 24); w = s * .866;
     ox = W / 2; oy = H / 2 - N * s / 2;
 
-    blocks = [
-      makeBlock(visible(".agent-chip"), s * .5, ["#2c2541", "#1d1830", "rgba(183,148,255,.45)"]),
-      makeBlock(visible(".slogan"), s * 1.1, ["#232120", "#171615", "#45413e"], { kind: "exit", lift: 6 }),
-      makeBlock(panel, s * 1.5, ["#232120", "#171615", "#45413e"], { kind: "dock" }),
-    ].filter(Boolean);
-    exitDoor = blocks.find((b) => b.door && b.door.kind === "exit")?.door;
-    dockDoor = blocks.find((b) => b.door && b.door.kind === "dock")?.door;
+    const sl = makeBlock(visible(".slogan"), s * 1.1, BLOCK_LOOK), inst = makeBlock(panel, s * 2, BLOCK_LOOK);
+    blocks = [makeBlock(visible(".agent-chip"), s * .5, CHIP_LOOK), sl, inst].filter(Boolean);
 
-    // The mark hangs to the right of the title, as large as the field's cubes (smaller on phones).
-    // It fits between the tag above the title and the slogan block below it.
-    const mark = rel(visible("h1 .wordmark")), chip = rel(visible(".agent-chip")), sl = rel(visible(".slogan"));
-    const room = sl.t - s * .8 - (chip ? chip.t : mark.t - s);
-    const height = Math.min((by1 - by0) * s / MARK_EDGE, room, wide ? 1e9 : (W - 16 - mark.r - 14) * (by1 - by0) / (bx1 - bx0));
-    const sc = height / (by1 - by0), left = mark.r + (wide ? s * 1.4 : 14), cy = sl.t - s * .8 - height / 2;
-    logo = { sc, x: left - bx0 * sc, y: cy - (by0 + by1) / 2 * sc };
-    const lr = { l: left, r: left + (bx1 - bx0) * sc, t: cy - height / 2, b: cy + height / 2 };
+    // The garage: a door at the foot of the install block's right face, one cell wide.
+    const jd = Math.floor(inst.jR - .55);
+    dock = {
+      iR: inst.iR, cell: [Math.ceil(inst.iR + .5), jd], flash: dock ? dock.flash : 0,
+      poly: [[inst.iR, jd - .55, 0], [inst.iR, jd + .55, 0], [inst.iR, jd + .55, 1.6], [inst.iR, jd - .55, 1.6]].map(P),
+    };
+    dock.mouth = P([inst.iR, jd, .8]);
+    // The hatch: the word "fly" on the slogan's face. Agents push out of it and drop to the field.
+    const fly = rel(visible(".fly-word"));
+    hatch = { rect: fly, c: sl.front, u: ((fly.l + fly.r) / 2 - ox) / w, h: Math.max(0, (sl.r.b - fly.b) / s), flash: hatch ? hatch.flash : 0 };
 
+    // The mark hangs beside the blocks at the field's cube size; on phones, below the install block.
+    const aspect = (bx1 - bx0) / (by1 - by0), box = inst.r;
+    let height = (by1 - by0) * s / MARK_EDGE, left, bottom;
+    if (wide) {
+      left = Math.max(sl.r.r + sl.D * w, box.r + inst.D * w) + 2.5 * w;
+      height = Math.min(height, (W - 3 * w - left) / aspect);
+      bottom = sl.r.b + s * .5;
+    } else {
+      height = Math.min(height, (W - 48) / aspect);
+      left = (W - height * aspect) / 2;
+      bottom = box.b + s * 1.6 + height;
+    }
+    const sc = height / (by1 - by0);
+    logo = { sc, x: left - bx0 * sc, y: bottom - by1 * sc };
+    logoBox = { l: left, r: left + height * aspect, t: bottom - height, b: bottom };
+
+    // A cell is blocked under a block, and also behind one wherever a cube on it would peek out
+    // from behind the block. Nothing in front of a block's face (by its plane) can be hidden by it.
     const quiet = [".brand", ".nav", "h1 .wordmark", ".legend"].map((q) => rel(visible(q))).filter(Boolean);
-    inField.fill(0); blocked.fill(0); hidden.fill(0); cells = [];
-    const margin = wide ? s * 1.3 : s * .5;
+    inField.fill(0); blocked.fill(0); hidden.fill(0); roomy.fill(0); cells = [];
     for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
       const [x, y] = iso(i, j, 0);
       if (x < -w || x > W + w || y < -s || y > H + 2 * s) continue;
@@ -405,22 +481,28 @@ const CONFIG = {
       for (const b of blocks) {
         const inside = inPoly(x, y, b.hull), e = edgeDist(x, y, b.hull);
         near = Math.min(near, inside ? 0 : e);
-        if (inside || e < margin) blocked[k] = 1;
         if (inside && e > s) hidden[k] = 1;
+        const inFront = i - .5 >= b.iR || i + j - 1 >= b.front;
+        if (inside || (!inFront && spriteHits(x, y, b.hull))) blocked[k] = 1;
       }
       dim[k] = (.25 + .75 * smooth(0, 70, near)) * Math.min(smooth(0, H * .1, y), smooth(H, H - 70, y));
       if (y > H - 2 * s || y < s * 2 || x < w || x > W - w) blocked[k] = 1;
+      // Fallen cubes keep off the lanes along the blocks, so they never wall the agents in.
+      roomy[k] = !blocked[k] && near > 2.4 * s && y < H - 3 * s ? 1 : 0;
     }
     cells.sort((a, b) => a.d - b.d || a.i - b.i);
-    for (const d of [exitDoor, dockDoor]) if (d) blocked[id(...d.cell)] = 0;
+    blocked[id(...dock.cell)] = 0;
 
-    const box = rel(panel);
-    // Where the mark's cubes land: the open cells nearest a spot below and right of the mark
-    // (on phones, below the install block).
-    const [tx, ty] = wide ? [lr.r + 3 * w, lr.b + 2 * s] : [W / 2, box.b + 5 * s];
-    landing = cells.filter((c) => !blocked[c.k])
-      .map((c) => { const [x, y] = iso(c.i, c.j, 0); return [Math.hypot(x - tx, (y - ty) * 1.6), c]; })
-      .sort((a, b) => a[0] - b[0]).slice(0, SLOTS.length * 3).map(([, c]) => [c.i, c.j]);
+    // Agents land on the first open row in front of the slogan, under the hatch.
+    const sum0 = Math.ceil(hatch.c + 1);
+    let best = null, bd = 1e9;
+    for (const c of cells) {
+      if (blocked[c.k] || c.d < sum0 || c.d > sum0 + 1) continue;
+      const d = Math.abs(c.i - c.j - hatch.u);
+      if (d < bd) { bd = d; best = c; }
+    }
+    if (!best) best = nearestCell((fly.l + fly.r) / 2, sl.r.b + s, (k) => !blocked[k]);
+    hatch.cell = [best.i, best.j];
 
     renderBase();
     if (fresh) reset();
@@ -428,21 +510,21 @@ const CONFIG = {
 
   function reset() {
     loose.fill(-1); reserved.fill(0); glow.fill(0); glowing.clear(); spawnQueue = [];
-    slot.forEach((st) => { st.state = "set"; });
-    agents = Array.from({ length: wide ? 5 : 3 }, (_, n) => ({ state: "parked", seed: n * 1.7, path: [], task: -1 }));
+    slot.forEach((st) => { st.state = "set"; st.assigned = false; });
+    agents = Array.from({ length: wide ? 6 : 4 }, (_, n) => ({ state: "parked", seed: n * 1.7, path: [], task: -1 }));
     phase = "rest"; phaseT = 0;
   }
 
   // ---------- agents and paths
-  const onField = (a) => a.state !== "parked";
+  const onField = (a) => a.state !== "parked" && !(a.state === "enter" && a.timer > ENTER * .4);
   const agentAt = (k, self) => agents.some((a) => a !== self && onField(a) && a.to && (id(...a.to) === k || id(...a.from) === k));
-  const passable = (k, self) => inField[k] && !blocked[k] && loose[k] < 0 && !reserved[k] && !agentAt(k, self);
+  const passable = (k, self, anyAgents) => free(k) && (anyAgents || !agentAt(k, self));
   const adjacent = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
   const same = (a, b) => a[0] === b[0] && a[1] === b[1];
 
   const prev = new Int32Array(NN), seen = new Uint32Array(NN);
   let stamp = 0;
-  function bfs(a, isGoal) {
+  function bfs(a, isGoal, anyAgents) {
     stamp++;
     const start = id(...a.to), queue = [start];
     seen[start] = stamp; prev[start] = -1;
@@ -453,68 +535,100 @@ const CONFIG = {
         for (let c = k; c !== start; c = prev[c]) path.unshift(cellOf(c));
         return path;
       }
-      for (const [ni, nj] of [[i + 1, j], [i - 1, j], [i, j + 1], [i, j - 1]]) {
+      for (const [di, dj] of DIRS) {
+        const ni = i + di, nj = j + dj;
         if (ni < 0 || nj < 0 || ni >= N || nj >= N) continue;
         const nk = id(ni, nj);
-        if (seen[nk] === stamp || !passable(nk, a)) continue;
+        if (seen[nk] === stamp || !passable(nk, a, anyAgents)) continue;
         seen[nk] = stamp; prev[nk] = k; queue.push(nk);
       }
     }
     return null;
   }
+  // Drive around the other agents unless that is a real detour; then squeeze past them.
+  function plan(a, goal) {
+    const direct = bfs(a, goal, true);
+    if (!direct) return null;
+    const around = bfs(a, goal, false);
+    if (around && around.length <= direct.length + 4) return around;
+    a.pushing = true;
+    return direct;
+  }
 
   function flash(el, cls, ms) { if (!el) return; el.classList.add(cls); clearTimeout(el["_" + cls]); el["_" + cls] = setTimeout(() => el.classList.remove(cls), ms); }
 
   function startExit(a) {
-    const c = exitDoor.cell;
+    const c = hatch.cell;
     if (agentAt(id(...c), a)) return false;
-    Object.assign(a, { state: "exit", from: c, to: c, x: c[0], y: c[1], t: 1, path: [], task: -1, timer: 0 });
-    exitDoor.flash = 1;
-    flash(visible(".fly-word"), "spawn", 260);
+    Object.assign(a, { state: "exit", from: c, to: c, x: c[0], y: c[1], t: 1, path: [], task: -1, timer: 0, pushing: false });
+    hatch.flash = 1;
+    flash(visible(".fly-word"), "spawn", 320);
     return true;
   }
   function startEnter(a) {
-    a.state = "enter"; a.timer = 0;
-    dockDoor.flash = 1;
-    flash(panel, "dock", 220);
+    a.state = "enter"; a.timer = 0; a.path = [];
+    dock.flash = 1;
+    flash(panel, "dock", 260);
   }
 
+  // Each agent takes the nearest cube nobody holds, even one still falling or rolling.
   function pickTask(a) {
     const othersLeft = slot.some((st, n) => n !== LIT && st.state !== "set");
     let best = -1, bestD = 1e9;
     slot.forEach((st, n) => {
-      if (st.state !== "loose" || st.assigned || (n === LIT && othersLeft)) return;
+      if (!["fall", "roll", "loose"].includes(st.state) || st.assigned || (n === LIT && othersLeft)) return;
       const d = Math.abs(st.cell[0] - a.to[0]) + Math.abs(st.cell[1] - a.to[1]);
       if (d < bestD) { bestD = d; best = n; }
     });
     if (best >= 0) slot[best].assigned = true;
     return best;
   }
-
-  // Take the nearest free cube; wait only while there is work nobody has claimed, else go home.
+  // Never wait: drive to a cube, or home as soon as every cube left is taken.
   function decide(a) {
     if (a.task < 0) a.task = pickTask(a);
     if (a.task >= 0) {
       const L = slot[a.task].cell;
       if (adjacent(a.to, L)) return startPlace(a);
-      const path = bfs(a, (c) => adjacent(c, L));
+      const path = plan(a, (c) => adjacent(c, L));
       if (path) { a.state = "walk"; a.path = path; return; }
       slot[a.task].assigned = false; a.task = -1;
     }
-    const pending = slot.filter((st) => st.state === "fall" || (st.state === "loose" && !st.assigned)).length;
-    const waiting = agents.filter((b) => b !== a && b.state === "idle").length;
-    if (pending > waiting) { a.state = "idle"; a.idle = 0; } else goHome(a);
+    goHome(a);
   }
   function goHome(a) {
-    if (same(a.to, dockDoor.cell)) return startEnter(a);
-    const path = bfs(a, (c) => same(c, dockDoor.cell));
-    if (path) { a.state = "home"; a.path = path; } else { a.state = "idle"; a.idle = 0; }
+    a.state = "home";
+    if (same(a.to, dock.cell)) return startEnter(a);
+    a.path = plan(a, (c) => same(c, dock.cell)) || [];
   }
   function startPlace(a) {
-    const st = slot[a.task];
-    loose[id(...st.cell)] = -1;
+    const n = a.task, st = slot[n], k = id(...st.cell);
+    const start = slotPose(st, n);
+    if (st.state === "loose") loose[k] = -1; else reserved[k] = 0;
     st.state = "carried";
-    a.state = "place"; a.timer = 0; a.work = { n: a.task, cell: st.cell };
+    a.state = "place"; a.timer = 0; a.path = []; a.work = { n, start };
+  }
+
+  function move(a, dt) {
+    a.t += dt / (a.path.length > 6 ? STEP * .6 : STEP);   // long runs go faster
+    if (a.t >= 1) {
+      const extra = Math.min(a.t - 1, .9);
+      a.t = 1; a.from = a.to;
+      const k = id(...a.to);
+      glow[k] = 1; glowing.add(k);
+      advance(a);
+      if (a.t === 0) a.t = extra;   // keep the speed through the cell
+    }
+    a.x = lerp(a.from[0], a.to[0], a.t); a.y = lerp(a.from[1], a.to[1], a.t);
+  }
+  function advance(a) {
+    if (a.path.length) {
+      const nk = id(...a.path[0]);
+      if (passable(nk, a, true) && (a.pushing || passable(nk, a, false))) { a.to = a.path.shift(); a.t = 0; return; }
+      a.path = [];
+    }
+    a.pushing = false;
+    if (a.state === "home") goHome(a); else decide(a);
+    if ((a.state === "walk" || a.state === "home") && a.path.length) { a.to = a.path.shift(); a.t = 0; }
   }
 
   // ---------- the mark
@@ -527,94 +641,135 @@ const CONFIG = {
     }
     return [logo.x + SLOTS[n].x * logo.sc + dx, logo.y + SLOTS[n].y * logo.sc + dy];
   }
+  // The mark caves in: every cube drops straight onto a heap under it, lower cubes first,
+  // then tips over one to three cells away from the heap's middle.
   function collapse() {
     phase = "build"; phaseT = 0;
+    const lb = logoBox, hits = [], taken = new Set();
     SLOTS.forEach((_, n) => {
-      const free = landing.filter((c) => { const k = id(...c); return loose[k] < 0 && !reserved[k]; });
-      if (!free.length) return;
-      const cell = pick(free);
-      reserved[id(...cell)] = 1;
-      Object.assign(slot[n], { state: "fall", t: -(n === LIT ? .3 : .03 * n + Math.random() * .25), dur: .7 + Math.random() * .3, from: slotPos(n), cell, assigned: false, landed: 0 });
+      const [x, y] = slotPos(n), c = nearestCell(x, lb.b + s * (.9 + 2.4 * (y - lb.t) / (lb.b - lb.t)), (k) => free(k) && roomy[k] && !taken.has(k));
+      if (c) { taken.add(c.k); hits[n] = [c.i, c.j]; }
     });
-    agents.forEach((a, n) => { if (a.state === "parked") spawnQueue.push([time + .6 + n * .5, a]); });
+    let mi = 0, mj = 0, cnt = 0;
+    hits.forEach((h) => { if (h) { mi += h[0]; mj += h[1]; cnt++; } });
+    mi /= cnt || 1; mj /= cnt || 1;
+    for (const n of SLOTS.map((_, n) => n).sort(() => Math.random() - .5)) {
+      const h = hits[n];
+      if (!h) continue;
+      const di = h[0] - mi, dj = h[1] - mj;
+      const first = Math.abs(di) + Math.abs(dj) < .6 ? pick(DIRS) : Math.abs(di) > Math.abs(dj) ? [Math.sign(di), 0] : [0, Math.sign(dj)];
+      let path = [], cur = h;
+      for (const e of [first, ...DIRS]) {
+        path = []; cur = h;
+        const want = 1 + Math.floor(Math.random() * 3);
+        for (let q = 0; q < want; q++) {
+          const nx = [cur[0] + e[0], cur[1] + e[1]];
+          if (!free(id(...nx)) || !roomy[id(...nx)]) break;
+          path.push(nx); cur = nx;
+        }
+        if (!reserved[id(...cur)]) break;
+      }
+      if (reserved[id(...cur)]) continue;   // no room: this cube stays in the mark
+      reserved[id(...cur)] = 1;
+      const [x0, y0] = slotPos(n), [, ye] = iso(h[0], h[1], SLOTS[n].k);
+      Object.assign(slot[n], {
+        state: "fall", t: -(.2 * (lb.b - y0) / (lb.b - lb.t) + Math.random() * .05), dur: Math.sqrt(2 * Math.max(ye - y0, s) / (110 * s)),
+        from: [x0, y0], at: h, path, si: 0, u: -.6, cell: cur, assigned: false, landed: 0,
+      });
+    }
+    agents.forEach((a, n) => { if (a.state === "parked") spawnQueue.push([time + .35 + n * .22, a]); });
   }
-  const restPos = (st) => { const [i, j] = st.cell; return iso(i, j, hill(i, j) + 1); };
   function fallPose(st, n) {
-    const u = clamp(st.t / st.dur, 0, 1), [lx, ly] = restPos(st), [x0, y0] = st.from;
-    const arc = s * 1.6 + Math.abs(lx - x0) * .12;
-    return [x0 + (lx - x0) * u, y0 + (ly - y0) * u * u - arc * 4 * u * (1 - u) * (1 - u), lerp(kLogo(n), SLOTS[n].k, u)];
+    const u = clamp(st.t / st.dur, 0, 1), [x0, y0] = st.from, k = SLOTS[n].k, [xe, ye] = iso(st.at[0], st.at[1], hill(...st.at) + k);
+    return [lerp(x0, xe, u), y0 + (ye - y0) * u * u, lerp(kLogo(n), k, u)];
+  }
+  function rollStep(st) {
+    const from = st.at, to = st.path[st.si];
+    return to ? { from, e: [to[0] - from[0], to[1] - from[1]], u: clamp(st.u, 0, 1) } : null;
+  }
+  // Screen top-face centre and size of a loose cube wherever it is, for the beam that picks it up.
+  function slotPose(st, n) {
+    const k = SLOTS[n].k;
+    if (st.state === "fall") return fallPose(st, n);
+    const r = st.state === "roll" && rollStep(st);
+    if (r) {
+      const [x0, y0] = iso(r.from[0], r.from[1], hill(...r.from) + k), [x1, y1] = iso(r.from[0] + r.e[0], r.from[1] + r.e[1], k);
+      return [lerp(x0, x1, r.u), lerp(y0, y1, r.u) - Math.sin(Math.PI * r.u) * .2 * k * s, k];
+    }
+    const c = st.state === "roll" ? st.at : st.cell;
+    return [...iso(c[0], c[1], hill(...c) + k), k];
   }
   function placePose(a) {
     const p = a.timer / PLACE, q = ease(clamp((p - .18) / .7, 0, 1)), n = a.work.n;
-    const [sx, sy] = iso(a.work.cell[0], a.work.cell[1], hill(...a.work.cell) + 1), [ex, ey] = slotPos(n);
+    const [sx, sy, k0] = a.work.start, [ex, ey] = slotPos(n);
     const mx = (sx + ex) / 2, my = Math.min(sy, ey) - s * 3;
     return {
       p, n, reach: Math.min(1, p / .18), alpha: p > .88 ? (1 - p) / .12 : 1, slot: [ex, ey],
       pos: [(1 - q) * (1 - q) * sx + 2 * (1 - q) * q * mx + q * q * ex, (1 - q) * (1 - q) * sy + 2 * (1 - q) * q * my + q * q * ey],
-      k: lerp(SLOTS[n].k, kLogo(n), q),
+      k: lerp(k0, kLogo(n), q),
     };
   }
 
-  const walking = (a) => a.state === "walk" || a.state === "home" || a.state === "idle" || a.state === "place";
+  // How much an agent lifts the field under it: fully while driving, fading in and out at the doors.
+  function bump(a) {
+    if (a.state === "walk" || a.state === "home" || a.state === "place") return 1;
+    if (a.state === "exit") return smooth(.5, 1, a.timer / EXIT);
+    if (a.state === "enter") return 1 - smooth(0, .4, a.timer / ENTER);
+    return 0;
+  }
   function hill(i, j) {
     let h = 0;
     for (const a of agents) {
-      if (!walking(a)) continue;
-      const di = i - a.x, dj = j - a.y; h += HILL * Math.exp(-(di * di + dj * dj) / HILL_R2);
+      const b = bump(a);
+      if (!b) continue;
+      const di = i - a.x, dj = j - a.y; h += b * HILL * Math.exp(-(di * di + dj * dj) / HILL_R2);
     }
     return h;
   }
-  const agentTop = (a) => iso(a.x, a.y, hill(a.x, a.y) + 1 + (a.state === "idle" ? Math.abs(Math.sin(time * 4 + a.seed)) * .14 : 0));
+  const driving = (a) => a.state === "walk" || a.state === "home" || a.state === "place";
 
   // ---------- simulation
   function update(dt) {
     time += dt; phaseT += dt;
-    const fade = Math.exp(-dt / 3.2);
+    const fade = Math.exp(-dt / 6);
     for (const k of glowing) if ((glow[k] *= fade) < .02) { glow[k] = 0; glowing.delete(k); }
-    for (const d of [exitDoor, dockDoor]) if (d) d.flash = Math.max(0, d.flash - dt * 1.6);
+    dock.flash = Math.max(0, dock.flash - dt * 1.8); hatch.flash = Math.max(0, hatch.flash - dt * 1.8);
 
     if (phase === "rest" && phaseT >= restDur) { phase = "wobble"; phaseT = 0; }
     else if (phase === "wobble" && phaseT >= 1.1) collapse();
     else if (phase === "build" && slot.every((st) => st.state === "set") && agents.every((a) => a.state === "parked")) { phase = "rest"; phaseT = 0; restDur = 4; }
 
     slot.forEach((st, n) => {
-      if (st.state === "fall" && (st.t += dt) >= st.dur) {
-        const k = id(...st.cell);
-        reserved[k] = 0; loose[k] = n; st.state = "loose"; st.landed = 0;
+      if (st.state === "fall") {
+        if ((st.t += dt) >= st.dur) st.state = "roll";
+      } else if (st.state === "roll") {
+        st.u += dt / (ROLL * (1 + st.si * .35));
+        while (st.u >= 1 && st.si < st.path.length) { st.u -= 1; st.at = st.path[st.si++]; }
+        if (st.si >= st.path.length) {
+          const k = id(...st.cell);
+          reserved[k] = 0; loose[k] = n; st.state = "loose"; st.landed = 0;
+        }
       } else if (st.state === "loose" && (st.landed += dt) > 25 && !st.assigned) {
         loose[id(...st.cell)] = -1; st.state = "set";   // nobody can reach it: put it back
       }
     });
     if (spawnQueue.length && spawnQueue[0][0] <= time) {
       const [, a] = spawnQueue[0];
-      if (startExit(a)) spawnQueue.shift(); else spawnQueue[0][0] = time + .25;
+      if (startExit(a)) spawnQueue.shift(); else spawnQueue[0][0] = time + .1;
     }
 
     for (const a of agents) {
       if (a.state === "parked") continue;
-      if (a.state === "exit") { if ((a.timer += dt) >= EXIT) decide(a); continue; }
+      if (a.state === "exit") { if ((a.timer += dt) >= EXIT) { a.state = "walk"; advance(a); } continue; }
       if (a.state === "enter") { if ((a.timer += dt) >= ENTER) a.state = "parked"; continue; }
       if (a.state === "place") {
         a.timer += dt;
         const st = slot[a.work.n];
         if (a.timer / PLACE >= .88 && st.state === "carried") { st.state = "set"; st.assigned = false; }
-        if (a.timer >= PLACE) { a.task = -1; a.work = null; decide(a); }
+        if (a.timer >= PLACE) { a.task = -1; a.work = null; a.state = "walk"; advance(a); }
         continue;
       }
-      if (a.state === "idle") { if ((a.idle += dt) > .4) { a.idle = 0; decide(a); } continue; }
-      if (a.t < 1) {
-        a.t = Math.min(1, a.t + dt / (a.path.length > 8 ? STEP * .38 : STEP));   // long transits drive fast
-        const e = ease(a.t);
-        a.x = lerp(a.from[0], a.to[0], e); a.y = lerp(a.from[1], a.to[1], e);
-        if (a.t === 1) { glow[id(...a.to)] = 1; glowing.add(id(...a.to)); }
-        continue;
-      }
-      a.from = a.to;
-      if (a.path.length) {
-        if (passable(id(...a.path[0]), a)) { a.to = a.path.shift(); a.t = 0; a.wait = 0; }
-        else if ((a.wait = (a.wait || 0) + dt) > .5) { a.wait = 0; a.path = []; }
-      } else if (a.state === "home") goHome(a);
-      else decide(a);
+      move(a, dt);
     }
   }
 
@@ -651,12 +806,12 @@ const CONFIG = {
 
   function drawCell(g, c, topOnly) {
     const h = hill(c.i, c.j), gl = glow[c.k], up = Math.min(1, h / HILL), dm = dim[c.k];
-    const lit = Math.min(1, .26 + .74 * up + .3 * gl) * (dm + (1 - dm) * Math.max(up, gl) * .8);
+    const lit = Math.min(1.15, .26 + .74 * up + .6 * gl) * (dm + (1 - dm) * Math.max(up, gl));
     const raw = MATERIALS[mat[c.k]].rgb, grey = (raw[0] + raw[1] + raw[2]) / 3;
-    const tint = mix([grey, grey, grey], raw, Math.min(1, .3 + .7 * up + gl)), top = mix(tint, ORANGE, gl * .6);
+    const tint = mix([grey, grey, grey], raw, Math.min(1, .3 + .7 * up + gl)), top = mix(tint, [255, 120, 90], gl * .85);
     const [x, y] = iso(c.i, c.j, h);
     if (topOnly) return topFace(g, x, y, rgb(top, lit));
-    cube(g, x, y, [rgb(top, lit), rgb(mix(tint, ORANGE, gl * .45), lit * .66), rgb(mix(tint, ORANGE, gl * .35), lit * .42)]);
+    cube(g, x, y, [rgb(top, lit), rgb(mix(tint, ORANGE, gl * .6), lit * .66), rgb(mix(tint, ORANGE, gl * .5), lit * .42)]);
   }
   function drawBlocks(g) {
     for (const b of blocks) {
@@ -664,16 +819,10 @@ const CONFIG = {
       g.fillStyle = top; poly(g, b.top); g.fill();
       g.fillStyle = side; poly(g, b.side); g.fill();
       g.strokeStyle = edge; g.lineWidth = 1; poly(g, b.top); g.stroke(); poly(g, b.side); g.stroke();
-      if (!b.door) continue;
-      const d = b.door;
-      g.fillStyle = "#090908"; poly(g, d.poly); g.fill();
-      g.strokeStyle = d.flash > 0 ? `rgba(255,77,46,${.45 + .55 * d.flash})` : "rgba(255,77,46,.45)";
-      g.lineWidth = 1.5; poly(g, d.poly); g.stroke();
-      if (d.flash > 0) {
-        g.save(); poly(g, d.poly); g.clip();
-        glowAt(g, ...d.mouth, s * 1.6, .6 * d.flash); g.restore();
-      }
     }
+    g.fillStyle = "#070706"; poly(g, dock.poly); g.fill();
+    g.strokeStyle = `rgba(255,77,46,${.5 + .5 * dock.flash})`; g.lineWidth = 1.5; poly(g, dock.poly); g.stroke();
+    if (dock.flash > 0) { g.save(); poly(g, dock.poly); g.clip(); glowAt(g, ...dock.mouth, s * 1.6, .7 * dock.flash); g.restore(); }
   }
   function renderBase() {
     bctx.clearRect(0, 0, W, H);
@@ -683,7 +832,7 @@ const CONFIG = {
   }
 
   function markCube(g, n, x, y, k, lying) {
-    const faces = n === LIT && lying ? ["#b8452e", "#8f3b27", "#6a2f22"] : SLOTS[n].c;
+    const faces = n === LIT && lying ? LIT_LYING : SLOTS[n].c;
     cube(g, x, lying ? y - (k - 1) * s : y, faces, k);
   }
   function agentCube(g, x, y, k = 1, alpha = 1) {
@@ -729,6 +878,42 @@ const CONFIG = {
     ctx.restore();
   }
 
+  // An agent pushing out of the hatch: it slides out of the slogan's face, then drops to the field.
+  function drawExit(g, a) {
+    const v = a.timer / EXIT, [ci, cj] = hatch.cell;
+    let at;
+    if (v < .5) {
+      const q = easeOut(v / .5), sum = lerp(hatch.c - 1, ci + cj, q), u = lerp(hatch.u, ci - cj, q);
+      at = [(sum + u) / 2, (sum - u) / 2, hatch.h];
+    } else {
+      const q = (v - .5) / .5;
+      at = [ci, cj, lerp(hatch.h, hill(ci, cj), q * q)];
+    }
+    const [x, y] = P([at[0], at[1], at[2] + .5]);
+    glowAt(g, x, y, s * 2.4, .38 * smooth(0, .3, v));
+    solid(g, at, 1, AGENT_RGB, null, [1, 1, 0, hatch.c]);
+  }
+  // An agent driving into the garage: the part still outside the block's right face shows in full,
+  // the part inside shows dimly through the door.
+  function drawEnter(g, a) {
+    const v = clamp(a.timer / ENTER, 0, 1), [ci, cj] = dock.cell, at = [lerp(ci, dock.iR - .6, ease(v)), cj, hill(ci, cj)];
+    const [x, y] = P([at[0], at[1], at[2] + .5]);
+    glowAt(g, x, y, s * 2.4, .38 * (1 - v));
+    solid(g, at, 1, AGENT_RGB, null, [1, 0, 0, dock.iR]);
+    g.save(); poly(g, dock.poly); g.clip(); g.globalAlpha = .4 * (1 - v);
+    solid(g, at, 1, AGENT_RGB, null, [-1, 0, 0, -dock.iR]);
+    g.restore();
+  }
+  // Corner marks on the word "fly": the hatch in the slogan's face.
+  function drawHatch(g) {
+    const r = hatch.rect, x0 = r.l - 5, x1 = r.r + 5, y0 = r.t, y1 = r.b, c = 6;
+    g.save(); g.strokeStyle = `rgba(255,77,46,${.4 + .6 * hatch.flash})`; g.lineWidth = 1.5; g.beginPath();
+    for (const [x, y, sx, sy] of [[x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1]]) { g.moveTo(x + sx * c, y); g.lineTo(x, y); g.lineTo(x, y + sy * c); }
+    g.stroke();
+    if (hatch.flash > 0) glowAt(g, (x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) * .9, .35 * hatch.flash);
+    g.restore();
+  }
+
   function draw() {
     ctx.clearRect(0, 0, W, H);
     ctx.drawImage(base, 0, 0, W, H);
@@ -737,7 +922,7 @@ const CONFIG = {
     const active = new Set();
     for (const k of glowing) if (!hidden[k]) active.add(k);
     for (const a of agents) {
-      if (!walking(a)) continue;
+      if (!bump(a)) continue;
       const ci = Math.round(a.x), cj = Math.round(a.y);
       for (let di = -4; di <= 4; di++) for (let dj = -4; dj <= 4; dj++) {
         const k = id(ci + di, cj + dj);
@@ -751,44 +936,50 @@ const CONFIG = {
     }
     list.sort((p, q) => p.c.d - q.c.d || p.c.i - q.c.i);
 
+    // Things standing on the field, in painter order; they are drawn again over the page blocks.
     const items = [], places = [];
     for (const a of agents) {
-      if (!walking(a)) continue;
-      items.push({ key: a.x + a.y + .6, draw: () => agentCube(ctx, ...agentTop(a)) });
+      if (!driving(a)) continue;
+      items.push({ key: a.x + a.y + .6, draw: (g) => agentCube(g, ...P([a.x, a.y, hill(a.x, a.y) + 1])) });
       if (a.state === "place") places.push([a, placePose(a)]);
     }
     slot.forEach((st, n) => {
-      if (st.state !== "loose") return;
-      const [i, j] = st.cell, b = st.landed < .6 ? s * .35 * Math.exp(-7 * st.landed) * Math.abs(Math.sin(12 * st.landed)) : 0;
-      items.push({ key: i + j + .5, draw: () => { const [x, y] = iso(i, j, hill(i, j) + 1); markCube(ctx, n, x, y - b, SLOTS[n].k, true); } });
+      if (st.state === "loose") {
+        const [i, j] = st.cell, b = st.landed < .6 ? s * .35 * Math.exp(-7 * st.landed) * Math.abs(Math.sin(12 * st.landed)) : 0;
+        items.push({ key: i + j + .5, draw: (g) => { const [x, y] = iso(i, j, hill(i, j) + 1); markCube(g, n, x, y - b, SLOTS[n].k, true); } });
+      } else if (st.state === "roll") {
+        const r = rollStep(st), [i, j] = st.at, colors = n === LIT ? LIT_RGB : SLOT_RGB[n];
+        items.push({ key: i + j + (r ? (r.e[0] + r.e[1]) * r.u : 0) + .5, draw: (g) => solid(g, [i, j, hill(i, j)], SLOTS[n].k, colors, r && { e: r.e, a: Math.PI / 2 * ease(r.u) }) });
+      }
     });
     items.sort((p, q) => p.key - q.key);
     let d = 0;
     for (const e of list) {
-      while (d < items.length && items[d].key < e.c.d) items[d++].draw();
+      while (d < items.length && items[d].key < e.c.d) items[d++].draw(ctx);
       drawCell(ctx, e.c, e.top);
     }
-    while (d < items.length) items[d++].draw();
+    while (d < items.length) items[d++].draw(ctx);
 
     drawBlocks(ctx);
-
-    // agents leaving the slogan's door and driving into the install panel's door
-    for (const a of agents) {
-      if (a.state === "exit") {
-        const u = a.timer / EXIT, [mx, my] = exitDoor.mouth, out = [mx + w * 1.1, my + s * .5], [lx, ly] = agentTop({ ...a, state: "walk" });
-        if (u < .45) { const v = easeOut(u / .45); agentCube(ctx, lerp(mx, out[0], v), lerp(my, out[1], v), lerp(.35, .9, v)); }
-        else { const v = (u - .45) / .55; agentCube(ctx, lerp(out[0], lx, v), lerp(out[1], ly, v * v), lerp(.9, 1, v)); }
-      } else if (a.state === "enter") {
-        const v = ease(a.timer / ENTER), [sx, sy] = agentTop({ ...a, state: "walk" }), [mx, my] = dockDoor.mouth;
-        agentCube(ctx, lerp(sx, mx, v), lerp(sy, my, v), lerp(1, .35, v), 1 - v * .8);
-      }
-    }
+    const doors = agents.filter((a) => a.state === "exit" || a.state === "enter");
+    const drawDoors = (g) => { for (const a of doors) (a.state === "exit" ? drawExit : drawEnter)(g, a); };
+    drawDoors(ctx);
 
     if (phase === "build") slot.forEach((st, n) => { if (st.state !== "set") ghostSlot(n); });
     slot.forEach((st, n) => { if (st.state === "set" || (st.state === "fall" && st.t < 0)) drawSlot(n); });
     slot.forEach((st, n) => { if (st.state === "fall" && st.t >= 0) { const [x, y, k] = fallPose(st, n); markCube(ctx, n, x, y, k, false); } });
     for (const [, pose] of places) if (pose.p < .88) markCube(ctx, pose.n, ...pose.pos, pose.k, false);
-    for (const [a, pose] of places) command(agentTop(a), [pose.pos, pose.slot], [pose.k, kLogo(pose.n)], pose.reach, pose.alpha);
+    for (const [a, pose] of places) command(P([a.x, a.y, hill(a.x, a.y) + 1]), [pose.pos, pose.slot], [pose.k, kLogo(pose.n)], pose.reach, pose.alpha);
+
+    // The page's blocks cover the field canvas; whatever stands in front of their faces is drawn again on top.
+    fctx.clearRect(0, 0, W, H);
+    fctx.save(); fctx.beginPath();
+    for (const b of blocks) fctx.rect(b.r.l, b.r.t, b.r.w, b.r.h);
+    fctx.clip();
+    for (const it of items) it.draw(fctx);
+    drawDoors(fctx);
+    drawHatch(fctx);
+    fctx.restore();
   }
 
   layout(true);

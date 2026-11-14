@@ -138,10 +138,6 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
 .technical { margin-top: 96px; padding-top: 64px; border-top: 1px solid var(--border); scroll-margin-top: 28px; }
 .technical-nav { display: flex; flex-wrap: wrap; gap: 12px; }
 .technical-nav .secondary { margin-top: 24px; }
-.benchmark-result { margin: 28px 0 16px; font: 700 clamp(52px, 7vw, 80px)/1 var(--display); }
-.benchmark-result small { display: block; margin-top: 12px; font: 700 20px/1.3 var(--display); }
-.technical .benchmark-note { margin-top: 24px; font-size: 12px; color: var(--text-faint); }
-.showcase-status { display: inline-block; margin-top: 24px; padding: 6px 10px; border: 1px solid var(--border); color: var(--text-muted); }
 
 footer { border-top: 1px solid var(--border); background: var(--panel); }
 footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 14px 18px; }
@@ -253,61 +249,26 @@ footer a:hover { color: var(--text); }
       <div>
         <div class="section-title"><span class="en">Inside the engine</span><span class="ru">Внутри движка</span></div>
         <h2 id="technology-title"><span class="en"><span class="lead-in">Performance</span> by design</span><span class="ru"><span class="lead-in">Производительность</span> по замыслу</span></h2>
-        <p class="lead"><span class="en">A data-oriented 3D engine for ambitious worlds. Built from scratch. Designed to reduce overhead and achieve maximum performance for large scale worlds. SPITE is made for fast creation of demanding games and simulations, requiring minimal optimizations on your side.</span><span class="ru">Ориентированный на данные 3D-движок для масштабных миров. Создан с нуля, чтобы снижать накладные расходы и добиваться максимальной производительности. SPITE позволяет быстро создавать требовательные игры и симуляции с минимумом оптимизаций с вашей стороны.</span></p>
-        <div class="technical-nav"><a class="secondary" href="#showcases"><span class="en">Explore the showcases ↓</span><span class="ru">Посмотреть демонстрации ↓</span></a></div>
+        <p class="lead"><span class="en">A closer look at how scene data is organized, how geometry reaches the screen, and what you can inspect inside a running frame.</span><span class="ru">Как устроены данные сцены, как геометрия попадает на экран и что можно исследовать внутри кадра работающего движка.</span></p>
+        <!-- Placeholder repository URL; replace when the benchmarks repository is available. -->
+        <div class="technical-nav"><a class="secondary" href="https://github.com/spiteful-team/spite-benchmarks" target="_blank" rel="noopener"><span class="en">Benchmarks</span><span class="ru">Бенчмарки</span> ↗</a></div>
       </div>
       <ul class="claims">
         <li><span class="code">ECS</span><div>
-          <h3><span class="en">A core built for scale</span><span class="ru">Ядро для больших масштабов</span></h3>
-          <p><span class="en">SPITE's core organizes your data for most efficient parallel processing. Scale it to your needs — SPITE provides a simple ECS API that allows you to add any kind of custom logic to your scenes: from simple games to industrial simulations.</span><span class="ru">Ядро SPITE организует данные для эффективной параллельной обработки. Простой ECS API позволяет масштабировать сцены под ваши задачи и добавлять любую логику: от простых игр до промышленных симуляций.</span></p>
+          <h3><span class="en">Process components together</span><span class="ru">Компоненты обрабатываются вместе</span></h3>
+          <p><span class="en">Entities with the same set of components are grouped together. Systems query the component data they need and process it in batches, giving custom game logic the same data-oriented foundation as the engine’s own systems.</span><span class="ru">Сущности с одинаковым набором компонентов хранятся группами. Системы запрашивают нужные данные и обрабатывают их пакетами. Пользовательская игровая логика работает на той же ориентированной на данные основе, что и системы движка.</span></p>
         </div></li>
-        <li><span class="code"><span class="en">Tooling</span><span class="ru">Инструменты</span></span><div>
-          <h3><span class="en">Tooling and runtime</span><span class="ru">Инструменты и исполнение</span></h3>
-          <p><span class="en">An all-in-one editor provides everything to develop and manage your games and simulations. Build your assets in any software you want — bring them to SPITE for runtime.</span><span class="ru">Единый редактор предоставляет всё для разработки игр и симуляций и управления ими. Создавайте ассеты в любом удобном ПО и используйте их в SPITE.</span></p>
+        <li><span class="code">GPU</span><div>
+          <h3><span class="en">Update changes. Cull geometry.</span><span class="ru">Обновляются изменения. Отсекается геометрия.</span></h3>
+          <p><span class="en">The renderer keeps a persistent GPU scene and sends per-object updates only when something changes. Models are split into meshlets; the GPU selects detail at the cluster level and culls geometry outside the view or hidden behind other objects.</span><span class="ru">Рендерер сохраняет сцену на GPU и передаёт обновления объектов только при изменениях. Модели разбиваются на мешлеты: GPU выбирает детализацию на уровне кластеров и отсекает геометрию вне поля зрения или за другими объектами.</span></p>
         </div></li>
-        <li><span class="code"><span class="en">Control</span><span class="ru">Управление</span></span><div>
-          <h3><span class="en">Runtime control for agents</span><span class="ru">Управление работающим миром</span></h3>
-          <p><span class="en">Develop, inspect, change, and debug a running world. Your agent can query state, issue commands, profile and debug the whole scene live as you play or develop. Agents can query and change the state of scenes, including GPU buffers and images through SPITE’s control interface.</span><span class="ru">Разрабатывайте, изучайте, меняйте и отлаживайте работающий мир. Агент может запрашивать состояние, выполнять команды, профилировать и отлаживать всю сцену прямо во время игры или разработки. Интерфейс управления SPITE позволяет читать и менять состояние сцен, включая буферы и изображения на GPU.</span></p>
+        <li><span class="code"><span class="en">Inspect</span><span class="ru">Анализ</span></span><div>
+          <h3><span class="en">Trace a frame down to its data</span><span class="ru">От кадра к его данным</span></h3>
+          <p><span class="en">Frame captures, profiling, pixel inspection, and GPU buffer readbacks expose the data behind the image. The editor, command-line tools, and agents use the same runtime control interface to investigate a rendering result.</span><span class="ru">Захваты кадров, профилирование, анализ пикселей и чтение GPU-буферов открывают доступ к данным, из которых складывается изображение. Редактор, командная строка и агенты исследуют результат рендеринга через единый интерфейс управления движком.</span></p>
         </div></li>
         <li><span class="code"><span class="en">Modules</span><span class="ru">Модули</span></span><div>
-          <h3><span class="en">Modular by design</span><span class="ru">Модульность в основе</span></h3>
-          <p><span class="en">SPITE has everything built in. It also allows you to replace its parts with your own modules: physics, audio, rendering, and more.</span><span class="ru">В SPITE всё встроено, но отдельные части можно заменить собственными модулями: физику, звук, рендеринг и другие системы.</span></p>
-        </div></li>
-      </ul>
-    </div>
-  </section>
-  <section class="wrap technical" id="showcases" aria-labelledby="showcases-title">
-    <div class="about-grid">
-      <div>
-        <div class="section-title"><span class="en">Demo modules</span><span class="ru">Демонстрации</span></div>
-        <h2 id="showcases-title"><span class="en"><span class="lead-in">Five scenes.</span> See the work.</span><span class="ru"><span class="lead-in">Пять сцен.</span> Движок в деле.</span></h2>
-        <p class="lead"><span class="en">Five showcase scenes built with SPITE let you inspect different workloads. Scene source is intended to let you port these scenes to other engines and compare the results.</span><span class="ru">Пять демонстрационных сцен на SPITE показывают разные виды нагрузки. Исходный код сцен предназначен для переноса в другие движки и сравнения результатов.</span></p>
-        <p class="benchmark-result"><span class="en">Up to 16.7×<small>the performance</small></span><span class="ru">До 16,7×<small>выше производительность</small></span></p>
-        <p class="lead"><span class="en">Peak measured advantage in our benchmark, compared with the fastest configurations we tested across publicly available engines.</span><span class="ru">Максимальное измеренное преимущество в нашем бенчмарке относительно самых быстрых из протестированных нами конфигураций общедоступных движков.</span></p>
-        <p class="benchmark-note"><span class="en">The 16.7× figure is the peak frame-rate advantage measured in the Formations scene with 200,000 entities, compared with tested configurations of well-known engines on an NVIDIA RTX 2060 Super and AMD Ryzen 7 7700. Results depend on the scene and settings.</span><span class="ru">16,7× — максимальное преимущество по частоте кадров, измеренное в сцене Formations с 200 000 сущностей относительно протестированных конфигураций известных движков на NVIDIA RTX 2060 Super и AMD Ryzen 7 7700. Результаты зависят от сцены и настроек.</span></p>
-        <span class="showcase-status section-title"><span class="en">Showcase downloads · Coming soon</span><span class="ru">Скачать демонстрации · Скоро</span></span>
-        <p class="benchmark-note"><span class="en">Showcase builds: Windows 10+. Not all GPUs may be supported yet.</span><span class="ru">Сборки демонстраций: Windows 10+. Пока могут поддерживаться не все GPU.</span></p>
-      </div>
-      <ul class="claims">
-        <li id="cube-formations"><span class="code">01 / <span class="en">Entities</span><span class="ru">Сущности</span></span><div>
-          <h3><span class="en">Cube formations</span><span class="ru">Формации кубов</span></h3>
-          <p><span class="en">Thousands of dynamic cubes form changing shapes, creating a representative benchmark of SPITE’s core systems. Each cube is not a simple particle — it is a fully simulated entity with its own transform, physics, and rendering data.</span><span class="ru">Тысячи динамических кубов собираются в меняющиеся фигуры, создавая характерную нагрузку на основные системы SPITE. Каждый куб — полноценная симулируемая сущность со своей трансформацией, физикой и данными рендеринга.</span></p>
-        </div></li>
-        <li><span class="code">02 / <span class="en">City</span><span class="ru">Город</span></span><div>
-          <h3><span class="en">Living city</span><span class="ru">Живой город</span></h3>
-          <p><span class="en">A large city with traffic and pedestrian simulation.</span><span class="ru">Большой город с симуляцией транспорта и пешеходов.</span></p>
-        </div></li>
-        <li><span class="code">03 / <span class="en">Industry</span><span class="ru">Индустрия</span></span><div>
-          <h3><span class="en">Factory swarm</span><span class="ru">Фабричный рой</span></h3>
-          <p><span class="en">A simple factory simulation at a large scale with moving drones and vehicles.</span><span class="ru">Простая симуляция большой фабрики с движущимися дронами и транспортом.</span></p>
-        </div></li>
-        <li><span class="code">04 / <span class="en">Physics</span><span class="ru">Физика</span></span><div>
-          <h3><span class="en">Gnome physics</span><span class="ru">Физика гномов</span></h3>
-          <p><span class="en">Thousands of detailed gnomes. Throw them around with physics.</span><span class="ru">Тысячи детализированных гномов, которых можно разбрасывать с помощью физики.</span></p>
-        </div></li>
-        <li><span class="code">05 / UI</span><div>
-          <h3><span class="en">UI in motion</span><span class="ru">Интерфейс в движении</span></h3>
-          <p><span class="en">SPITE’s own data-oriented UI framework at work. Thousands of interactive UI elements change their state live.</span><span class="ru">Собственная ориентированная на данные UI-система SPITE в работе. Тысячи интерактивных элементов меняют своё состояние в реальном времени.</span></p>
+          <h3><span class="en">One foundation, separate hosts</span><span class="ru">Общая основа, разные приложения</span></h3>
+          <p><span class="en">The editor and standalone game share the same engine foundation, so a game can run without the editor. Physics, audio, and rendering are modules that can be replaced with your own implementations.</span><span class="ru">Редактор и самостоятельная игра используют одну основу движка, поэтому игра может работать без редактора. Физику, звук и рендеринг можно заменить модулями с собственной реализацией.</span></p>
         </div></li>
       </ul>
     </div>

@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SPITE Engine</title>
+<meta name="description" content="SPITE is an agent-native game engine: lighter, faster and simpler for AI agents than any engine on the market.">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMzIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjMyMCI+PGRlZnM+PGZpbHRlciBpZD0iZ2xvdyIgeD0iLTEiIHk9Ii0xIiB3aWR0aD0iMyIgaGVpZ2h0PSIzIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSI3Ii8+PC9maWx0ZXI+PC9kZWZzPjxwYXRoIGQ9Ik04Ni45LDU4LjdMNTcuNiw3NS42TDU3LjYsNDEuOEw4Ni45LDI0LjlaTTI4LjQsNTguN0wyOC40LDI0LjlMNTcuNiw0MS44TDU3LjYsNzUuNlpNNTcuNiw4TDg2LjksMjQuOUw1Ny42LDQxLjhMMjguNCwyNC45WiIgZmlsbD0iIzE0MTMxMiIgc3Ryb2tlPSIjMTQxMzEyIiBzdHJva2Utd2lkdGg9IjAuOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik04Mi44LDU2LjNMNjEuNyw2OC41TDYxLjcsNDQuMUw4Mi44LDMyWiIgZmlsbD0iIzQ1NDEzZSIvPjxwYXRoIGQ9Ik0zMi41LDU2LjNMMzIuNSwzMkw1My41LDQ0LjFMNTMuNSw2OC41WiIgZmlsbD0iIzZmNmE2NSIvPjxwYXRoIGQ9Ik01Ny42LDEyLjdMNzguNywyNC45TDU3LjYsMzdMMzYuNiwyNC45WiIgZmlsbD0iI2E5YTM5ZiIvPjxwYXRoIGQ9Ik0xMTYuMSw3NS42TDg2LjksOTIuNEw4Ni45LDU4LjdMMTE2LjEsNDEuOFpNNTcuNiw3NS42TDU3LjYsNDEuOEw4Ni45LDU4LjdMODYuOSw5Mi40Wk04Ni45LDI0LjlMMTE2LjEsNDEuOEw4Ni45LDU4LjdMNTcuNiw0MS44WiIgZmlsbD0iIzE0MTMxMiIgc3Ryb2tlPSIjMTQxMzEyIiBzdHJva2Utd2lkdGg9IjAuOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0xMTIsNzMuMkw5MSw4NS40TDkxLDYxTDExMiw0OC45WiIgZmlsbD0iIzQ1NDEzZSIvPjxwYXRoIGQ9Ik02MS43LDczLjJMNjEuNyw0OC45TDgyLjgsNjFMODIuOCw4NS40WiIgZmlsbD0iIzZmNmE2NSIvPjxwYXRoIGQ9Ik04Ni45LDI5LjZMMTA3LjksNDEuOEw4Ni45LDUzLjlMNjUuOCw0MS44WiIgZmlsbD0iI2E5YTM5ZiIvPjxwYXRoIGQ9Ik0xNDUuNCw5Mi40TDExNi4xLDEwOS4zTDExNi4xLDc1LjZMMTQ1LjQsNTguN1pNODYuOSw5Mi40TDg2LjksNTguN0wxMTYuMSw3NS42TDExNi4xLDEwOS4zWk0xMTYuMSw0MS44TDE0NS40LDU4LjdMMTE2LjEsNzUuNkw4Ni45LDU4LjdaIiBmaWxsPSIjMTQxMzEyIiBzdHJva2U9IiMxNDEzMTIiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTE0MS4zLDkwLjFMMTIwLjIsMTAyLjJMMTIwLjIsNzcuOUwxNDEuMyw2NS44WiIgZmlsbD0iIzQ1NDEzZSIvPjxwYXRoIGQ9Ik05MSw5MC4xTDkxLDY1LjhMMTEyLDc3LjlMMTEyLDEwMi4yWiIgZmlsbD0iIzZmNmE2NSIvPjxwYXRoIGQ9Ik0xMTYuMSw0Ni41TDEzNy4yLDU4LjdMMTE2LjEsNzAuOEw5NS4xLDU4LjdaIiBmaWxsPSIjYTlhMzlmIi8+PHBhdGggZD0iTTE3NC42LDEwOS4zTDE0NS40LDEyNi4yTDE0NS40LDkyLjRMMTc0LjYsNzUuNlpNMTE2LjEsMTA5LjNMMTE2LjEsNzUuNkwxNDUuNCw5Mi40TDE0NS40LDEyNi4yWk0xNDUuNCw1OC43TDE3NC42LDc1LjZMMTQ1LjQsOTIuNEwxMTYuMSw3NS42WiIgZmlsbD0iIzE0MTMxMiIgc3Ryb2tlPSIjMTQxMzEyIiBzdHJva2Utd2lkdGg9IjAuOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0xNzAuNSwxMDdMMTQ5LjUsMTE5LjFMMTQ5LjUsOTQuOEwxNzAuNSw4Mi42WiIgZmlsbD0iIzQ1NDEzZSIvPjxwYXRoIGQ9Ik0xMjAuMiwxMDdMMTIwLjIsODIuNkwxNDEuMyw5NC44TDE0MS4zLDExOS4xWiIgZmlsbD0iIzZmNmE2NSIvPjxwYXRoIGQ9Ik0xNDUuNCw2My40TDE2Ni40LDc1LjZMMTQ1LjQsODcuN0wxMjQuMyw3NS42WiIgZmlsbD0iI2E5YTM5ZiIvPjxwYXRoIGQ9Ik0yMDMuOSwxMjYuMkwxNzQuNiwxNDMuMUwxNzQuNiwxMDkuM0wyMDMuOSw5Mi40Wk0xNDUuNCwxMjYuMkwxNDUuNCw5Mi40TDE3NC42LDEwOS4zTDE3NC42LDE0My4xWk0xNzQuNiw3NS42TDIwMy45LDkyLjRMMTc0LjYsMTA5LjNMMTQ1LjQsOTIuNFoiIGZpbGw9IiMxNDEzMTIiIHN0cm9rZT0iIzE0MTMxMiIgc3Ryb2tlLXdpZHRoPSIwLjgiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMTk5LjgsMTIzLjlMMTc4LjcsMTM2TDE3OC43LDExMS43TDE5OS44LDk5LjVaIiBmaWxsPSIjNDU0MTNlIi8+PHBhdGggZD0iTTE0OS41LDEyMy45TDE0OS41LDk5LjVMMTcwLjUsMTExLjdMMTcwLjUsMTM2WiIgZmlsbD0iIzZmNmE2NSIvPjxwYXRoIGQ9Ik0xNzQuNiw4MC4zTDE5NS43LDkyLjRMMTc0LjYsMTA0LjZMMTUzLjYsOTIuNFoiIGZpbGw9IiNhOWEzOWYiLz48cGF0aCBkPSJNMjMzLjEsMTQzLjFMMjAzLjksMTYwTDIwMy45LDEyNi4yTDIzMy4xLDEwOS4zWk0xNzQuNiwxNDMuMUwxNzQuNiwxMDkuM0wyMDMuOSwxMjYuMkwyMDMuOSwxNjBaTTIwMy45LDkyLjRMMjMzLjEsMTA5LjNMMjAzLjksMTI2LjJMMTc0LjYsMTA5LjNaIiBmaWxsPSIjMTQxMzEyIiBzdHJva2U9IiMxNDEzMTIiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTIyOSwxNDAuN0wyMDgsMTUyLjlMMjA4LDEyOC42TDIyOSwxMTYuNFoiIGZpbGw9IiM0NTQxM2UiLz48cGF0aCBkPSJNMTc4LjcsMTQwLjdMMTc4LjcsMTE2LjRMMTk5LjgsMTI4LjZMMTk5LjgsMTUyLjlaIiBmaWxsPSIjNmY2YTY1Ii8+PHBhdGggZD0iTTIwMy45LDk3LjJMMjI0LjksMTA5LjNMMjAzLjksMTIxLjVMMTgyLjgsMTA5LjNaIiBmaWxsPSIjYTlhMzlmIi8+PHBhdGggZD0iTTI2Mi40LDE2MEwyMzMuMSwxNzYuOUwyMzMuMSwxNDMuMUwyNjIuNCwxMjYuMlpNMjAzLjksMTYwTDIwMy45LDEyNi4yTDIzMy4xLDE0My4xTDIzMy4xLDE3Ni45Wk0yMzMuMSwxMDkuM0wyNjIuNCwxMjYuMkwyMzMuMSwxNDMuMUwyMDMuOSwxMjYuMloiIGZpbGw9IiMxNDEzMTIiIHN0cm9rZT0iIzE0MTMxMiIgc3Ryb2tlLXdpZHRoPSIwLjgiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMjU4LjMsMTU3LjZMMjM3LjIsMTY5LjhMMjM3LjIsMTQ1LjVMMjU4LjMsMTMzLjNaIiBmaWxsPSIjNDU0MTNlIi8+PHBhdGggZD0iTTIwOCwxNTcuNkwyMDgsMTMzLjNMMjI5LDE0NS41TDIyOSwxNjkuOFoiIGZpbGw9IiM2ZjZhNjUiLz48cGF0aCBkPSJNMjMzLjEsMTE0LjFMMjU0LjIsMTI2LjJMMjMzLjEsMTM4LjRMMjEyLjEsMTI2LjJaIiBmaWxsPSIjYTlhMzlmIi8+PHBhdGggZD0iTTI5MS42LDE3Ni45TDI2Mi40LDE5My44TDI2Mi40LDE2MEwyOTEuNiwxNDMuMVpNMjMzLjEsMTc2LjlMMjMzLjEsMTQzLjFMMjYyLjQsMTYwTDI2Mi40LDE5My44Wk0yNjIuNCwxMjYuMkwyOTEuNiwxNDMuMUwyNjIuNCwxNjBMMjMzLjEsMTQzLjFaIiBmaWxsPSIjMTQxMzEyIiBzdHJva2U9IiMxNDEzMTIiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTI4Ny41LDE3NC41TDI2Ni41LDE4Ni43TDI2Ni41LDE2Mi40TDI4Ny41LDE1MC4yWiIgZmlsbD0iIzM1MzIyZiIvPjxwYXRoIGQ9Ik0yMzcuMiwxNzQuNUwyMzcuMiwxNTAuMkwyNTguMywxNjIuNEwyNTguMywxODYuN1oiIGZpbGw9IiM1YTU1NTEiLz48cGF0aCBkPSJNMjYyLjQsMTMxTDI4My40LDE0My4xTDI2Mi40LDE1NS4zTDI0MS4zLDE0My4xWiIgZmlsbD0iIzhhODQ3ZiIvPjxwYXRoIGQ9Ik0yNjIuNCwxOTMuOEwyMzMuMSwyMTAuN0wyMzMuMSwxNzYuOUwyNjIuNCwxNjBaTTIwMy45LDE5My44TDIwMy45LDE2MEwyMzMuMSwxNzYuOUwyMzMuMSwyMTAuN1pNMjMzLjEsMTQzLjFMMjYyLjQsMTYwTDIzMy4xLDE3Ni45TDIwMy45LDE2MFoiIGZpbGw9IiMxNDEzMTIiIHN0cm9rZT0iIzE0MTMxMiIgc3Ryb2tlLXdpZHRoPSIwLjgiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMjU4LjMsMTkxLjRMMjM3LjIsMjAzLjZMMjM3LjIsMTc5LjNMMjU4LjMsMTY3LjFaIiBmaWxsPSIjMzUzMjJmIi8+PHBhdGggZD0iTTIwOCwxOTEuNEwyMDgsMTY3LjFMMjI5LDE3OS4zTDIyOSwyMDMuNloiIGZpbGw9IiM1YTU1NTEiLz48cGF0aCBkPSJNMjMzLjEsMTQ3LjhMMjU0LjIsMTYwTDIzMy4xLDE3Mi4yTDIxMi4xLDE2MFoiIGZpbGw9IiM4YTg0N2YiLz48cGF0aCBkPSJNMjMzLjEsMjEwLjdMMjAzLjksMjI3LjZMMjAzLjksMTkzLjhMMjMzLjEsMTc2LjlaTTE3NC42LDIxMC43TDE3NC42LDE3Ni45TDIwMy45LDE5My44TDIwMy45LDIyNy42Wk0yMDMuOSwxNjBMMjMzLjEsMTc2LjlMMjAzLjksMTkzLjhMMTc0LjYsMTc2LjlaIiBmaWxsPSIjMTQxMzEyIiBzdHJva2U9IiMxNDEzMTIiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTIyOSwyMDguM0wyMDgsMjIwLjVMMjA4LDE5Ni4xTDIyOSwxODRaIiBmaWxsPSIjMzUzMjJmIi8+PHBhdGggZD0iTTE3OC43LDIwOC4zTDE3OC43LDE4NEwxOTkuOCwxOTYuMUwxOTkuOCwyMjAuNVoiIGZpbGw9IiM1YTU1NTEiLz48cGF0aCBkPSJNMjAzLjksMTY0LjdMMjI0LjksMTc2LjlMMjAzLjksMTg5TDE4Mi44LDE3Ni45WiIgZmlsbD0iIzhhODQ3ZiIvPjxwYXRoIGQ9Ik0yMDMuOSwyMjcuNkwxNzQuNiwyNDQuNEwxNzQuNiwyMTAuN0wyMDMuOSwxOTMuOFpNMTQ1LjQsMjI3LjZMMTQ1LjQsMTkzLjhMMTc0LjYsMjEwLjdMMTc0LjYsMjQ0LjRaTTE3NC42LDE3Ni45TDIwMy45LDE5My44TDE3NC42LDIxMC43TDE0NS40LDE5My44WiIgZmlsbD0iIzE0MTMxMiIgc3Ryb2tlPSIjMTQxMzEyIiBzdHJva2Utd2lkdGg9IjAuOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0xOTkuOCwyMjUuMkwxNzguNywyMzcuNEwxNzguNywyMTNMMTk5LjgsMjAwLjlaIiBmaWxsPSIjMzUzMjJmIi8+PHBhdGggZD0iTTE0OS41LDIyNS4yTDE0OS41LDIwMC45TDE3MC41LDIxM0wxNzAuNSwyMzcuNFoiIGZpbGw9IiM1YTU1NTEiLz48cGF0aCBkPSJNMTc0LjYsMTgxLjZMMTk1LjcsMTkzLjhMMTc0LjYsMjA1LjlMMTUzLjYsMTkzLjhaIiBmaWxsPSIjOGE4NDdmIi8+PHBhdGggZD0iTTE3NC42LDI0NC40TDE0NS40LDI2MS4zTDE0NS40LDIyNy42TDE3NC42LDIxMC43Wk0xMTYuMSwyNDQuNEwxMTYuMSwyMTAuN0wxNDUuNCwyMjcuNkwxNDUuNCwyNjEuM1pNMTQ1LjQsMTkzLjhMMTc0LjYsMjEwLjdMMTQ1LjQsMjI3LjZMMTE2LjEsMjEwLjdaIiBmaWxsPSIjMTQxMzEyIiBzdHJva2U9IiMxNDEzMTIiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTE3MC41LDI0Mi4xTDE0OS41LDI1NC4yTDE0OS41LDIyOS45TDE3MC41LDIxNy44WiIgZmlsbD0iIzM1MzIyZiIvPjxwYXRoIGQ9Ik0xMjAuMiwyNDIuMUwxMjAuMiwyMTcuOEwxNDEuMywyMjkuOUwxNDEuMywyNTQuMloiIGZpbGw9IiM1YTU1NTEiLz48cGF0aCBkPSJNMTQ1LjQsMTk4LjVMMTY2LjQsMjEwLjdMMTQ1LjQsMjIyLjhMMTI0LjMsMjEwLjdaIiBmaWxsPSIjOGE4NDdmIi8+PHBhdGggZD0iTTE0NS40LDI2MS4zTDExNi4xLDI3OC4yTDExNi4xLDI0NC40TDE0NS40LDIyNy42Wk04Ni45LDI2MS4zTDg2LjksMjI3LjZMMTE2LjEsMjQ0LjRMMTE2LjEsMjc4LjJaTTExNi4xLDIxMC43TDE0NS40LDIyNy42TDExNi4xLDI0NC40TDg2LjksMjI3LjZaIiBmaWxsPSIjMTQxMzEyIiBzdHJva2U9IiMxNDEzMTIiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTE0MS4zLDI1OUwxMjAuMiwyNzEuMUwxMjAuMiwyNDYuOEwxNDEuMywyMzQuNloiIGZpbGw9IiMzNTMyMmYiLz48cGF0aCBkPSJNOTEsMjU5TDkxLDIzNC42TDExMiwyNDYuOEwxMTIsMjcxLjFaIiBmaWxsPSIjNWE1NTUxIi8+PHBhdGggZD0iTTExNi4xLDIxNS40TDEzNy4yLDIyNy42TDExNi4xLDIzOS43TDk1LjEsMjI3LjZaIiBmaWxsPSIjOGE4NDdmIi8+PHBhdGggZD0iTTExNi4xLDI3OC4yTDg2LjksMjk1LjFMODYuOSwyNjEuM0wxMTYuMSwyNDQuNFpNNTcuNiwyNzguMkw1Ny42LDI0NC40TDg2LjksMjYxLjNMODYuOSwyOTUuMVpNODYuOSwyMjcuNkwxMTYuMSwyNDQuNEw4Ni45LDI2MS4zTDU3LjYsMjQ0LjRaIiBmaWxsPSIjMTQxMzEyIiBzdHJva2U9IiMxNDEzMTIiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTExMiwyNzUuOUw5MSwyODhMOTEsMjYzLjdMMTEyLDI1MS41WiIgZmlsbD0iIzM1MzIyZiIvPjxwYXRoIGQ9Ik02MS43LDI3NS45TDYxLjcsMjUxLjVMODIuOCwyNjMuN0w4Mi44LDI4OFoiIGZpbGw9IiM1YTU1NTEiLz48cGF0aCBkPSJNODYuOSwyMzIuM0wxMDcuOSwyNDQuNEw4Ni45LDI1Ni42TDY1LjgsMjQ0LjRaIiBmaWxsPSIjOGE4NDdmIi8+PHBhdGggZD0iTTg2LjksMjk1LjFMNTcuNiwzMTJMNTcuNiwyNzguMkw4Ni45LDI2MS4zWk0yOC40LDI5NS4xTDI4LjQsMjYxLjNMNTcuNiwyNzguMkw1Ny42LDMxMlpNNTcuNiwyNDQuNEw4Ni45LDI2MS4zTDU3LjYsMjc4LjJMMjguNCwyNjEuM1oiIGZpbGw9IiMxNDEzMTIiIHN0cm9rZT0iIzE0MTMxMiIgc3Ryb2tlLXdpZHRoPSIwLjgiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNODIuOCwyOTIuN0w2MS43LDMwNC45TDYxLjcsMjgwLjZMODIuOCwyNjguNFoiIGZpbGw9IiMyYTI3MjUiLz48cGF0aCBkPSJNMzIuNSwyOTIuN0wzMi41LDI2OC40TDUzLjUsMjgwLjZMNTMuNSwzMDQuOVoiIGZpbGw9IiM0NTQxM2UiLz48cGF0aCBkPSJNNTcuNiwyNDkuMkw3OC43LDI2MS4zTDU3LjYsMjczLjVMMzYuNiwyNjEuM1oiIGZpbGw9IiM2ZjZhNjUiLz48cGF0aCBkPSJNODYuOSwyNjEuM0w1Ny42LDI3OC4yTDU3LjYsMjQ0LjRMODYuOSwyMjcuNlpNMjguNCwyNjEuM0wyOC40LDIyNy42TDU3LjYsMjQ0LjRMNTcuNiwyNzguMlpNNTcuNiwyMTAuN0w4Ni45LDIyNy42TDU3LjYsMjQ0LjRMMjguNCwyMjcuNloiIGZpbGw9IiMxNDEzMTIiIHN0cm9rZT0iIzE0MTMxMiIgc3Ryb2tlLXdpZHRoPSIwLjgiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNODIuOCwyNTlMNjEuNywyNzEuMUw2MS43LDI0Ni44TDgyLjgsMjM0LjZaIiBmaWxsPSIjMmEyNzI1Ii8+PHBhdGggZD0iTTMyLjUsMjU5TDMyLjUsMjM0LjZMNTMuNSwyNDYuOEw1My41LDI3MS4xWiIgZmlsbD0iIzQ1NDEzZSIvPjxwYXRoIGQ9Ik01Ny42LDIxNS40TDc4LjcsMjI3LjZMNTcuNiwyMzkuN0wzNi42LDIyNy42WiIgZmlsbD0iIzZmNmE2NSIvPjxwYXRoIGQ9Ik04Ni45LDIyNy42TDU3LjYsMjQ0LjRMNTcuNiwyMTAuN0w4Ni45LDE5My44Wk0yOC40LDIyNy42TDI4LjQsMTkzLjhMNTcuNiwyMTAuN0w1Ny42LDI0NC40Wk01Ny42LDE3Ni45TDg2LjksMTkzLjhMNTcuNiwyMTAuN0wyOC40LDE5My44WiIgZmlsbD0iIzE0MTMxMiIgc3Ryb2tlPSIjMTQxMzEyIiBzdHJva2Utd2lkdGg9IjAuOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik04Mi44LDIyNS4yTDYxLjcsMjM3LjRMNjEuNywyMTNMODIuOCwyMDAuOVoiIGZpbGw9IiMyYTI3MjUiLz48cGF0aCBkPSJNMzIuNSwyMjUuMkwzMi41LDIwMC45TDUzLjUsMjEzTDUzLjUsMjM3LjRaIiBmaWxsPSIjNDU0MTNlIi8+PHBhdGggZD0iTTU3LjYsMTgxLjZMNzguNywxOTMuOEw1Ny42LDIwNS45TDM2LjYsMTkzLjhaIiBmaWxsPSIjNmY2YTY1Ii8+PHBhdGggZD0iTTg2LjksMTkzLjhMNTcuNiwyMTAuN0w1Ny42LDE3Ni45TDg2LjksMTYwWk0yOC40LDE5My44TDI4LjQsMTYwTDU3LjYsMTc2LjlMNTcuNiwyMTAuN1pNNTcuNiwxNDMuMUw4Ni45LDE2MEw1Ny42LDE3Ni45TDI4LjQsMTYwWiIgZmlsbD0iIzE0MTMxMiIgc3Ryb2tlPSIjMTQxMzEyIiBzdHJva2Utd2lkdGg9IjAuOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik04Mi44LDE5MS40TDYxLjcsMjAzLjZMNjEuNywxNzkuM0w4Mi44LDE2Ny4xWiIgZmlsbD0iIzJhMjcyNSIvPjxwYXRoIGQ9Ik0zMi41LDE5MS40TDMyLjUsMTY3LjFMNTMuNSwxNzkuM0w1My41LDIwMy42WiIgZmlsbD0iIzQ1NDEzZSIvPjxwYXRoIGQ9Ik01Ny42LDE0Ny44TDc4LjcsMTYwTDU3LjYsMTcyLjJMMzYuNiwxNjBaIiBmaWxsPSIjNmY2YTY1Ii8+PHBhdGggZD0iTTg2LjksMTYwTDU3LjYsMTc2LjlMNTcuNiwxNDMuMUw4Ni45LDEyNi4yWk0yOC40LDE2MEwyOC40LDEyNi4yTDU3LjYsMTQzLjFMNTcuNiwxNzYuOVpNNTcuNiwxMDkuM0w4Ni45LDEyNi4yTDU3LjYsMTQzLjFMMjguNCwxMjYuMloiIGZpbGw9IiMxNDEzMTIiIHN0cm9rZT0iIzE0MTMxMiIgc3Ryb2tlLXdpZHRoPSIwLjgiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNODIuOCwxNTcuNkw2MS43LDE2OS44TDYxLjcsMTQ1LjVMODIuOCwxMzMuM1oiIGZpbGw9IiMyYTI3MjUiLz48cGF0aCBkPSJNMzIuNSwxNTcuNkwzMi41LDEzMy4zTDUzLjUsMTQ1LjVMNTMuNSwxNjkuOFoiIGZpbGw9IiM0NTQxM2UiLz48cGF0aCBkPSJNNTcuNiwxMTQuMUw3OC43LDEyNi4yTDU3LjYsMTM4LjRMMzYuNiwxMjYuMloiIGZpbGw9IiM2ZjZhNjUiLz48cGF0aCBkPSJNODYuOSwxMjYuMkw1Ny42LDE0My4xTDU3LjYsMTA5LjNMODYuOSw5Mi40Wk0yOC40LDEyNi4yTDU3LjYsMTA5LjNMNTcuNiwxNDMuMVpNMjguNCwxMjYuMkwyOC40LDkyLjRMNTcuNiwxMDkuM1pNNTcuNiw3NS42TDg2LjksOTIuNEw1Ny42LDEwOS4zTDI4LjQsOTIuNFoiIGZpbGw9IiMxNDEzMTIiIHN0cm9rZT0iIzE0MTMxMiIgc3Ryb2tlLXdpZHRoPSIwLjgiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNODIuOCwxMjMuOUw2MS43LDEzNkw2MS43LDExMi40TDgyLjgsMTAwLjNaTTYxLjcsMTEyLjRMNjEuNywxMTEuN0w4Mi44LDk5LjVMODIuOCwxMDAuM1oiIGZpbGw9IiMyYTI3MjUiLz48cGF0aCBkPSJNNTMuNSwxMTcuMkw1My41LDEzNkwzNy4yLDEyNi42Wk0zMi41LDEyMy45TDMyLjUsOTkuNUw1My41LDExMS43TDUzLjUsMTE3LjJMMzcuMiwxMjYuNloiIGZpbGw9IiM0NTQxM2UiLz48cGF0aCBkPSJNNzgsOTIuOEw1Ny42LDEwNC42TDM2LjYsOTIuNEw1Nyw4MC43WiIgZmlsbD0iIzZmNmE2NSIvPjxwYXRoIGQ9Ik04Ni45LDkyLjRMNTcuNiwxMDkuM0w1Ny42LDc1LjZaTTI4LjQsOTIuNEw1Ny42LDc1LjZMNTcuNiwxMDkuM1pNMjguNCw5Mi40TDI4LjQsNTguN0w1Ny42LDc1LjZaIiBmaWxsPSIjMTQxMzEyIiBzdHJva2U9IiMxNDEzMTIiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTc4LDkyLjhMNjEuNywxMDIuMkw2MS43LDgzLjRaIiBmaWxsPSIjMmEyNzI1Ii8+PHBhdGggZD0iTTUzLjUsODMuNEw1My41LDEwMi4yTDM3LjIsOTIuOFpNMzIuNSw5MC4xTDMyLjUsNjYuNUw1My41LDc4LjdMNTMuNSw4My40TDM3LjIsOTIuOFoiIGZpbGw9IiM0NTQxM2UiLz48cGF0aCBkPSJNMTY4LjMsMTg0LjVMMTI1LjksMjA5TDEyNS45LDE2MEwxNjguMywxMzUuNVpNODMuNSwxODQuNUw4My41LDEzNS41TDEyNS45LDE2MEwxMjUuOSwyMDlaTTEyNS45LDExMUwxNjguMywxMzUuNUwxMjUuOSwxNjBMODMuNSwxMzUuNVoiIGZpbGw9IiNmZjZhNGQiIGZpbHRlcj0idXJsKCNnbG93KSIvPjxwYXRoIGQ9Ik0xNjguMywxODQuNUwxMjUuOSwyMDlMMTI1LjksMTYwTDE2OC4zLDEzNS41Wk04My41LDE4NC41TDgzLjUsMTM1LjVMMTI1LjksMTYwTDEyNS45LDIwOVpNMTI1LjksMTExTDE2OC4zLDEzNS41TDEyNS45LDE2MEw4My41LDEzNS41WiIgZmlsbD0iIzE0MTMxMiIgc3Ryb2tlPSIjMTQxMzEyIiBzdHJva2Utd2lkdGg9IjAuOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0xNjIuMywxODEuMUwxMzEuOCwxOTguN0wxMzEuOCwxNjMuNEwxNjIuMywxNDUuOFoiIGZpbGw9IiM5ZTQyMzAiLz48cGF0aCBkPSJNODkuNCwxODEuMUw4OS40LDE0NS44TDExOS45LDE2My40TDExOS45LDE5OC43WiIgZmlsbD0iI2NjM2UyNSIvPjxwYXRoIGQ9Ik0xMjUuOSwxMTcuOUwxNTYuNCwxMzUuNUwxMjUuOSwxNTMuMUw5NS4zLDEzNS41WiIgZmlsbD0iI2ZmNGQyZSIvPjwvc3ZnPg==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap">
+<style>
+/* SPITE Forge (doc-52, assets/ui/forge/tokens.json), dark theme.
+   Layout: quiet left column over a live meshlet terrain where a sweeping frustum selects the clusters it keeps; below, statement + claim list.
+   Rules kept: accent only for interactive and selected; square panels and tabs; 2px radius on buttons and fields; hard offset shadows; uppercase only in display and code styles. */
+:root {
+  --ground: #0d0c0b;
+  --panel: #141312;
+  --raised: #1e1c1b;
+  --field: #090908;
+  --hover: #1c1a19;
+  --border: #2a2725;
+  --border-strong: #45413e;
+  --text: #f2efed;
+  --text-muted: #a9a39f;
+  --text-faint: #8a847f;
+  --accent: #ff4d2e;
+  --accent-hover: #ff6a4d;
+  --accent-pressed: #e0351a;
+  --on-accent: #1f0603;
+  --focus-ring: rgba(255, 77, 46, .4);
+  --press-shadow: #7a2010;
+  --agent: #b794ff;
+  --agent-wash: rgba(183, 148, 255, .08);
+  --display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --body: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--ground); color: var(--text); font: 15px/1.6 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+html[data-lang="en"] .ru, html[data-lang="ru"] .en { display: none !important; }
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); position: relative; }
+
+/* Forge text styles */
+.section-title { font: 700 12px/16px var(--display); letter-spacing: .08em; text-transform: uppercase; }
+.code { font: 500 10px/12px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--text-faint); }
+
+/* hero with terrain */
+.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
+#terrain { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  -webkit-mask-image: linear-gradient(90deg, transparent 18%, #000 62%); mask-image: linear-gradient(90deg, transparent 18%, #000 62%); }
+.legend { position: absolute; right: max(28px, env(safe-area-inset-right, 0px)); bottom: 20px; display: flex; gap: 16px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 8px; height: 8px; }
+.legend .on i { background: var(--accent); }
+.legend .off i { border: 1px solid var(--text-faint); }
+
+.bar { display: flex; justify-content: space-between; align-items: center; padding-block: 18px; }
+.brand { display: flex; align-items: center; gap: 8px; text-decoration: none; font: 700 18px/22px var(--display); letter-spacing: .02em; }
+.brand > svg { height: 32px; width: auto; display: block; }
+.nav { display: flex; align-items: center; gap: 20px; font-size: 13px; }
+.nav a { text-decoration: none; color: var(--text-muted); }
+.nav a:hover { color: var(--text); }
+.toggle { display: flex; border: 1px solid var(--border); }
+.toggle button { background: none; border: 0; color: var(--text-faint); font: 500 10px/12px var(--mono); letter-spacing: .04em; padding: 6px 9px; cursor: pointer; }
+.toggle button:hover { background: var(--hover); color: var(--text-muted); }
+.toggle button[aria-pressed="true"] { background: var(--raised); color: var(--text); }
+
+.hero-body { max-width: 620px; padding-block: 56px 120px; }
+.agent-chip { display: inline-flex; align-items: center; gap: 8px; height: 26px; padding: 0 10px; border: 1px solid var(--agent); background: var(--agent-wash); color: var(--agent); }
+.lamp { width: 7px; height: 7px; border-radius: 50%; background: var(--agent); box-shadow: 0 0 6px var(--agent); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 var(--display); letter-spacing: .02em; margin: 26px 0 22px; gap: .2em; }
+h1 > svg { height: .95em; width: auto; flex: none; }
+.slogan { font: 600 clamp(22px, 2.6vw, 30px)/1.25 var(--display); margin: 0 0 10px; text-wrap: balance; }
+.slogan .lead-in { color: var(--text-muted); }
+.sub { margin: 0; color: var(--text-muted); max-width: 46ch; }
+
+/* install panel */
+.install { margin-top: 36px; background: var(--panel); border: 1px solid var(--border); box-shadow: 4px 4px 0 #000; }
+.tabs { display: flex; height: 36px; border-bottom: 1px solid var(--border); }
+.tab { background: none; border: 0; border-right: 1px solid var(--border); color: var(--text-muted); font: 600 13px/16px var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 0 16px; cursor: pointer; }
+.tab:hover { background: var(--hover); }
+.tab[aria-selected="true"] { background: var(--raised); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
+.tabs .code { margin-left: auto; align-self: center; padding-right: 12px; }
+.install-body { padding: 12px; }
+.cmd { display: flex; align-items: center; gap: 12px; }
+.cmd code { flex: 1; min-width: 0; background: var(--field); border: 1px solid var(--border); border-radius: 2px; padding: 10px 12px; font: 13px/1.55 var(--mono); white-space: pre-wrap; word-break: break-all; }
+.cmd code:hover { border-color: var(--border-strong); }
+.cmd code::before { content: attr(data-prompt) " "; color: var(--text-faint); }
+.primary { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; background: var(--accent); color: var(--on-accent); border: 0; border-radius: 2px; padding: 0 12px; font: 700 12px/16px var(--display); letter-spacing: .08em; text-transform: uppercase; box-shadow: 3px 3px 0 var(--press-shadow); cursor: pointer; transition: transform .06s, box-shadow .06s, background .1s; }
+.primary:hover { background: var(--accent-hover); }
+.primary:active { background: var(--accent-pressed); transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--press-shadow); }
+.primary svg { width: 14px; height: 14px; }
+.primary .done-l, .primary.done .idle-l { display: none; }
+.primary.done .done-l { display: inline; }
+.meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; padding: 10px 2px 0; font-size: 12px; color: var(--text-muted); }
+.meta a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.meta a:hover { color: var(--accent-hover); }
+
+/* about */
+.about { padding-block: 96px 104px; }
+.about-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 72px; }
+.about .section-title { color: var(--text-muted); }
+.about h2 { font: 700 clamp(34px, 4.4vw, 52px)/1.05 var(--display); letter-spacing: .01em; margin: 14px 0 20px; text-wrap: balance; }
+.about h2 .lead-in { color: var(--text-muted); }
+.about .lead { color: var(--text-muted); margin: 0; max-width: 54ch; font-size: 16px; }
+.claims { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.claims li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 16px; padding-block: 26px; border-bottom: 1px solid var(--border); }
+.claims .code { padding-top: 6px; }
+.claims h3 { font: 700 20px/1.3 var(--display); margin: 0 0 8px; }
+.claims p { margin: 0; color: var(--text-muted); }
+.secondary { display: inline-flex; align-items: center; gap: 8px; height: 30px; margin-top: 16px; padding: 0 12px; background: var(--raised); border: 1px solid var(--border-strong); border-radius: 2px; text-decoration: none; font: 500 13px var(--body); }
+.secondary:hover { background: var(--hover); border-color: var(--text-faint); }
+.secondary svg { width: 15px; height: 15px; fill: currentColor; }
+
+footer { border-top: 1px solid var(--border); background: var(--panel); }
+footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 14px 18px; }
+footer a { color: var(--text-faint); }
+footer a:hover { color: var(--text); }
+
+@media (max-width: 900px) {
+  #terrain { -webkit-mask-image: linear-gradient(180deg, transparent 30%, #000 85%); mask-image: linear-gradient(180deg, transparent 30%, #000 85%); opacity: .7; }
+  .hero-body { padding-block: 36px 120px; }
+  .about-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+@media (max-width: 520px) {
+  .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .legend { right: max(16px, env(safe-area-inset-right, 0px)); }
+  .nav .hide-sm, .tabs .code { display: none; }
+  .primary span { display: none !important; }
+  .claims li { grid-template-columns: 1fr; gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .lamp { animation: none; } }
+</style>
+</head>
+<body>
+<section class="hero">
+  <canvas id="terrain" aria-hidden="true"></canvas>
+  <div class="legend code" aria-hidden="true"><span class="on"><i></i><span class="en">Drawn</span><span class="ru">Рисуется</span></span><span class="off"><i></i><span class="en">Culled on GPU</span><span class="ru">Отсечено на GPU</span></span></div>
+  <header class="wrap bar">
+    <a class="brand" href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 314 64" role="img" aria-label="SPITE Engine"><rect width="314" height="64" rx="0" fill="none"/><svg x="0" y="0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="64" height="64"><defs><filter id="glow-logo" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="7"/></filter></defs><path d="M102.8,72L64.7,94L64.7,50L102.8,28ZM26.6,72L26.6,28L64.7,50L64.7,94ZM64.7,6L102.8,28L64.7,50L26.6,28Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,68.9L70.1,84.8L70.1,53.1L97.5,37.2Z" fill="#45413e"/><path d="M32,68.9L32,37.2L59.4,53.1L59.4,84.8Z" fill="#6f6a65"/><path d="M64.7,12.2L92.2,28L64.7,43.8L37.3,28Z" fill="#a9a39f"/><path d="M140.9,94L102.8,116L102.8,72L140.9,50ZM64.7,94L64.7,50L102.8,72L102.8,116ZM102.8,28L140.9,50L102.8,72L64.7,50Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M135.6,90.9L108.2,106.8L108.2,75.1L135.6,59.2Z" fill="#45413e"/><path d="M70.1,90.9L70.1,59.2L97.5,75.1L97.5,106.8Z" fill="#6f6a65"/><path d="M102.8,34.2L130.3,50L102.8,65.8L75.4,50Z" fill="#a9a39f"/><path d="M179.1,116L140.9,138L140.9,94L179.1,72ZM102.8,116L102.8,72L140.9,94L140.9,138ZM140.9,50L179.1,72L140.9,94L102.8,72Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M173.7,112.9L146.3,128.8L146.3,97.1L173.7,81.2Z" fill="#45413e"/><path d="M108.2,112.9L108.2,81.2L135.6,97.1L135.6,128.8Z" fill="#6f6a65"/><path d="M140.9,56.2L168.4,72L140.9,87.8L113.5,72Z" fill="#a9a39f"/><path d="M217.2,138L179.1,160L179.1,116L217.2,94ZM140.9,138L140.9,94L179.1,116L179.1,160ZM179.1,72L217.2,94L179.1,116L140.9,94Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M211.8,134.9L184.4,150.8L184.4,119.1L211.8,103.2Z" fill="#45413e"/><path d="M146.3,134.9L146.3,103.2L173.7,119.1L173.7,150.8Z" fill="#6f6a65"/><path d="M179.1,78.2L206.5,94L179.1,109.8L151.6,94Z" fill="#a9a39f"/><path d="M255.3,160L217.2,182L217.2,138L255.3,116ZM179.1,160L179.1,116L217.2,138L217.2,182ZM217.2,94L255.3,116L217.2,138L179.1,116Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M249.9,156.9L222.5,172.8L222.5,141.1L249.9,125.2Z" fill="#45413e"/><path d="M184.4,156.9L184.4,125.2L211.8,141.1L211.8,172.8Z" fill="#6f6a65"/><path d="M217.2,100.2L244.6,116L217.2,131.8L189.7,116Z" fill="#a9a39f"/><path d="M293.4,182L255.3,204L255.3,160L293.4,138ZM217.2,182L217.2,138L255.3,160L255.3,204ZM255.3,116L293.4,138L255.3,160L217.2,138Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M288,178.9L260.6,194.8L260.6,163.1L288,147.2Z" fill="#35322f"/><path d="M222.5,178.9L222.5,147.2L249.9,163.1L249.9,194.8Z" fill="#5a5551"/><path d="M255.3,122.2L282.7,138L255.3,153.8L227.8,138Z" fill="#8a847f"/><path d="M255.3,204L217.2,226L217.2,182L255.3,160ZM179.1,204L179.1,160L217.2,182L217.2,226ZM217.2,138L255.3,160L217.2,182L179.1,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M249.9,200.9L222.5,216.8L222.5,185.1L249.9,169.2Z" fill="#35322f"/><path d="M184.4,200.9L184.4,169.2L211.8,185.1L211.8,216.8Z" fill="#5a5551"/><path d="M217.2,144.2L244.6,160L217.2,175.8L189.7,160Z" fill="#8a847f"/><path d="M217.2,226L179.1,248L179.1,204L217.2,182ZM140.9,226L140.9,182L179.1,204L179.1,248ZM179.1,160L217.2,182L179.1,204L140.9,182Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M211.8,222.9L184.4,238.8L184.4,207.1L211.8,191.2Z" fill="#35322f"/><path d="M146.3,222.9L146.3,191.2L173.7,207.1L173.7,238.8Z" fill="#5a5551"/><path d="M179.1,166.2L206.5,182L179.1,197.8L151.6,182Z" fill="#8a847f"/><path d="M179.1,248L140.9,270L140.9,226L179.1,204ZM102.8,248L102.8,204L140.9,226L140.9,270ZM140.9,182L179.1,204L140.9,226L102.8,204Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M173.7,244.9L146.3,260.8L146.3,229.1L173.7,213.2Z" fill="#35322f"/><path d="M108.2,244.9L108.2,213.2L135.6,229.1L135.6,260.8Z" fill="#5a5551"/><path d="M140.9,188.2L168.4,204L140.9,219.8L113.5,204Z" fill="#8a847f"/><path d="M140.9,270L102.8,292L102.8,248L140.9,226ZM64.7,270L64.7,226L102.8,248L102.8,292ZM102.8,204L140.9,226L102.8,248L64.7,226Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M135.6,266.9L108.2,282.8L108.2,251.1L135.6,235.2Z" fill="#35322f"/><path d="M70.1,266.9L70.1,235.2L97.5,251.1L97.5,282.8Z" fill="#5a5551"/><path d="M102.8,210.2L130.3,226L102.8,241.8L75.4,226Z" fill="#8a847f"/><path d="M102.8,292L64.7,314L64.7,270L102.8,248ZM26.6,292L26.6,248L64.7,270L64.7,314ZM64.7,226L102.8,248L64.7,270L26.6,248Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,288.9L70.1,304.8L70.1,273.1L97.5,257.2Z" fill="#2a2725"/><path d="M32,288.9L32,257.2L59.4,273.1L59.4,304.8Z" fill="#45413e"/><path d="M64.7,232.2L92.2,248L64.7,263.8L37.3,248Z" fill="#6f6a65"/><path d="M102.8,248L64.7,270L64.7,226L102.8,204ZM26.6,248L26.6,204L64.7,226L64.7,270ZM64.7,182L102.8,204L64.7,226L26.6,204Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,244.9L70.1,260.8L70.1,229.1L97.5,213.2Z" fill="#2a2725"/><path d="M32,244.9L32,213.2L59.4,229.1L59.4,260.8Z" fill="#45413e"/><path d="M64.7,188.2L92.2,204L64.7,219.8L37.3,204Z" fill="#6f6a65"/><path d="M102.8,204L64.7,226L64.7,182L102.8,160ZM26.6,204L26.6,160L64.7,182L64.7,226ZM64.7,138L102.8,160L64.7,182L26.6,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,200.9L70.1,216.8L70.1,185.1L97.5,169.2Z" fill="#2a2725"/><path d="M32,200.9L32,169.2L59.4,185.1L59.4,216.8Z" fill="#45413e"/><path d="M64.7,144.2L92.2,160L64.7,175.8L37.3,160Z" fill="#6f6a65"/><path d="M102.8,160L64.7,182L64.7,138L102.8,116ZM26.6,160L64.7,138L64.7,182ZM26.6,160L26.6,116L64.7,138ZM64.7,94L102.8,116L64.7,138L26.6,116Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,156.9L70.1,172.8L70.1,142L97.5,126.2ZM70.1,142L70.1,141.1L97.5,125.2L97.5,126.2Z" fill="#2a2725"/><path d="M59.4,148.2L59.4,172.8L38.1,160.5ZM32,156.9L32,125.2L59.4,141.1L59.4,148.2L38.1,160.5Z" fill="#45413e"/><path d="M91.3,116.5L64.7,131.8L37.3,116L63.9,100.6Z" fill="#6f6a65"/><path d="M102.8,116L64.7,138L64.7,94ZM26.6,116L64.7,94L64.7,138ZM26.6,116L26.6,72L64.7,94Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M91.3,116.5L70.1,128.8L70.1,104.2Z" fill="#2a2725"/><path d="M59.4,104.2L59.4,128.8L38.1,116.5ZM32,112.9L32,82.2L59.4,98L59.4,104.2L38.1,116.5Z" fill="#45413e"/><path d="M179.7,189.7L128.2,219.4L128.2,160L179.7,130.3ZM76.8,189.7L76.8,130.3L128.2,160L128.2,219.4ZM128.2,100.6L179.7,130.3L128.2,160L76.8,130.3Z" fill="#ff6a4d" filter="url(#glow-logo)"/><path d="M179.7,189.7L128.2,219.4L128.2,160L179.7,130.3ZM76.8,189.7L76.8,130.3L128.2,160L128.2,219.4ZM128.2,100.6L179.7,130.3L128.2,160L76.8,130.3Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M172.5,185.5L135.4,206.9L135.4,164.2L172.5,142.8Z" fill="#9e4230"/><path d="M84,185.5L84,142.8L121,164.2L121,206.9Z" fill="#cc3e25"/><path d="M128.2,108.9L165.3,130.3L128.2,151.7L91.2,130.3Z" fill="#ff4d2e"/></svg>
+<g transform="translate(78,19.5)"><g transform="translate(-1.79,25) scale(0.03571)" fill="#f2efed"><path transform="translate(0,0)" d="M50 -108V-208H184V-149L217 -116H424L458 -150V-266L425 -299H160L52 -407V-592L160 -700H476L584 -592V-491H450V-551L417 -584H219L186 -551V-448L219 -415H484L592 -307V-110L482 0H158Z"/><path transform="translate(657,0)" d="M65 -700H504L611 -592V-347L503 -238H201V0H65ZM442 -352 477 -387V-551L442 -586H201V-352Z"/><path transform="translate(1323,0)" d="M70 -700H206V0H70Z"/><path transform="translate(1619,0)" d="M224 -585H15V-700H569V-585H360V0H224Z"/><path transform="translate(2223,0)" d="M65 -700H571V-585H201V-408H542V-295H201V-115H571V0H65Z"/></g><g transform="translate(106.18,25) scale(0.03571)" fill="#a9a39f"><path transform="translate(0,0)" d="M65 -700H571V-585H201V-408H542V-295H201V-115H571V0H65Z"/><path transform="translate(626,0)" d="M65 -700H187L499 -225H501V-700H632V0H510L198 -474H196V0H65Z"/><path transform="translate(1343,0)" d="M55 -115V-585L170 -700H518L631 -587V-480H495V-537L448 -584H242L191 -533V-167L242 -116H450L499 -165V-274H349V-390H631V-115L516 0H170Z"/><path transform="translate(2039,0)" d="M70 -700H206V0H70Z"/><path transform="translate(2335,0)" d="M65 -700H187L499 -225H501V-700H632V0H510L198 -474H196V0H65Z"/><path transform="translate(3052,0)" d="M65 -700H571V-585H201V-408H542V-295H201V-115H571V0H65Z"/></g></g></svg></a>
+    <nav class="nav">
+      <a class="hide-sm" href="#about"><span class="en">Engine</span><span class="ru">Движок</span></a>
+      <a class="js-github" href="#">GitHub</a>
+      <div class="toggle" role="group" aria-label="Language"><button type="button" data-set-lang="en">EN</button><button type="button" data-set-lang="ru">RU</button></div>
+    </nav>
+  </header>
+  <div class="wrap">
+    <div class="hero-body">
+      <span class="agent-chip section-title"><span class="lamp"></span><span class="en">Agent-native game engine</span><span class="ru">Нативно агентный движок</span></span>
+      <h1><svg xmlns="http://www.w3.org/2000/svg" viewBox="26.4 6.0 267.2 308.0" aria-hidden="true"><defs><filter id="glow-hero" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="7"/></filter></defs><path d="M86.9,58.7L57.6,75.6L57.6,41.8L86.9,24.9ZM28.4,58.7L28.4,24.9L57.6,41.8L57.6,75.6ZM57.6,8L86.9,24.9L57.6,41.8L28.4,24.9Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,56.3L61.7,68.5L61.7,44.1L82.8,32Z" fill="#45413e"/><path d="M32.5,56.3L32.5,32L53.5,44.1L53.5,68.5Z" fill="#6f6a65"/><path d="M57.6,12.7L78.7,24.9L57.6,37L36.6,24.9Z" fill="#a9a39f"/><path d="M116.1,75.6L86.9,92.4L86.9,58.7L116.1,41.8ZM57.6,75.6L57.6,41.8L86.9,58.7L86.9,92.4ZM86.9,24.9L116.1,41.8L86.9,58.7L57.6,41.8Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M112,73.2L91,85.4L91,61L112,48.9Z" fill="#45413e"/><path d="M61.7,73.2L61.7,48.9L82.8,61L82.8,85.4Z" fill="#6f6a65"/><path d="M86.9,29.6L107.9,41.8L86.9,53.9L65.8,41.8Z" fill="#a9a39f"/><path d="M145.4,92.4L116.1,109.3L116.1,75.6L145.4,58.7ZM86.9,92.4L86.9,58.7L116.1,75.6L116.1,109.3ZM116.1,41.8L145.4,58.7L116.1,75.6L86.9,58.7Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M141.3,90.1L120.2,102.2L120.2,77.9L141.3,65.8Z" fill="#45413e"/><path d="M91,90.1L91,65.8L112,77.9L112,102.2Z" fill="#6f6a65"/><path d="M116.1,46.5L137.2,58.7L116.1,70.8L95.1,58.7Z" fill="#a9a39f"/><path d="M174.6,109.3L145.4,126.2L145.4,92.4L174.6,75.6ZM116.1,109.3L116.1,75.6L145.4,92.4L145.4,126.2ZM145.4,58.7L174.6,75.6L145.4,92.4L116.1,75.6Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M170.5,107L149.5,119.1L149.5,94.8L170.5,82.6Z" fill="#45413e"/><path d="M120.2,107L120.2,82.6L141.3,94.8L141.3,119.1Z" fill="#6f6a65"/><path d="M145.4,63.4L166.4,75.6L145.4,87.7L124.3,75.6Z" fill="#a9a39f"/><path d="M203.9,126.2L174.6,143.1L174.6,109.3L203.9,92.4ZM145.4,126.2L145.4,92.4L174.6,109.3L174.6,143.1ZM174.6,75.6L203.9,92.4L174.6,109.3L145.4,92.4Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M199.8,123.9L178.7,136L178.7,111.7L199.8,99.5Z" fill="#45413e"/><path d="M149.5,123.9L149.5,99.5L170.5,111.7L170.5,136Z" fill="#6f6a65"/><path d="M174.6,80.3L195.7,92.4L174.6,104.6L153.6,92.4Z" fill="#a9a39f"/><path d="M233.1,143.1L203.9,160L203.9,126.2L233.1,109.3ZM174.6,143.1L174.6,109.3L203.9,126.2L203.9,160ZM203.9,92.4L233.1,109.3L203.9,126.2L174.6,109.3Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M229,140.7L208,152.9L208,128.6L229,116.4Z" fill="#45413e"/><path d="M178.7,140.7L178.7,116.4L199.8,128.6L199.8,152.9Z" fill="#6f6a65"/><path d="M203.9,97.2L224.9,109.3L203.9,121.5L182.8,109.3Z" fill="#a9a39f"/><path d="M262.4,160L233.1,176.9L233.1,143.1L262.4,126.2ZM203.9,160L203.9,126.2L233.1,143.1L233.1,176.9ZM233.1,109.3L262.4,126.2L233.1,143.1L203.9,126.2Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M258.3,157.6L237.2,169.8L237.2,145.5L258.3,133.3Z" fill="#45413e"/><path d="M208,157.6L208,133.3L229,145.5L229,169.8Z" fill="#6f6a65"/><path d="M233.1,114.1L254.2,126.2L233.1,138.4L212.1,126.2Z" fill="#a9a39f"/><path d="M291.6,176.9L262.4,193.8L262.4,160L291.6,143.1ZM233.1,176.9L233.1,143.1L262.4,160L262.4,193.8ZM262.4,126.2L291.6,143.1L262.4,160L233.1,143.1Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M287.5,174.5L266.5,186.7L266.5,162.4L287.5,150.2Z" fill="#35322f"/><path d="M237.2,174.5L237.2,150.2L258.3,162.4L258.3,186.7Z" fill="#5a5551"/><path d="M262.4,131L283.4,143.1L262.4,155.3L241.3,143.1Z" fill="#8a847f"/><path d="M262.4,193.8L233.1,210.7L233.1,176.9L262.4,160ZM203.9,193.8L203.9,160L233.1,176.9L233.1,210.7ZM233.1,143.1L262.4,160L233.1,176.9L203.9,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M258.3,191.4L237.2,203.6L237.2,179.3L258.3,167.1Z" fill="#35322f"/><path d="M208,191.4L208,167.1L229,179.3L229,203.6Z" fill="#5a5551"/><path d="M233.1,147.8L254.2,160L233.1,172.2L212.1,160Z" fill="#8a847f"/><path d="M233.1,210.7L203.9,227.6L203.9,193.8L233.1,176.9ZM174.6,210.7L174.6,176.9L203.9,193.8L203.9,227.6ZM203.9,160L233.1,176.9L203.9,193.8L174.6,176.9Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M229,208.3L208,220.5L208,196.1L229,184Z" fill="#35322f"/><path d="M178.7,208.3L178.7,184L199.8,196.1L199.8,220.5Z" fill="#5a5551"/><path d="M203.9,164.7L224.9,176.9L203.9,189L182.8,176.9Z" fill="#8a847f"/><path d="M203.9,227.6L174.6,244.4L174.6,210.7L203.9,193.8ZM145.4,227.6L145.4,193.8L174.6,210.7L174.6,244.4ZM174.6,176.9L203.9,193.8L174.6,210.7L145.4,193.8Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M199.8,225.2L178.7,237.4L178.7,213L199.8,200.9Z" fill="#35322f"/><path d="M149.5,225.2L149.5,200.9L170.5,213L170.5,237.4Z" fill="#5a5551"/><path d="M174.6,181.6L195.7,193.8L174.6,205.9L153.6,193.8Z" fill="#8a847f"/><path d="M174.6,244.4L145.4,261.3L145.4,227.6L174.6,210.7ZM116.1,244.4L116.1,210.7L145.4,227.6L145.4,261.3ZM145.4,193.8L174.6,210.7L145.4,227.6L116.1,210.7Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M170.5,242.1L149.5,254.2L149.5,229.9L170.5,217.8Z" fill="#35322f"/><path d="M120.2,242.1L120.2,217.8L141.3,229.9L141.3,254.2Z" fill="#5a5551"/><path d="M145.4,198.5L166.4,210.7L145.4,222.8L124.3,210.7Z" fill="#8a847f"/><path d="M145.4,261.3L116.1,278.2L116.1,244.4L145.4,227.6ZM86.9,261.3L86.9,227.6L116.1,244.4L116.1,278.2ZM116.1,210.7L145.4,227.6L116.1,244.4L86.9,227.6Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M141.3,259L120.2,271.1L120.2,246.8L141.3,234.6Z" fill="#35322f"/><path d="M91,259L91,234.6L112,246.8L112,271.1Z" fill="#5a5551"/><path d="M116.1,215.4L137.2,227.6L116.1,239.7L95.1,227.6Z" fill="#8a847f"/><path d="M116.1,278.2L86.9,295.1L86.9,261.3L116.1,244.4ZM57.6,278.2L57.6,244.4L86.9,261.3L86.9,295.1ZM86.9,227.6L116.1,244.4L86.9,261.3L57.6,244.4Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M112,275.9L91,288L91,263.7L112,251.5Z" fill="#35322f"/><path d="M61.7,275.9L61.7,251.5L82.8,263.7L82.8,288Z" fill="#5a5551"/><path d="M86.9,232.3L107.9,244.4L86.9,256.6L65.8,244.4Z" fill="#8a847f"/><path d="M86.9,295.1L57.6,312L57.6,278.2L86.9,261.3ZM28.4,295.1L28.4,261.3L57.6,278.2L57.6,312ZM57.6,244.4L86.9,261.3L57.6,278.2L28.4,261.3Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,292.7L61.7,304.9L61.7,280.6L82.8,268.4Z" fill="#2a2725"/><path d="M32.5,292.7L32.5,268.4L53.5,280.6L53.5,304.9Z" fill="#45413e"/><path d="M57.6,249.2L78.7,261.3L57.6,273.5L36.6,261.3Z" fill="#6f6a65"/><path d="M86.9,261.3L57.6,278.2L57.6,244.4L86.9,227.6ZM28.4,261.3L28.4,227.6L57.6,244.4L57.6,278.2ZM57.6,210.7L86.9,227.6L57.6,244.4L28.4,227.6Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,259L61.7,271.1L61.7,246.8L82.8,234.6Z" fill="#2a2725"/><path d="M32.5,259L32.5,234.6L53.5,246.8L53.5,271.1Z" fill="#45413e"/><path d="M57.6,215.4L78.7,227.6L57.6,239.7L36.6,227.6Z" fill="#6f6a65"/><path d="M86.9,227.6L57.6,244.4L57.6,210.7L86.9,193.8ZM28.4,227.6L28.4,193.8L57.6,210.7L57.6,244.4ZM57.6,176.9L86.9,193.8L57.6,210.7L28.4,193.8Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,225.2L61.7,237.4L61.7,213L82.8,200.9Z" fill="#2a2725"/><path d="M32.5,225.2L32.5,200.9L53.5,213L53.5,237.4Z" fill="#45413e"/><path d="M57.6,181.6L78.7,193.8L57.6,205.9L36.6,193.8Z" fill="#6f6a65"/><path d="M86.9,193.8L57.6,210.7L57.6,176.9L86.9,160ZM28.4,193.8L28.4,160L57.6,176.9L57.6,210.7ZM57.6,143.1L86.9,160L57.6,176.9L28.4,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,191.4L61.7,203.6L61.7,179.3L82.8,167.1Z" fill="#2a2725"/><path d="M32.5,191.4L32.5,167.1L53.5,179.3L53.5,203.6Z" fill="#45413e"/><path d="M57.6,147.8L78.7,160L57.6,172.2L36.6,160Z" fill="#6f6a65"/><path d="M86.9,160L57.6,176.9L57.6,143.1L86.9,126.2ZM28.4,160L28.4,126.2L57.6,143.1L57.6,176.9ZM57.6,109.3L86.9,126.2L57.6,143.1L28.4,126.2Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,157.6L61.7,169.8L61.7,145.5L82.8,133.3Z" fill="#2a2725"/><path d="M32.5,157.6L32.5,133.3L53.5,145.5L53.5,169.8Z" fill="#45413e"/><path d="M57.6,114.1L78.7,126.2L57.6,138.4L36.6,126.2Z" fill="#6f6a65"/><path d="M86.9,126.2L57.6,143.1L57.6,109.3L86.9,92.4ZM28.4,126.2L57.6,109.3L57.6,143.1ZM28.4,126.2L28.4,92.4L57.6,109.3ZM57.6,75.6L86.9,92.4L57.6,109.3L28.4,92.4Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,123.9L61.7,136L61.7,112.4L82.8,100.3ZM61.7,112.4L61.7,111.7L82.8,99.5L82.8,100.3Z" fill="#2a2725"/><path d="M53.5,117.2L53.5,136L37.2,126.6ZM32.5,123.9L32.5,99.5L53.5,111.7L53.5,117.2L37.2,126.6Z" fill="#45413e"/><path d="M78,92.8L57.6,104.6L36.6,92.4L57,80.7Z" fill="#6f6a65"/><path d="M86.9,92.4L57.6,109.3L57.6,75.6ZM28.4,92.4L57.6,75.6L57.6,109.3ZM28.4,92.4L28.4,58.7L57.6,75.6Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M78,92.8L61.7,102.2L61.7,83.4Z" fill="#2a2725"/><path d="M53.5,83.4L53.5,102.2L37.2,92.8ZM32.5,90.1L32.5,66.5L53.5,78.7L53.5,83.4L37.2,92.8Z" fill="#45413e"/><path d="M168.3,184.5L125.9,209L125.9,160L168.3,135.5ZM83.5,184.5L83.5,135.5L125.9,160L125.9,209ZM125.9,111L168.3,135.5L125.9,160L83.5,135.5Z" fill="#ff6a4d" filter="url(#glow-hero)"/><path d="M168.3,184.5L125.9,209L125.9,160L168.3,135.5ZM83.5,184.5L83.5,135.5L125.9,160L125.9,209ZM125.9,111L168.3,135.5L125.9,160L83.5,135.5Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M162.3,181.1L131.8,198.7L131.8,163.4L162.3,145.8Z" fill="#9e4230"/><path d="M89.4,181.1L89.4,145.8L119.9,163.4L119.9,198.7Z" fill="#cc3e25"/><path d="M125.9,117.9L156.4,135.5L125.9,153.1L95.3,135.5Z" fill="#ff4d2e"/></svg>SPITE</h1>
+      <p class="slogan"><span class="en"><span class="lead-in">Your agent builds the game.</span> SPITE runs it.</span><span class="ru"><span class="lead-in">Игру собирает агент.</span> Запускает SPITE.</span></p>
+      <p class="sub"><span class="en">One command installs the engine, the editor and the SDK.</span><span class="ru">Одна команда ставит движок, редактор и SDK.</span></p>
+
+      <div class="install">
+        <div class="tabs" role="tablist" aria-label="Platform">
+          <button class="tab" role="tab" data-os="windows">Windows</button>
+          <button class="tab" role="tab" data-os="linux">Linux</button>
+          <span class="code" id="shell"></span>
+        </div>
+        <div class="install-body">
+          <div class="cmd">
+            <code id="cmd" data-prompt="&gt;"></code>
+            <button class="primary" id="copy" type="button" aria-label="Copy command">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="9" y="9" width="12" height="12"/><path d="M5 15V3h12"/></svg>
+              <span class="idle-l"><span class="en">Copy</span><span class="ru">Копировать</span></span><span class="done-l"><span class="en">Copied</span><span class="ru">Готово</span></span>
+            </button>
+          </div>
+          <div class="meta">
+            <span id="req"></span>
+            <span><span class="en">Or get the script:</span><span class="ru">Или возьмите скрипт:</span> <a id="script-link" href="#"></a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="about" id="about">
+  <div class="wrap about-grid">
+    <div>
+      <div class="section-title"><span class="en">About the engine</span><span class="ru">О движке</span></div>
+      <h2><span class="en"><span class="lead-in">Agent-native,</span> from the first line</span><span class="ru"><span class="lead-in">Нативно агентный</span> с первой строки</span></h2>
+      <p class="lead"><span class="en">SPITE is built for AI agents. Everything a person can do in the editor, an agent can do through the control protocol, and runtime state answers queries as JSON. The agent builds scenes, writes game logic in C++ modules that reload while the game runs, and reads back what it changed.</span><span class="ru">SPITE сделан для ИИ-агентов. Всё, что человек делает в редакторе, агент делает через управляющий протокол, а состояние рантайма отвечает на запросы в JSON. Агент собирает сцены, пишет игровую логику в C++-модулях, которые перезагружаются прямо в запущенной игре, и читает результат своих правок.</span></p>
+    </div>
+    <ul class="claims">
+      <li>
+        <span class="code"><span class="en">Agents</span><span class="ru">Агенты</span></span>
+        <div>
+          <h3><span class="en">Lighter, faster and simpler for agents</span><span class="ru">Легче, быстрее и проще для агентов</span></h3>
+          <p><span class="en">Than any other engine on the market. One protocol and plain JSON state replace clicking through a GUI and learning a scripting layer.</span><span class="ru">Чем любой другой движок на рынке. Один протокол и состояние в JSON вместо кликов по интерфейсу и изучения скриптового языка.</span></p>
+        </div>
+      </li>
+      <li>
+        <span class="code"><span class="en">Core</span><span class="ru">Ядро</span></span>
+        <div>
+          <h3><span class="en">A core faster by orders of magnitude</span><span class="ru">Ядро быстрее на порядки</span></h3>
+          <p><span class="en">The core outperforms every competitor by several orders of magnitude. Data-oriented ECS and GPU-driven Vulkan rendering: the GPU culls and builds its own draws, as in the terrain above.</span><span class="ru">Ядро быстрее и производительнее любого конкурента на несколько порядков. Data-oriented ECS и GPU-driven рендеринг на Vulkan: GPU сам отсекает и собирает отрисовку, как на рельефе выше.</span></p>
+        </div>
+      </li>
+      <li>
+        <span class="code"><span class="en">Tooling</span><span class="ru">Инструменты</span></span>
+        <div>
+          <h3><span class="en">Open tooling around the core</span><span class="ru">Открытый инструментарий вокруг ядра</span></h3>
+          <p><span class="en">All the tooling around the core is open. Read it, audit it and extend it on GitHub.</span><span class="ru">Весь инструментарий вокруг ядра открыт. Его можно прочитать, проверить и доработать на GitHub.</span></p>
+          <a class="secondary js-github" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.3 18.3 4.6 18.3 4.6c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg>github.com/spiteful-team</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</main>
+
+<footer><div class="wrap code"><span>© 2026 SPITE</span><a class="js-github" href="#">GitHub</a></div></footer>
+
+<script>
+const CONFIG = {
+  github: "https://github.com/spiteful-team",
+  platforms: {
+    windows: { script: "https://github.com/spiteful-team/spite-engine/releases/latest/download/install.ps1", command: (u) => `powershell -c "irm ${u} | iex"`, prompt: "PS>", shell: "PowerShell", file: "install.ps1", req: { en: "Windows 10+ x64 · Vulkan 1.3 GPU", ru: "Windows 10+ x64 · GPU с Vulkan 1.3" } },
+    linux:   { script: "https://github.com/spiteful-team/spite-engine/releases/latest/download/install.sh",  command: (u) => `curl -fsSL ${u} | sh`, prompt: "$", shell: "sh", file: "install.sh", req: { en: "Ubuntu 24.04+ x86-64 · Vulkan 1.3 GPU", ru: "Ubuntu 24.04+ x86-64 · GPU с Vulkan 1.3" } },
+  },
+};
+(() => {
+  const root = document.documentElement, $ = (s) => document.querySelector(s), $$ = (s) => document.querySelectorAll(s);
+  let os = /linux|x11/i.test(navigator.userAgent) && !/android/i.test(navigator.userAgent) ? "linux" : "windows";
+  const save = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
+  const load = (k) => { try { return localStorage.getItem(k); } catch (_) { return null; } };
+  function render() {
+    const p = CONFIG.platforms[os], lang = root.dataset.lang, cmd = $("#cmd"), link = $("#script-link");
+    cmd.textContent = p.command(p.script); cmd.dataset.prompt = p.prompt;
+    $("#shell").textContent = p.shell;
+    $("#req").textContent = p.req[lang];
+    link.href = p.script; link.textContent = p.file;
+    $$(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.os === os)));
+    $$("[data-set-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.setLang === lang)));
+  }
+  function setLang(l) { root.dataset.lang = l; root.lang = l; save("spite-lang", l); render(); }
+  $$(".tab").forEach((t) => t.addEventListener("click", () => { os = t.dataset.os; render(); }));
+  $$("[data-set-lang]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.setLang)));
+  $$(".js-github").forEach((a) => { a.href = CONFIG.github; a.target = "_blank"; a.rel = "noopener"; });
+  let t;
+  $("#copy").addEventListener("click", async () => {
+    const text = $("#cmd").textContent, btn = $("#copy");
+    try { await navigator.clipboard.writeText(text); btn.classList.add("done"); clearTimeout(t); t = setTimeout(() => btn.classList.remove("done"), 1800); }
+    catch (_) { const r = document.createRange(); r.selectNodeContents($("#cmd")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  });
+  setLang(load("spite-lang") || (/^ru\b/i.test(navigator.language) ? "ru" : "en"));
+})();
+
+// Meshlet terrain: a triangulated ground plane grouped into 3x3-cell clusters.
+// A camera frustum sweeps across it; clusters inside are selected in the accent, the rest stay as faint outlines.
+(() => {
+  const canvas = document.getElementById("terrain"), ctx = canvas.getContext("2d");
+  const css = getComputedStyle(document.documentElement);
+  const ACCENT = css.getPropertyValue("--accent").trim(), MUTED = css.getPropertyValue("--text-muted").trim();
+  const COLS = 36, ROWS = 26, X = 11, Z0 = 1.1, Z1 = 16, CAM_H = 1.7, CLUSTER = 3;
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W = 0, H = 0, f = 1, horizon = 0, cx = 0;
+
+  const jitter = [];
+  for (let j = 0; j <= ROWS; j++) for (let i = 0; i <= COLS; i++) {
+    const s = Math.sin(i * 12.9898 + j * 78.233) * 43758.5453;
+    jitter.push((s - Math.floor(s) - .5) * .5);
+  }
+  function resize() {
+    const dpr = Math.min(devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect();
+    W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    horizon = H * .3; cx = W * (W > 900 ? .68 : .5);
+    f = (H - horizon) * Z0 / CAM_H * 1.15;
+  }
+  function point(i, j, t) {
+    const x = -X + (2 * X * i) / COLS + jitter[j * (COLS + 1) + i];
+    const z = Z0 + (Z1 - Z0) * Math.pow(j / ROWS, 1.35);
+    const y = .55 * Math.sin(x * .45 + t * .5) * Math.cos(z * .38 - t * .35) + .25 * Math.sin(z * .9 + x * .2);
+    return { x, z, sx: cx + (x * f) / z, sy: horizon + ((CAM_H - y) * f) / z };
+  }
+  function frame(ms) {
+    const t = ms / 1000;
+    ctx.clearRect(0, 0, W, H);
+    const pts = [];
+    for (let j = 0; j <= ROWS; j++) for (let i = 0; i <= COLS; i++) pts.push(point(i, j, t));
+    const at = (i, j) => pts[j * (COLS + 1) + i];
+    const aim = Math.sin(t * .32) * .55, half = .3;
+    const lit = new Path2D(), dim = new Path2D();
+    for (let cj = 0; cj < ROWS; cj += CLUSTER) for (let ci = 0; ci < COLS; ci += CLUSTER) {
+      const mid = at(Math.min(ci + 1, COLS), Math.min(cj + 1, ROWS));
+      const target = Math.abs(Math.atan2(mid.x, mid.z) - aim) < half && mid.z < Z1 * .82 ? lit : dim;
+      for (let j = cj; j < Math.min(cj + CLUSTER, ROWS); j++) for (let i = ci; i < Math.min(ci + CLUSTER, COLS); i++) {
+        const a = at(i, j), b = at(i + 1, j), c = at(i + 1, j + 1), d = at(i, j + 1);
+        for (const [p, q, r] of [[a, b, c], [a, c, d]]) {
+          target.moveTo(p.sx, p.sy); target.lineTo(q.sx, q.sy); target.lineTo(r.sx, r.sy); target.closePath();
+        }
+      }
+    }
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = .18; ctx.strokeStyle = MUTED; ctx.stroke(dim);
+    ctx.globalAlpha = .08; ctx.fillStyle = ACCENT; ctx.fill(lit);
+    ctx.globalAlpha = .8; ctx.strokeStyle = ACCENT; ctx.stroke(lit);
+    ctx.globalAlpha = .35; ctx.setLineDash([4, 6]);
+    ctx.beginPath();
+    for (const s of [-1, 1]) {
+      const ang = aim + s * half, z = Z1 * .82;
+      ctx.moveTo(cx, H + 40); ctx.lineTo(cx + Math.tan(ang) * f, horizon + (CAM_H * f) / z);
+    }
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+    if (!still) requestAnimationFrame(frame);
+  }
+  resize();
+  new ResizeObserver(() => { resize(); if (still) frame(0); }).observe(canvas);
+  still ? frame(0) : requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

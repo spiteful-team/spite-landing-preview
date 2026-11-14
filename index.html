@@ -33,6 +33,8 @@
   --press-shadow: #7a2010;
   --agent: #b794ff;
   --agent-wash: rgba(183, 148, 255, .08);
+  --hard-shadow: #050404;
+  --floor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='32'%3E%3Cpath d='M28 1.5 L54 16 L28 30.5 L2 16Z' fill='%231a1817' stroke='%23252220'/%3E%3C/svg%3E");
   --display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
   --body: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Geist Mono", ui-monospace, Consolas, monospace;
@@ -140,25 +142,79 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
 
 /* about */
 .about { padding-block: 96px 104px; }
-.about-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 72px; }
+/* Header row: the heading div dissolves so title and h2 sit left and the lead sits right, bottom-aligned; the claims take a full row below. */
+.about > .about-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 72px; }
+.about > .about-grid > div { display: contents; }
+.about > .about-grid .section-title { grid-area: 1 / 1; }
+.about > .about-grid h2 { grid-area: 2 / 1; margin-bottom: 0; }
+.about > .about-grid .lead { grid-area: 1 / 2 / 3 / 3; align-self: end; }
+.about > .about-grid .claims { grid-area: 3 / 1 / 4 / 3; margin-top: 40px; }
 .about .section-title { color: var(--text-muted); }
 .about h2 { font: 700 clamp(34px, 4.4vw, 52px)/1.05 var(--display); letter-spacing: .01em; margin: 14px 0 20px; text-wrap: balance; }
 .about h2 .lead-in { color: var(--text-muted); }
 .about .lead { color: var(--text-muted); margin: 0; max-width: 54ch; font-size: 16px; }
-.claims { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
-.claims li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 16px; padding-block: 26px; border-bottom: 1px solid var(--border); }
-.claims .code { padding-top: 6px; }
-.challenge { margin-top: 80px; font: 700 clamp(28px, 3.6vw, 44px)/1.15 var(--display); letter-spacing: .01em; text-wrap: balance; }
+/* Panels. The copy script regenerates each li as span.code + div; the bar (number, label) is drawn with pseudo-elements and an absolutely placed label so that markup stays as is. */
+.claims { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; counter-reset: claim; }
+.claims li { counter-increment: claim; position: relative; display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 20px; align-items: start; padding: 56px 22px 24px; background: var(--panel); border: 1px solid var(--border); box-shadow: 6px 6px 0 var(--hard-shadow); transition: border-color .2s, transform .2s, box-shadow .2s; }
+.claims li:hover { border-color: var(--border-strong); transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--hard-shadow); }
+.claims li::after { content: ""; position: absolute; inset: 0 0 auto; height: 34px; border-bottom: 1px solid var(--border); }
+.claims li::before, .claims li > .code { position: absolute; z-index: 1; top: 0; height: 33px; display: flex; align-items: center; border-right: 1px solid var(--border); }
+.claims li::before { content: counter(claim, decimal-leading-zero); left: 0; width: 42px; justify-content: center; font: 500 10px/12px var(--mono); letter-spacing: .04em; color: var(--text-faint); }
+.claims li > .code { left: 42px; padding: 0 12px; background: var(--raised); color: var(--text); box-shadow: inset 0 -2px 0 var(--border-strong); }
+.claims li > div { grid-column: 2; grid-row: 1; }
+.claims li > .claim-icon { grid-column: 1; grid-row: 1; display: flex; justify-content: center; padding-top: 4px; }
+.iso { display: block; overflow: visible; }
+.iso .hot { filter: drop-shadow(0 0 5px rgba(255, 77, 46, .6)); }
+/* Closing line: a full-bleed band standing on the faded isometric floor. */
+.verify { position: relative; margin-top: 96px; border-block: 1px solid var(--border); overflow: hidden; }
+.verify::before { content: ""; position: absolute; inset: 0; background: var(--floor); -webkit-mask: radial-gradient(70% 140% at 80% 50%, #000, transparent 75%); mask: radial-gradient(70% 140% at 80% 50%, #000, transparent 75%); }
+.challenge { padding-block: 56px; font: 700 clamp(28px, 3.8vw, 48px)/1.15 var(--display); letter-spacing: .01em; text-wrap: balance; }
 .challenge .lead-in { color: var(--text-muted); }
-.claims h3 { font: 700 20px/1.3 var(--display); margin: 0 0 8px; }
-.claims p { margin: 0; color: var(--text-muted); }
+.claims h3, .modules h3, .log-card h3 { font: 700 20px/1.3 var(--display); margin: 0 0 8px; }
+.claims p, .modules p, .log-card p { margin: 0; color: var(--text-muted); }
 .secondary { display: inline-flex; align-items: center; gap: 8px; height: 30px; margin-top: 16px; padding: 0 12px; background: var(--raised); border: 1px solid var(--border-strong); border-radius: 2px; text-decoration: none; font: 500 13px var(--body); }
 .secondary:hover { background: var(--hover); border-color: var(--text-faint); }
 .secondary svg { width: 15px; height: 15px; fill: currentColor; }
 
 .technical { margin-top: 96px; padding-top: 64px; border-top: 1px solid var(--border); scroll-margin-top: 28px; }
+.verify + .technical { margin-top: 0; border-top: 0; }
 .technical-nav { display: flex; flex-wrap: wrap; gap: 12px; }
 .technical-nav .secondary { margin-top: 24px; }
+
+/* core diagram: heading, the isometric core, a bus of wires drawn by script, the module cards */
+.tech-head { max-width: 760px; margin: 0 auto 56px; text-align: center; }
+.tech-head .lead { margin-inline: auto; }
+.tech-head .technical-nav { justify-content: center; }
+.tech-diagram { position: relative; display: flex; flex-direction: column; align-items: center; gap: 104px; }
+.tech-core { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.tech-core .code { color: var(--text); }
+.modules { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 20px; }
+.modules li { position: relative; z-index: 1; background: var(--panel); border: 1px solid var(--border); padding: 18px 20px 20px; box-shadow: 5px 5px 0 var(--hard-shadow); }
+.modules .code { display: block; margin-bottom: 8px; color: var(--agent); }
+.modules p { font-size: 14px; }
+.tech-wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.tech-wires path { fill: none; stroke: var(--text-faint); stroke-width: 1; stroke-dasharray: 4 4; animation: wire-flow 2.4s linear infinite; }
+.tech-wires rect { fill: var(--text-faint); }
+@keyframes wire-flow { to { stroke-dashoffset: -16; } }
+
+/* agent log: reusable roadmap. ol.log > li.log-step[data-state=now|next|done] > .log-chip, .log-status, .log-card */
+.log-layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 72px; }
+.log-side { position: sticky; top: 120px; align-self: start; }
+.log-side > p.section-title { margin: 32px 0 8px; }
+.log { list-style: none; margin: 0; padding: 0; position: relative; }
+.log::before { content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px; border-left: 1px dashed var(--agent); opacity: .6; }
+.log::after { content: ""; position: absolute; left: 3px; top: 0; width: 9px; height: 9px; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: log-run 6s linear infinite; }
+@keyframes log-run { from { top: 0; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } to { top: 100%; opacity: 0; } }
+.log-step { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 0 0 44px 44px; }
+.log-step:last-child { padding-bottom: 0; }
+.log-step::before { content: ""; position: absolute; left: 0; top: 4px; width: 15px; height: 15px; background: var(--ground); border: 1px solid var(--agent); }
+.log-step[data-state="now"]::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(255, 77, 46, .7); }
+.log-step[data-state="done"]::before { background: var(--text-faint); border-color: var(--text-faint); }
+.log-chip { display: inline-flex; align-items: center; gap: 10px; height: 24px; padding: 0 8px; border: 1px solid rgba(183, 148, 255, .35); background: var(--agent-wash); color: var(--agent); }
+.log-status { color: var(--text-muted); }
+.log-step[data-state="now"] .log-status { color: var(--text); }
+.log-card { flex: 0 0 100%; margin-top: 4px; background: var(--panel); border: 1px solid var(--border); padding: 20px 22px 22px; }
+.log-step[data-state="now"] .log-card { border-color: var(--border-strong); }
 
 footer { border-top: 1px solid var(--border); background: var(--panel); }
 footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 14px 18px; }
@@ -175,7 +231,6 @@ footer a:hover { color: var(--text); }
   .roof-label { gap: 5px; padding: 0 8px; font-size: 11.5px; line-height: 14px; letter-spacing: .06em; }
   .roof-label svg { width: 11px; height: 11px; }
   .roof-text { padding: 0 8px; font-size: 12px; line-height: 14px; }
-  .about-grid { grid-template-columns: 1fr; gap: 40px; }
 }
 @media (max-width: 520px) {
   .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -187,9 +242,33 @@ footer a:hover { color: var(--text); }
   .cmd code { font-size: 13px; padding: 10px 11px; }
   .meta { font-size: 13px; }
   .primary span { display: none !important; }
-  .claims li { grid-template-columns: 1fr; gap: 6px; }
+}
+@media (max-width: 900px) {
+  .about > .about-grid { grid-template-columns: 1fr; }
+  .about > .about-grid .section-title, .about > .about-grid h2, .about > .about-grid .lead, .about > .about-grid .claims { grid-column: 1; }
+  .about > .about-grid h2 { grid-row: 2; }
+  .about > .about-grid .lead { grid-row: 3; align-self: start; margin-top: 20px; }
+  .about > .about-grid .claims { grid-row: 4; margin-top: 32px; }
+  .claims { grid-template-columns: 1fr; }
+  .tech-diagram { gap: 28px; }
+  .tech-core svg { width: 150px; height: auto; }
+  .tech-wires { display: none; }
+  .modules { grid-auto-flow: row; grid-template-columns: 1fr; }
+  .log-layout { grid-template-columns: 1fr; gap: 40px; }
+  .log-side { position: static; }
+}
+@media (max-width: 520px) {
+  .claims li { grid-template-columns: 1fr; gap: 14px; padding-inline: 18px; }
+  .claims li > .claim-icon { justify-content: flex-start; }
+  .claims li > div { grid-column: 1; grid-row: 2; }
+  .log-step { padding-left: 34px; }
 }
 @media (prefers-reduced-motion: reduce) { .lamp { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .claims li { transition: none; }
+  .tech-wires path { animation: none; }
+  .log::after { display: none; }
+}
 </style>
 </head>
 <body>
@@ -280,17 +359,21 @@ footer a:hover { color: var(--text); }
       </li>
     </ul>
   </div>
-  <p class="wrap challenge"><span class="en"><span class="lead-in">Every claim here can be verified.</span> The benchmarks are open.</span><span class="ru"><span class="lead-in">Каждое утверждение здесь можно проверить.</span> Бенчмарки открыты.</span></p>
+  <div class="verify">
+    <p class="wrap challenge"><span class="en"><span class="lead-in">Every claim here can be verified.</span> The benchmarks are open.</span><span class="ru"><span class="lead-in">Каждое утверждение здесь можно проверить.</span> Бенчмарки открыты.</span></p>
+  </div>
   <section class="wrap technical" id="technology" aria-labelledby="technology-title">
-    <div class="about-grid">
-      <div>
-        <div class="section-title"><span class="en">Built for your world</span><span class="ru">Для вашего мира</span></div>
-        <h2 id="technology-title"><span class="en"><span class="lead-in">Big worlds.</span> Your rules.</span><span class="ru"><span class="lead-in">Большие миры.</span> Ваши правила.</span></h2>
-        <p class="lead"><span class="en">From demanding games to industrial simulations, SPITE gives you a foundation for worlds with more going on.</span><span class="ru">От требовательных игр до промышленных симуляций — SPITE даёт основу для миров, в которых происходит больше.</span></p>
-        <!-- Placeholder repository URL; replace when the benchmarks repository is available. -->
-        <div class="technical-nav"><a class="secondary" href="https://github.com/spiteful-team/spite-benchmarks" target="_blank" rel="noopener"><span class="en">Benchmarks</span><span class="ru">Бенчмарки</span> ↗</a></div>
-      </div>
-      <ul class="claims">
+    <div class="tech-head">
+      <div class="section-title"><span class="en">Built for your world</span><span class="ru">Для вашего мира</span></div>
+      <h2 id="technology-title"><span class="en"><span class="lead-in">Big worlds.</span> Your rules.</span><span class="ru"><span class="lead-in">Большие миры.</span> Ваши правила.</span></h2>
+      <p class="lead"><span class="en">From demanding games to industrial simulations, SPITE gives you a foundation for worlds with more going on.</span><span class="ru">От требовательных игр до промышленных симуляций — SPITE даёт основу для миров, в которых происходит больше.</span></p>
+      <!-- Placeholder repository URL; replace when the benchmarks repository is available. -->
+      <div class="technical-nav"><a class="secondary" href="https://github.com/spiteful-team/spite-benchmarks" target="_blank" rel="noopener"><span class="en">Benchmarks</span><span class="ru">Бенчмарки</span> ↗</a></div>
+    </div>
+    <div class="tech-diagram" id="tech-diagram">
+      <svg class="tech-wires" aria-hidden="true"></svg>
+      <div class="tech-core"><span class="code"><span class="en">SPITE core</span><span class="ru">Ядро SPITE</span></span></div>
+      <ul class="modules">
         <li><span class="code"><span class="en">Rendering</span><span class="ru">Рендеринг</span></span><div>
           <h3><span class="en">Detail at scale</span><span class="ru">Детализация в масштабе</span></h3>
           <p><span class="en">Build rich 3D environments with detailed geometry and large numbers of moving objects. SPITE’s renderer is designed for large, dynamic scenes.</span><span class="ru">Создавайте насыщенные 3D-миры с детализированной геометрией и множеством движущихся объектов. Рендерер SPITE рассчитан на большие динамические сцены.</span></p>
@@ -307,36 +390,48 @@ footer a:hover { color: var(--text); }
     </div>
   </section>
   <section class="wrap technical" id="roadmap" aria-labelledby="roadmap-title">
-    <div class="about-grid">
-      <div>
+    <div class="log-layout">
+      <div class="log-side">
         <div class="section-title"><span class="en">Development direction</span><span class="ru">Направление развития</span></div>
         <h2 id="roadmap-title"><span class="en"><span class="lead-in">What comes</span> next.</span><span class="ru"><span class="lead-in">Что</span> дальше.</span></h2>
         <p class="lead"><span class="en">SPITE is in beta. These are the areas guiding development; priorities can change as the engine evolves.</span><span class="ru">SPITE находится в бете. Эти направления определяют развитие движка; по мере его разработки приоритеты могут меняться.</span></p>
         <p class="section-title"><span class="en">Release timing</span><span class="ru">Сроки выпуска</span></p>
         <p class="lead"><span class="en">No release dates are announced. Availability and scope will be shared as they are confirmed.</span><span class="ru">Даты релизов не объявлены. Информация о доступности и составе обновлений будет опубликована по мере подтверждения.</span></p>
       </div>
-      <ul class="claims">
-        <li><span class="code">01 / <span class="en">Foundation</span><span class="ru">Основа</span></span><div>
-          <div class="code"><span class="en">In development</span><span class="ru">В разработке</span></div>
-          <h3><span class="en">Engine, editor, and runtime</span><span class="ru">Движок, редактор и исполнение</span></h3>
-          <p><span class="en">Continue refining the data-oriented core, editor, game runtime, and workflows for building and inspecting scenes.</span><span class="ru">Продолжать совершенствовать ориентированное на данные ядро, редактор, игровую среду исполнения и процессы создания и исследования сцен.</span></p>
-        </div></li>
-        <li><span class="code">02 / <span class="en">Graphics</span><span class="ru">Графика</span></span><div>
-          <div class="code"><span class="en">In development</span><span class="ru">В разработке</span></div>
-          <h3><span class="en">Rendering and content</span><span class="ru">Рендеринг и контент</span></h3>
-          <p><span class="en">Expand and improve the Vulkan rendering pipeline, asset workflows, and GPU streaming while measuring their performance.</span><span class="ru">Расширять и улучшать рендеринг на Vulkan, работу с ассетами и потоковую загрузку на GPU, измеряя их производительность.</span></p>
-        </div></li>
-        <li><span class="code">03 / <span class="en">Agents</span><span class="ru">Агенты</span></span><div>
-          <div class="code"><span class="en">In development</span><span class="ru">В разработке</span></div>
-          <h3><span class="en">Agent control and inspection</span><span class="ru">Управление и анализ для агентов</span></h3>
-          <p><span class="en">Improve the tools agents use to query state, issue commands, and investigate a running world.</span><span class="ru">Улучшать инструменты, с помощью которых агенты запрашивают состояние, выполняют команды и исследуют работающий мир.</span></p>
-        </div></li>
-        <li><span class="code">04 / <span class="en">Demonstrations</span><span class="ru">Демонстрации</span></span><div>
-          <div class="code"><span class="en">Planned</span><span class="ru">Запланировано</span></div>
-          <h3><span class="en">Public benchmark scenes</span><span class="ru">Публичные сцены для бенчмарков</span></h3>
-          <p><span class="en">Prepare downloadable scenes and builds, including the configurable cube benchmark and its scene source.</span><span class="ru">Подготовить сцены и сборки для скачивания, включая настраиваемый бенчмарк с кубами и исходный код его сцены.</span></p>
-        </div></li>
-      </ul>
+      <ol class="log">
+        <li class="log-step" data-state="now">
+          <span class="code log-chip">01 / <span class="en">Foundation</span><span class="ru">Основа</span></span>
+          <span class="code log-status"><span class="en">In development</span><span class="ru">В разработке</span></span>
+          <div class="log-card">
+            <h3><span class="en">Engine, editor, and runtime</span><span class="ru">Движок, редактор и исполнение</span></h3>
+            <p><span class="en">Continue refining the data-oriented core, editor, game runtime, and workflows for building and inspecting scenes.</span><span class="ru">Продолжать совершенствовать ориентированное на данные ядро, редактор, игровую среду исполнения и процессы создания и исследования сцен.</span></p>
+          </div>
+        </li>
+        <li class="log-step" data-state="now">
+          <span class="code log-chip">02 / <span class="en">Graphics</span><span class="ru">Графика</span></span>
+          <span class="code log-status"><span class="en">In development</span><span class="ru">В разработке</span></span>
+          <div class="log-card">
+            <h3><span class="en">Rendering and content</span><span class="ru">Рендеринг и контент</span></h3>
+            <p><span class="en">Expand and improve the Vulkan rendering pipeline, asset workflows, and GPU streaming while measuring their performance.</span><span class="ru">Расширять и улучшать рендеринг на Vulkan, работу с ассетами и потоковую загрузку на GPU, измеряя их производительность.</span></p>
+          </div>
+        </li>
+        <li class="log-step" data-state="now">
+          <span class="code log-chip">03 / <span class="en">Agents</span><span class="ru">Агенты</span></span>
+          <span class="code log-status"><span class="en">In development</span><span class="ru">В разработке</span></span>
+          <div class="log-card">
+            <h3><span class="en">Agent control and inspection</span><span class="ru">Управление и анализ для агентов</span></h3>
+            <p><span class="en">Improve the tools agents use to query state, issue commands, and investigate a running world.</span><span class="ru">Улучшать инструменты, с помощью которых агенты запрашивают состояние, выполняют команды и исследуют работающий мир.</span></p>
+          </div>
+        </li>
+        <li class="log-step" data-state="next">
+          <span class="code log-chip">04 / <span class="en">Demonstrations</span><span class="ru">Демонстрации</span></span>
+          <span class="code log-status"><span class="en">Planned</span><span class="ru">Запланировано</span></span>
+          <div class="log-card">
+            <h3><span class="en">Public benchmark scenes</span><span class="ru">Публичные сцены для бенчмарков</span></h3>
+            <p><span class="en">Prepare downloadable scenes and builds, including the configurable cube benchmark and its scene source.</span><span class="ru">Подготовить сцены и сборки для скачивания, включая настраиваемый бенчмарк с кубами и исходный код его сцены.</span></p>
+          </div>
+        </li>
+      </ol>
     </div>
   </section>
   <section class="wrap together" id="contact">
@@ -1277,6 +1372,69 @@ const CONFIG = {
     running = e.isIntersecting;
     if (running && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
   }).observe(hero);
+})();
+</script>
+<script>
+// Icons for the About panels and the technology core diagram. Separate from the hero script so a failure in one cannot take the other down.
+(() => {
+  // Isometric cubes as SVG, same projection as the hero. Painter order: far to near by x+y+z, then z.
+  // Cube kinds: n grey, g grey with opacity, a accent (glows through CSS .hot), o dashed outline.
+  function iso(cubes, s) {
+    const c = .866, P = (x, y, z) => [(x - y) * s * c, (x + y) * s * .5 - z * s];
+    const pal = { n: ["#a9a39f", "#6f6a65", "#45413e"], a: ["#ff4d2e", "#cc3e25", "#9e4230"], g: ["#a9a39f", "#6f6a65", "#45413e"] };
+    const list = cubes.map((q) => ({ x: q[0], y: q[1], z: q[2], k: q[3] || "n", op: q[4] ?? 1 }))
+      .sort((p, q) => (p.x + p.y + p.z) - (q.x + q.y + q.z) || p.z - q.z);
+    let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9, out = "";
+    for (const { x, y, z, k, op } of list) {
+      const faces = [
+        [P(x, y, z + 1), P(x + 1, y, z + 1), P(x + 1, y + 1, z + 1), P(x, y + 1, z + 1)],
+        [P(x, y + 1, z), P(x + 1, y + 1, z), P(x + 1, y + 1, z + 1), P(x, y + 1, z + 1)],
+        [P(x + 1, y, z), P(x + 1, y + 1, z), P(x + 1, y + 1, z + 1), P(x + 1, y, z + 1)],
+      ];
+      faces.flat().forEach(([px, py]) => { minX = Math.min(minX, px); maxX = Math.max(maxX, px); minY = Math.min(minY, py); maxY = Math.max(maxY, py); });
+      const pts = (f) => f.map((p) => p.map((v) => v.toFixed(1)).join(",")).join(" ");
+      if (k === "o") { out += faces.map((f) => `<polygon points="${pts(f)}" fill="none" stroke="#8a847f" stroke-dasharray="3 3"/>`).join(""); continue; }
+      out += `<g opacity="${op}"${k === "a" ? ' class="hot"' : ""}>` + faces.map((f, i) => `<polygon points="${pts(f)}" fill="${pal[k][i]}" stroke="#141312" stroke-width="1.2" stroke-linejoin="round"/>`).join("") + "</g>";
+    }
+    const pad = 6, w = maxX - minX + pad * 2, h = maxY - minY + pad * 2;
+    return `<svg class="iso" width="${w.toFixed(0)}" height="${h.toFixed(0)}" viewBox="${(minX - pad).toFixed(1)} ${(minY - pad).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}" aria-hidden="true">${out}</svg>`;
+  }
+
+  // About: one icon per claim by position (agent, speed, iterate, assets); more claims cycle through the table.
+  const ICONS = [
+    [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [1, 1, 1, "a"]],
+    [[0, 0, 0, "g", .2], [1, 0, 0, "g", .45], [2, 0, 0, "g", .75], [3, 0, 0, "a"]],
+    [[0, 0, 0], [0, 0, 1], [0, 0, 2, "a"], [1, 0, 2, "o"]],
+    [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0, "a"], [0, 0, 1]],
+  ];
+  document.querySelectorAll("#about .claims > li").forEach((li, i) => {
+    li.insertAdjacentHTML("afterbegin", `<div class="claim-icon" aria-hidden="true">${iso(ICONS[i % ICONS.length], 18)}</div>`);
+  });
+
+  // Technology: the SPITE core (3x3 base, one accent cube on top) and wires to every card.
+  const diagram = document.getElementById("tech-diagram"), core = diagram.querySelector(".tech-core");
+  const wires = diagram.querySelector(".tech-wires"), cards = [...diagram.querySelectorAll(".modules > li")];
+  const base = [];
+  for (let x = 0; x < 3; x++) for (let y = 0; y < 3; y++) base.push([x, y, 0]);
+  core.insertAdjacentHTML("afterbegin", iso([...base, [1, 1, 1, "a"]], 40));
+
+  // Orthogonal wires: one trunk from the core down to a bus, one branch from the bus to the top centre of each card.
+  // Each subpath runs from the card toward the core, so the dash flow reads as data moving into the core.
+  function drawWires() {
+    if (getComputedStyle(wires).display === "none") return;
+    const box = diagram.getBoundingClientRect(), c = core.getBoundingClientRect();
+    const cx = Math.round(c.left + c.width / 2 - box.left), y0 = Math.round(c.bottom - box.top) + 8;
+    const ends = cards.map((li) => { const r = li.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2 - box.left), y: Math.round(r.top - box.top) - 3 }; });
+    const bus = Math.round((y0 + Math.min(...ends.map((e) => e.y))) / 2) + .5;
+    let d = `M${cx + .5} ${bus}V${y0}`, squares = "";
+    for (const e of ends) {
+      d += `M${e.x + .5} ${e.y}V${bus}H${cx + .5}`;
+      squares += `<rect x="${e.x - 2}" y="${e.y - 2}" width="5" height="5"/>`;
+    }
+    wires.innerHTML = `<path d="${d}"/>${squares}`;
+  }
+  new ResizeObserver(drawWires).observe(diagram);
+  document.fonts?.ready.then(drawWires);
 })();
 </script>
 </body>

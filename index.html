@@ -320,7 +320,7 @@ const CONFIG = {
   const easeOut = (t) => 1 - (1 - t) * (1 - t);
   const lerp = (a, b, t) => a + (b - a) * t;
 
-  const mat = new Uint8Array(NN), glow = new Float32Array(NN), dim = new Float32Array(NN);
+  const mat = new Uint8Array(NN), glow = new Float32Array(NN), glowQ = new Uint8Array(NN), dim = new Float32Array(NN);
   const inField = new Uint8Array(NN), blocked = new Uint8Array(NN), hidden = new Uint8Array(NN), reserved = new Uint8Array(NN), roomy = new Uint8Array(NN);
   const loose = new Int16Array(NN).fill(-1), cellRef = new Array(NN);
   for (let k = 0; k < NN; k++) {
@@ -444,7 +444,8 @@ const CONFIG = {
   // ---------- layout
   function layout(fresh) {
     const hr = hero.getBoundingClientRect();
-    W = hr.width; H = hr.height; dpr = Math.min(devicePixelRatio || 1, 2);
+    W = hr.width; H = hr.height; dpr = devicePixelRatio >= 1.5 ? 2 : 1;
+    tw = Math.ceil(W / TILE); th = Math.ceil(H / TILE); wasDirty = new Uint8Array(tw * th); redrawAll = true;
     for (const [c, g] of [[field, ctx], [front, fctx], [base, bctx]]) { c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); }
     wide = W > 900;
     s = clamp(W / 54, 15, 24); w = s * .866;
@@ -489,8 +490,9 @@ const CONFIG = {
       if (x < -w || x > W + w || y < -s || y > H + 2 * s) continue;
       const k = id(i, j), c = { i, j, k, d: i + j };
       inField[k] = 1; cells.push(c); cellRef[k] = c;
-      let near = 1e9;
-      for (const r of quiet) near = Math.min(near, Math.hypot(Math.max(r.l - x, 0, x - r.r), Math.max(r.t - y, 0, y - r.b)));
+      // Text dims the floor under it; the blocks stand on a fully lit floor.
+      let nearText = 1e9, near = 1e9;
+      for (const r of quiet) nearText = Math.min(nearText, Math.hypot(Math.max(r.l - x, 0, x - r.r), Math.max(r.t - y, 0, y - r.b)));
       for (const b of blocks) {
         const inside = inPoly(x, y, b.hull), e = edgeDist(x, y, b.hull);
         near = Math.min(near, inside ? 0 : e);
@@ -498,10 +500,10 @@ const CONFIG = {
         const inFront = i - .5 >= b.iR || i + j - 1 >= b.front;
         if (inside || (!inFront && spriteHits(x, y, b.hull))) blocked[k] = 1;
       }
-      dim[k] = (.25 + .75 * smooth(0, 70, near)) * Math.min(smooth(0, H * .1, y), smooth(H, H - 70, y));
+      dim[k] = (.25 + .75 * smooth(0, 70, nearText)) * Math.min(smooth(0, H * .1, y), smooth(H, H - 70, y));
       if (y > H - 2 * s || y < s * 2 || x < w || x > W - w) blocked[k] = 1;
       // Fallen cubes keep off the lanes along the blocks, so they never wall the agents in.
-      roomy[k] = !blocked[k] && near > 2.4 * s && y < H - 3 * s ? 1 : 0;
+      roomy[k] = !blocked[k] && Math.min(near, nearText) > 2.4 * s && y < H - 3 * s ? 1 : 0;
     }
     cells.sort((a, b) => a.d - b.d || a.i - b.i);
     blocked[id(...dock.cell)] = 0;
@@ -522,7 +524,7 @@ const CONFIG = {
   }
 
   function reset() {
-    loose.fill(-1); reserved.fill(0); glow.fill(0); glowing.clear(); spawnQueue = [];
+    loose.fill(-1); reserved.fill(0); glow.fill(0); glowQ.fill(0); glowing.clear(); spawnQueue = [];
     slot.forEach((st) => { st.state = "set"; st.assigned = false; });
     agents = Array.from({ length: wide ? 6 : 4 }, (_, n) => ({ state: "parked", seed: n * 1.7, path: [], task: -1 }));
     phase = "rest"; phaseT = 0;
@@ -818,7 +820,7 @@ const CONFIG = {
   }
 
   function drawCell(g, c, topOnly) {
-    const h = hill(c.i, c.j), gl = glow[c.k], up = Math.min(1, h / HILL), dm = dim[c.k];
+    const h = hill(c.i, c.j), gl = Math.round(glow[c.k] * GLOW_STEPS) / GLOW_STEPS, up = Math.min(1, h / HILL), dm = dim[c.k];
     const lit = Math.min(1, .26 + .74 * up) * (dm + (1 - dm) * up);
     const raw = MATERIALS[mat[c.k]].rgb, grey = (raw[0] + raw[1] + raw[2]) / 3;
     const tint = mix([grey, grey, grey], raw, Math.min(1, .3 + .7 * up));
@@ -931,28 +933,42 @@ const CONFIG = {
     g.restore();
   }
 
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    ctx.drawImage(base, 0, 0, W, H);
+  // Repaint only the screen tiles where something moved this frame or last frame; the rest of
+  // both canvases keeps its pixels. A frame at rest repaints little more than the mark.
+  // The trail's shade moves in steps, so a fading cell needs repainting only when it steps.
+  const TILE = 64, GLOW_STEPS = 48;
+  let tw = 0, th = 0, wasDirty = new Uint8Array(0), redrawAll = true;
+  function mark(d, x0, y0, x1, y1) {
+    const a = Math.max(0, Math.floor(x0 / TILE)), b = Math.min(tw - 1, Math.floor(x1 / TILE));
+    const c = Math.max(0, Math.floor(y0 / TILE)), e = Math.min(th - 1, Math.floor(y1 / TILE));
+    for (let ty = c; ty <= e; ty++) for (let tx = a; tx <= b; tx++) d[ty * tw + tx] = 1;
+  }
+  const around = (d, [x, y], r) => mark(d, x - r, y - r, x + r, y + r);
+  function touches(d, x0, y0, x1, y1) {
+    const a = Math.max(0, Math.floor(x0 / TILE)), b = Math.min(tw - 1, Math.floor(x1 / TILE));
+    const c = Math.max(0, Math.floor(y0 / TILE)), e = Math.min(th - 1, Math.floor(y1 / TILE));
+    for (let ty = c; ty <= e; ty++) for (let tx = a; tx <= b; tx++) if (d[ty * tw + tx]) return true;
+    return false;
+  }
+  const cellBox = (k) => { const [x, y] = iso(cellRef[k].i, cellRef[k].j, 0); return [x - w - 2, y - 3.2 * s, x + w + 2, y + 1.6 * s]; };
 
-    // Redraw only what moves: cells near agents and the fading trail, plus the top faces in front of them.
-    const active = new Set();
-    for (const k of glowing) if (!hidden[k]) active.add(k);
+  function draw() {
+    // Cells to redraw: those near agents, trail cells whose shade stepped, any trail cell on a
+    // repainted tile, plus the top faces in front of them all.
+    const active = new Set(), stepped = [];
+    for (const k of glowing) {
+      const q = Math.round(glow[k] * GLOW_STEPS);
+      if (!hidden[k] && q !== glowQ[k]) { glowQ[k] = q; stepped.push(k); }
+    }
     for (const a of agents) {
       if (!bump(a)) continue;
       const ci = Math.round(a.x), cj = Math.round(a.y);
-      for (let di = -4; di <= 4; di++) for (let dj = -4; dj <= 4; dj++) {
+      // The bump fades below half a pixel three cells out.
+      for (let di = -3; di <= 3; di++) for (let dj = -3; dj <= 3; dj++) {
         const k = id(ci + di, cj + dj);
-        if (Math.abs(di) + Math.abs(dj) <= 6 && inField[k] && !hidden[k]) active.add(k);
+        if (di * di + dj * dj <= 10 && inField[k] && !hidden[k]) active.add(k);
       }
     }
-    const list = [...active].map((k) => ({ c: cellRef[k], top: false }));
-    for (const k of [...active]) {
-      const [i, j] = cellOf(k);
-      for (const k2 of [id(i + 1, j), id(i, j + 1), id(i + 1, j + 1)]) if (inField[k2] && !hidden[k2] && !active.has(k2)) { active.add(k2); list.push({ c: cellRef[k2], top: true }); }
-    }
-    list.sort((p, q) => p.c.d - q.c.d || p.c.i - q.c.i);
-
     // Things standing on the field, in painter order; they are drawn again over the page blocks.
     const items = [], places = [];
     for (const a of agents) {
@@ -970,6 +986,48 @@ const CONFIG = {
       }
     });
     items.sort((p, q) => p.key - q.key);
+    const doors = agents.filter((a) => a.state === "exit" || a.state === "enter");
+
+    const cur = new Uint8Array(tw * th), L = MARK_EDGE * logo.sc, pad = Math.max(2.8 * L, 2 * s);
+    for (const k of active) mark(cur, ...cellBox(k));
+    for (const k of stepped) mark(cur, ...cellBox(k));
+    for (const a of agents) if (a.state !== "parked") around(cur, P([a.x, a.y, .5]), 3.4 * s);
+    if (hatch.flash > 0 || doors.some((a) => a.state === "exit")) { const r = hatch.rect, m = Math.max(3.4 * s, r.w); mark(cur, r.l - m, r.t - m, r.r + m, r.b + m); }
+    if (dock.flash > 0) { const xs = dock.poly.map((q) => q[0]), ys = dock.poly.map((q) => q[1]); mark(cur, Math.min(...xs) - 2 * s, Math.min(...ys) - 2 * s, Math.max(...xs) + 2 * s, Math.max(...ys) + 2 * s); }
+    mark(cur, logoBox.l - pad, logoBox.t - pad, logoBox.r + pad, logoBox.b + pad);
+    slot.forEach((st, n) => {
+      if (st.state === "fall" && st.t >= 0) around(cur, fallPose(st, n), 2.5 * s * SLOTS[n].k);
+      else if (st.state === "roll") around(cur, P([st.at[0], st.at[1], .5]), 3 * s);
+      else if (st.state === "loose" && st.landed < .7) around(cur, P([st.cell[0], st.cell[1], .5]), 2 * s);
+    });
+    for (const [a, pose] of places) {
+      const pts = [P([a.x, a.y, 1]), pose.pos, pose.slot], xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]), m = 2.5 * s * Math.max(pose.k, 1);
+      mark(cur, Math.min(...xs) - m, Math.min(...ys) - m, Math.max(...xs) + m, Math.max(...ys) + m);
+    }
+    const dirty = cur.map((v, t) => v | wasDirty[t] | (redrawAll ? 1 : 0));
+    wasDirty = cur; redrawAll = false;
+    const runs = [], maxW = base.width / dpr, maxH = base.height / dpr;
+    for (let ty = 0; ty < th; ty++) for (let tx = 0; tx < tw; tx++) {
+      if (!dirty[ty * tw + tx]) continue;
+      let e = tx;
+      while (e + 1 < tw && dirty[ty * tw + e + 1]) e++;
+      const x = tx * TILE, y = ty * TILE;
+      runs.push([x, y, Math.min((e - tx + 1) * TILE, maxW - x), Math.min(TILE, maxH - y)]);
+      tx = e;
+    }
+    if (!runs.length) return;
+    for (const k of glowing) if (!hidden[k] && !active.has(k) && touches(dirty, ...cellBox(k))) active.add(k);
+    const list = [...active].map((k) => ({ c: cellRef[k], top: false }));
+    for (const k of [...active]) {
+      const [i, j] = cellOf(k);
+      for (const k2 of [id(i + 1, j), id(i, j + 1), id(i + 1, j + 1)]) if (inField[k2] && !hidden[k2] && !active.has(k2)) { active.add(k2); list.push({ c: cellRef[k2], top: true }); }
+    }
+    list.sort((p, q) => p.c.d - q.c.d || p.c.i - q.c.i);
+    const clipRuns = (g) => { g.beginPath(); for (const [x, y, rw, rh] of runs) { g.clearRect(x, y, rw, rh); g.rect(x, y, rw, rh); } g.clip(); };
+
+    ctx.save();
+    clipRuns(ctx);
+    for (const [x, y, rw, rh] of runs) ctx.drawImage(base, x * dpr, y * dpr, rw * dpr, rh * dpr, x, y, rw, rh);
     let d = 0;
     for (const e of list) {
       while (d < items.length && items[d].key < e.c.d) items[d++].draw(ctx);
@@ -978,7 +1036,6 @@ const CONFIG = {
     while (d < items.length) items[d++].draw(ctx);
 
     drawBlocks(ctx);
-    const doors = agents.filter((a) => a.state === "exit" || a.state === "enter");
     const drawDoors = (g) => { for (const a of doors) (a.state === "exit" ? drawExit : drawEnter)(g, a); };
     drawDoors(ctx);
 
@@ -987,10 +1044,12 @@ const CONFIG = {
     slot.forEach((st, n) => { if (st.state === "fall" && st.t >= 0) { const [x, y, k] = fallPose(st, n); markCube(ctx, n, x, y, k, false); } });
     for (const [, pose] of places) if (pose.p < .88) markCube(ctx, pose.n, ...pose.pos, pose.k, false);
     for (const [a, pose] of places) command(P([a.x, a.y, hill(a.x, a.y) + 1]), [pose.pos, pose.slot], [pose.k, kLogo(pose.n)], pose.reach, pose.alpha);
+    ctx.restore();
 
     // The page's blocks cover the field canvas; whatever stands in front of their faces is drawn again on top.
-    fctx.clearRect(0, 0, W, H);
-    fctx.save(); fctx.beginPath();
+    fctx.save();
+    clipRuns(fctx);
+    fctx.beginPath();
     for (const b of blocks) fctx.rect(b.r.l, b.r.t, b.r.w, b.r.h);
     fctx.clip();
     for (const it of items) it.draw(fctx);
@@ -1004,6 +1063,7 @@ const CONFIG = {
   // A new width rebuilds the scene; a new height (fonts loading, language switch) only refits it.
   let width = hero.clientWidth;
   new ResizeObserver(() => { const fresh = hero.clientWidth !== width; width = hero.clientWidth; layout(fresh); draw(); }).observe(hero);
+  new MutationObserver(() => { layout(false); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang"] });
   if (still) return;
 
   let last = performance.now(), running = true, raf = 0;

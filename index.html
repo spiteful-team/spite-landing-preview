@@ -99,18 +99,23 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
 
 /* install panel */
 .install { margin-top: calc(4 * clamp(15px, 1.852vw, 24px)); background: var(--panel); border: 1px solid var(--border); transition: border-color .8s, box-shadow .8s; }
-/* The install block's roof: the contact button and the address lie on its top face. Along the
-   wall the roof runs as the wall does. Its depth runs toward the viewer, which in the wall's
-   own coordinates is one pixel right for each pixel down, hence the 45 degree shear. */
+/* The install block's roof: one large button lies on its top face. It names the contact and
+   copies it. Along the wall the roof runs as the wall does. Its depth runs toward the viewer,
+   which in the wall's own coordinates is one pixel right for each pixel down, hence the
+   45 degree shear. */
 .roof { display: none; }
 .scene .install { position: relative; }
-.scene .roof { position: absolute; left: -1px; bottom: calc(100% + 1px); width: calc(100% + 2px); height: var(--roof, 70px); transform: skewX(45deg); transform-origin: 0 100%; display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 0 18px; pointer-events: none; }
-.roof a { pointer-events: auto; text-decoration: none; }
-.roof-btn { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: 2px; background: var(--raised); color: var(--text); font: 700 13px/16px var(--display); letter-spacing: .08em; text-transform: uppercase; }
-.roof-btn:hover { background: var(--hover); border-color: var(--text-faint); }
-.roof-btn svg { width: 14px; height: 14px; }
-.roof-mail { color: var(--text); font: 600 18px/1.1 var(--display); letter-spacing: .03em; white-space: nowrap; border-bottom: 1px solid var(--accent); }
-.roof-mail:hover { color: var(--accent-hover); }
+.scene .roof { position: absolute; left: -1px; bottom: calc(100% + 1px); width: calc(100% + 2px); height: var(--roof, 70px); transform: skewX(45deg); transform-origin: 0 100%; display: flex; align-items: center; justify-content: flex-end; padding: 0 16px; pointer-events: none; }
+.roof-btn { pointer-events: auto; display: inline-flex; align-items: stretch; min-width: 0; max-width: 100%; height: 46px; padding: 0; border: 1px solid var(--border-strong); border-radius: 2px; background: var(--raised); color: var(--text); cursor: pointer; box-shadow: 3px 3px 0 var(--ground); transition: transform .06s, box-shadow .06s, border-color .1s; }
+.roof-btn:hover { border-color: var(--accent); }
+.roof-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ground); }
+.roof-label { flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 0 16px; font: 700 17px/20px var(--display); letter-spacing: .08em; text-transform: uppercase; }
+.roof-label svg { width: 17px; height: 17px; }
+.roof-btn .roof-done, .roof-btn.done .roof-idle { display: none; }
+.roof-btn.done .roof-done { display: inline; }
+.roof-btn.done .roof-label { color: var(--accent-hover); }
+.roof-text { min-width: 0; display: flex; align-items: center; padding: 0 16px; background: var(--field); border-left: 1px solid var(--border-strong); font: 500 16px/20px var(--mono); white-space: nowrap; overflow: hidden; }
+.roof-text > span { overflow: hidden; text-overflow: ellipsis; }
 .install.dock { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 32px rgba(255, 77, 46, .3); transition: none; }
 .install .sub { padding: 11px 14px; border-bottom: 1px solid var(--border); font: 500 15px/1.35 var(--body); color: var(--text); max-width: none; }
 .tabs { display: flex; align-items: stretch; height: 44px; border-bottom: 1px solid var(--border); }
@@ -165,10 +170,11 @@ footer a:hover { color: var(--text); }
   /* the wall covers cos 30 of the column's width, which leaves the agents a lane on the right */
   .scene .hero-body { padding-top: 150px; }
   /* here the roof is two cells deep */
-  .scene .roof { gap: 10px; padding: 0 10px; }
-  .roof-btn { height: 22px; padding: 0 8px; gap: 5px; font-size: 11px; line-height: 14px; }
-  .roof-btn svg { width: 11px; height: 11px; }
-  .roof-mail { font-size: 14px; }
+  .scene .roof { padding: 0 8px; }
+  .roof-btn { height: 24px; box-shadow: none; }
+  .roof-label { gap: 5px; padding: 0 8px; font-size: 11.5px; line-height: 14px; letter-spacing: .06em; }
+  .roof-label svg { width: 11px; height: 11px; }
+  .roof-text { padding: 0 8px; font-size: 12px; line-height: 14px; }
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
 }
 @media (max-width: 520px) {
@@ -179,7 +185,6 @@ footer a:hover { color: var(--text); }
   .install .sub { font-size: 14px; }
   .tab { padding: 0 13px; font-size: 14px; }
   .cmd code { font-size: 13px; padding: 10px 11px; }
-  .roof.has-mail .roof-btn { display: none; }
   .meta { font-size: 13px; }
   .primary span { display: none !important; }
   .claims li { grid-template-columns: 1fr; gap: 6px; }
@@ -207,8 +212,10 @@ footer a:hover { color: var(--text); }
 
       <div class="install">
         <div class="roof" id="roof">
-          <a class="roof-btn" href="#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><path d="m3 7 9 6 9-6"/></svg><span id="roof-label"></span></a>
-          <a class="roof-mail" id="roof-mail" hidden></a>
+          <button class="roof-btn" id="roof-copy" type="button">
+            <span class="roof-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="9" y="9" width="12" height="12"/><path d="M5 15V3h12"/></svg><span class="roof-idle"><span class="en">Get in touch</span><span class="ru">Связаться</span></span><span class="roof-done"><span class="en">Copied</span><span class="ru">Скопировано</span></span></span>
+            <span class="roof-text" id="roof-text"><span class="en">Hello World</span><span class="ru">Hello World</span></span>
+          </button>
         </div>
         <p class="sub"><span class="en">One command installs the engine, the editor and the SDK.</span><span class="ru">Одна команда устанавливает движок, редактор и SDK.</span></p>
         <div class="tabs" role="tablist" aria-label="Platform">
@@ -376,18 +383,13 @@ const CONFIG = {
     if (d.dataset.ru) d.content = d.dataset.ru;
   }
   render();
-  // The roof of the install block repeats the Contact link and names the first contact filled
-  // in the copy for this language, a mail address before any other.
-  const filled = [...$$("#contact-links a")].filter((a) => a.getClientRects().length);
-  const first = filled.find((a) => a.protocol === "mailto:") || filled[0], mail = $("#roof-mail");
-  $("#roof-label").innerHTML = $(".nav .contact-link").innerHTML;
-  if (first) {
-    const isMail = first.protocol === "mailto:";
-    mail.href = first.href; mail.hidden = false;
-    mail.textContent = isMail ? decodeURIComponent(first.pathname) : (first.host + first.pathname).replace(/^www\.|\/$/g, "");
-    if (!isMail) { mail.target = "_blank"; mail.rel = "noopener"; }
-    $("#roof").classList.add("has-mail");
-  }
+  // The button on the install block's roof copies the text written on it.
+  let rt;
+  $("#roof-copy").addEventListener("click", async () => {
+    const btn = $("#roof-copy"), node = $("#roof-text ." + root.dataset.lang);
+    try { await navigator.clipboard.writeText(node.textContent); btn.classList.add("done"); clearTimeout(rt); rt = setTimeout(() => btn.classList.remove("done"), 1800); }
+    catch (_) { const r = document.createRange(); r.selectNodeContents(node); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  });
 })();
 
 // Agent scene: the hero is one isometric scene. The slogan, the install panel and the tag are

@@ -76,7 +76,7 @@ html[data-lang="en"] .ru, html[data-lang="ru"] .en { display: none !important; }
 .contact-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 .contact-links:empty { display: none; }
 
-.hero-body { max-width: 620px; padding-block: 56px 150px; }
+.hero-body { max-width: 620px; padding-block: 56px 104px; }
 .agent-chip { display: inline-flex; align-items: center; gap: 8px; height: 26px; padding: 0 10px; border: 1px solid var(--agent); background: var(--agent-wash); color: var(--agent); }
 .lamp { width: 7px; height: 7px; border-radius: 50%; background: var(--agent); box-shadow: 0 0 6px var(--agent); animation: pulse 2s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .35; } }
@@ -84,36 +84,40 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
 .logo-slot { display: block; flex: none; width: .9em; height: 1em; }
 .logo-slot > svg { display: block; height: 100%; width: auto; }
 .scene .logo-slot { display: none; }
-.wordmark { text-shadow: -0.87px -1.00px 0 #3a3633, -1.74px -2.00px 0 #373330, -2.61px -3.00px 0 #34312e, -3.48px -4.00px 0 #312e2b, -4.35px -5.00px 0 #2e2b29, -5.22px -6.00px 0 #2b2826, -6.09px -7.00px 0 #292624, -6.96px -8.00px 0 #262321, -7.83px -9.00px 0 #23201f, -8.70px -10.00px 0 #201d1c, -9.57px -11.00px 0 #1d1b1a, -10.44px -12.00px 0 #1a1817; }
-.slogan { display: inline-block; font: 600 clamp(22px, 2.6vw, 30px)/1.25 var(--display); margin: 0; padding: 14px 20px 16px; background: var(--panel); border: 1px solid var(--border); text-wrap: balance; }
-.slogan .lead-in { color: var(--text-muted); }
+.wordmark { text-shadow: -.008em -.008em 0 #4a4642, -.016em -.016em 0 #46423e, -.024em -.024em 0 #423e3b, -.032em -.032em 0 #3e3a37, -.040em -.040em 0 #3a3633, -.048em -.048em 0 #363330, -.056em -.056em 0 #33302d, -.064em -.064em 0 #2f2c2a, -.072em -.072em 0 #2c2927, -.080em -.080em 0 #282624, -.088em -.088em 0 #252321, -.096em -.096em 0 #22201e, -.104em -.104em 0 #1f1d1c, -.112em -.112em 0 #1c1a19, -.120em -.120em 0 #1a1817, -.128em -.128em 0 #181615; }
+.slogan { display: inline-block; font: 600 clamp(22px, 2.7vw, 32px)/1.22 var(--display); letter-spacing: .01em; margin: 0; padding: 14px 22px 17px; background: var(--panel); border: 1px solid var(--border); text-wrap: balance; }
+.slogan .lead-in { display: block; color: var(--text-muted); }
 /* one line on wide screens, so the block hugs the text */
-/* With the scene on, the hero column is a wall of the isometric field: sheared 30 degrees
-   along the floor's axis, its blocks extruded back and to the left. */
-.scene .hero-body { transform: skewY(-30deg); transform-origin: 0 100%; max-width: 500px; padding-top: 190px; }
+/* With the scene on, the hero column is a wall of the isometric field, in the field's own
+   projection: a pixel along the wall covers cos 30 on screen and climbs half a pixel, so a
+   square on the wall is the same rhombus as a cube's face. Its blocks are extruded back and
+   to the left. Type on the wall is set larger and heavier than on a flat page. */
+.scene .hero-body { transform: matrix(.866, -.5, 0, 1, 0, 0); transform-origin: 0 100%; max-width: 588px; padding-top: 160px; }
+.scene h1 { margin: 16px 0 14px; letter-spacing: .04em; }
+.scene .agent-chip { height: 30px; padding: 0 12px; font-size: 13px; letter-spacing: .1em; }
 .sub { margin: 0; color: var(--text-muted); max-width: 46ch; }
 
 /* install panel */
-.install { margin-top: calc(5 * clamp(15px, 1.852vw, 24px)); background: var(--panel); border: 1px solid var(--border); transition: border-color .8s, box-shadow .8s; }
+.install { margin-top: calc(4 * clamp(15px, 1.852vw, 24px)); background: var(--panel); border: 1px solid var(--border); transition: border-color .8s, box-shadow .8s; }
 .install.dock { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 32px rgba(255, 77, 46, .3); transition: none; }
-.install .sub { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; max-width: none; }
-.tabs { display: flex; height: 36px; border-bottom: 1px solid var(--border); }
-.tab { background: none; border: 0; border-right: 1px solid var(--border); color: var(--text-muted); font: 600 13px/16px var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 0 16px; cursor: pointer; }
+.install .sub { padding: 11px 14px; border-bottom: 1px solid var(--border); font: 500 15px/1.35 var(--body); color: var(--text); max-width: none; }
+.tabs { display: flex; align-items: stretch; height: 44px; border-bottom: 1px solid var(--border); }
+.tab { background: none; border: 0; border-right: 1px solid var(--border); color: var(--text-muted); font: 600 15px/18px var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 0 18px; cursor: pointer; }
 .tab:hover { background: var(--hover); }
 .tab[aria-selected="true"] { background: var(--raised); color: var(--text); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); }
-.tabs .code { margin-left: auto; align-self: center; padding-right: 12px; }
-.install-body { padding: 12px; }
+.tabs .primary { margin-left: auto; align-self: center; margin-right: 10px; }
+.install-body { padding: 14px; }
 .cmd { display: flex; align-items: center; gap: 12px; }
-.cmd code { flex: 1; min-width: 0; background: var(--field); border: 1px solid var(--border); border-radius: 2px; padding: 10px 12px; font: 13px/1.55 var(--mono); white-space: pre-wrap; word-break: break-all; }
+.cmd code { flex: 1; min-width: 0; background: var(--field); border: 1px solid var(--border); border-radius: 2px; padding: 11px 14px; font: 500 14.5px/1.6 var(--mono); overflow-wrap: anywhere; }
 .cmd code:hover { border-color: var(--border-strong); }
 .cmd code::before { content: attr(data-prompt) " "; color: var(--text-faint); }
-.primary { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; background: var(--accent); color: var(--on-accent); border: 0; border-radius: 2px; padding: 0 12px; font: 700 12px/16px var(--display); letter-spacing: .08em; text-transform: uppercase; box-shadow: 3px 3px 0 var(--press-shadow); cursor: pointer; transition: transform .06s, box-shadow .06s, background .1s; }
+.primary { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 30px; background: var(--accent); color: var(--on-accent); border: 0; border-radius: 2px; padding: 0 13px; font: 700 13px/16px var(--display); letter-spacing: .08em; text-transform: uppercase; box-shadow: 3px 3px 0 var(--press-shadow); cursor: pointer; transition: transform .06s, box-shadow .06s, background .1s; }
 .primary:hover { background: var(--accent-hover); }
 .primary:active { background: var(--accent-pressed); transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--press-shadow); }
 .primary svg { width: 14px; height: 14px; }
 .primary .done-l, .primary.done .idle-l { display: none; }
 .primary.done .done-l { display: inline; }
-.meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; padding: 10px 2px 0; font-size: 12px; color: var(--text-muted); }
+.meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 11px 2px 0; font: 500 13.5px/1.4 var(--body); color: var(--text-muted); }
 .meta a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 3px; }
 .meta a:hover { color: var(--accent-hover); }
 
@@ -146,14 +150,19 @@ footer a:hover { color: var(--text); }
 
 @media (max-width: 900px) {
   .hero-body { padding-block: 36px 330px; }
-  /* room on the left for the blocks' end faces, a lane on the right for the agents */
-  .scene .hero-body { padding-right: 36px; padding-top: 150px; }
+  /* the wall covers cos 30 of the column's width, which leaves the agents a lane on the right */
+  .scene .hero-body { padding-top: 150px; }
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
 }
 @media (max-width: 520px) {
   .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .legend { right: max(16px, env(safe-area-inset-right, 0px)); }
-  .nav .hide-sm, .tabs .code, .brand .beta { display: none; }
+  .nav .hide-sm, .brand .beta { display: none; }
+  .scene .agent-chip { height: 26px; padding: 0 9px; font-size: 10.5px; letter-spacing: .05em; white-space: nowrap; }
+  .install .sub { font-size: 14px; }
+  .tab { padding: 0 13px; font-size: 14px; }
+  .cmd code { font-size: 13px; padding: 10px 11px; }
+  .meta { font-size: 13px; }
   .primary span { display: none !important; }
   .claims li { grid-template-columns: 1fr; gap: 6px; }
 }
@@ -183,15 +192,14 @@ footer a:hover { color: var(--text); }
         <div class="tabs" role="tablist" aria-label="Platform">
           <button class="tab" role="tab" data-os="windows">Windows</button>
           <button class="tab" role="tab" data-os="linux">Linux</button>
-          <span class="code" id="shell"></span>
+        <button class="primary" id="copy" type="button" aria-label="Copy command">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="9" y="9" width="12" height="12"/><path d="M5 15V3h12"/></svg>
+          <span class="idle-l"><span class="en">Copy</span><span class="ru">Копировать</span></span><span class="done-l"><span class="en">Copied</span><span class="ru">Скопировано</span></span>
+        </button>
         </div>
         <div class="install-body">
           <div class="cmd">
             <code id="cmd" data-prompt="&gt;"></code>
-            <button class="primary" id="copy" type="button" aria-label="Copy command">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="9" y="9" width="12" height="12"/><path d="M5 15V3h12"/></svg>
-              <span class="idle-l"><span class="en">Copy</span><span class="ru">Копировать</span></span><span class="done-l"><span class="en">Copied</span><span class="ru">Скопировано</span></span>
-            </button>
           </div>
           <div class="meta">
             <span id="req"></span>
@@ -292,8 +300,9 @@ const CONFIG = {
   let os = /linux|x11/i.test(navigator.userAgent) && !/android/i.test(navigator.userAgent) ? "linux" : "windows";
   function render() {
     const p = CONFIG.platforms[os], lang = root.dataset.lang, cmd = $("#cmd"), link = $("#script-link");
-    cmd.textContent = p.command(p.script); cmd.dataset.prompt = p.prompt;
-    $("#shell").textContent = p.shell;
+    // The command may wrap after a slash, never inside a word.
+    cmd.textContent = ""; cmd.dataset.prompt = p.prompt;
+    p.command(p.script).split(/(?<=\w\/)(?=\w)/).forEach((part, n) => { if (n) cmd.append(document.createElement("wbr")); cmd.append(part); });
     $("#req").textContent = p.req[lang];
     link.href = p.script; link.textContent = p.file;
     $$(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.os === os)));
@@ -329,8 +338,12 @@ const CONFIG = {
   const AGENT = css.getPropertyValue("--agent").trim();
   const SEAM = "#141312", HOT = [255, 120, 80], RED = [214, 62, 36], EMBER = [92, 30, 18];
   const AGENT_FACES = ["#ff4d2e", "#cc3e25", "#9e4230"], LIT_LYING = ["#b8452e", "#8f3b27", "#6a2f22"];
-  const BLOCK_LOOK = ["#232120", "#171615", "#45413e"], CHIP_LOOK = ["#2c2541", "#1d1830", "rgba(183,148,255,.45)"];
+  const BLOCK_LOOK = ["#2b2826", "#1c1a19", "#45413e"], CHIP_LOOK = ["#2c2541", "#1d1830", "rgba(183,148,255,.45)"];
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // An empty inline box sits on the wordmark's baseline: it tells where the letters' feet are.
+  const feet = document.createElement("i");
+  feet.style.cssText = "display:inline-block;width:0;height:0";
+  document.querySelector("h1 .wordmark").append(feet);
   document.documentElement.classList.add("scene");
 
   // Slots of the mark in SVG drawing order (the order makes the triangle impossible).
@@ -466,10 +479,12 @@ const CONFIG = {
     for (let e = hero; e; e = e.offsetParent) { x -= e.offsetLeft; y -= e.offsetTop; }
     return { l: x, t: y, r: x + el.offsetWidth, b: y + el.offsetHeight, w: el.offsetWidth, h: el.offsetHeight };
   }
-  // The column shears 30 degrees about its left edge: a layout point moves up by tan(30) per pixel right.
-  const TAN = Math.tan(Math.PI / 6);
+  // The column is a wall in the field's projection, turned about its left edge: a layout pixel
+  // to the right covers cos(30) of a screen pixel and climbs half of one. So s layout pixels
+  // along the wall are one cell, the same as s pixels up it.
+  const KX = Math.cos(Math.PI / 6);
   let shearX = 0;
-  const sheared = (x, y) => [x, y - (x - shearX) * TAN];
+  const sheared = (x, y) => [shearX + (x - shearX) * KX, y - (x - shearX) / 2];
   // A block is the element's face standing in the plane i = I, from j = jL (its left end) to jR,
   // extruded D cells back along -i. Its top and its left end face show; the page draws the front.
   function makeBlock(el, D, look) {
@@ -478,7 +493,7 @@ const CONFIG = {
     // The face's bottom-left corner stands on the floor; it fixes the plane I and the end jL.
     const [sx, sy] = sheared(r.l, r.b);
     const a = (sx - ox) / w, c = (sy - oy) / (s / 2), Ib = (a + c) / 2, jb = (c - a) / 2;
-    const jR = jb - r.w / w, Ht = r.h / s;
+    const jR = jb - r.w / s, Ht = r.h / s;
     const F = (j, hh) => P([Ib, j, hh]), B = (j, hh) => P([Ib - D, j, hh]);
     return {
       r, look, I: Ib, jL: jb, jR, D, H: Ht,
@@ -513,13 +528,22 @@ const CONFIG = {
     // Left of the column there must be room for the install block's end face and a lane past it.
     const slEl = visible(".slogan"), hb = document.querySelector(".hero-body"), instD = wide ? 3 : 2;
     hb.style.paddingLeft = "";
-    const pad = parseFloat(getComputedStyle(hb).paddingLeft), roomL = lay(hb).l + pad;
-    hb.style.paddingLeft = pad + Math.max(0, (instD + 1.6) * w - roomL) + "px";
+    const pad = parseFloat(getComputedStyle(hb).paddingLeft);
+    hb.style.paddingLeft = Math.max(pad, ((instD + 1.6) * w - lay(hb).l) / KX) + "px";
     for (const el of [slEl, panel]) el.style.width = "";
     panel.style.marginTop = "";
-    for (const el of [slEl, panel]) el.style.width = Math.floor(el.offsetWidth / w) * w + "px";
+    // A block grows to the next whole cell when the column has the room, so its text keeps its lines.
+    const hs = getComputedStyle(hb), room = hb.clientWidth - parseFloat(hs.paddingLeft) - parseFloat(hs.paddingRight);
+    for (const el of [slEl, panel]) {
+      const up = Math.ceil(el.offsetWidth / s - .01) * s;
+      el.style.width = (up <= room + .5 ? up : Math.floor(el.offsetWidth / s) * s) + "px";
+    }
     const gap = lay(panel).b - lay(slEl).b;
     panel.style.marginTop = parseFloat(getComputedStyle(panel).marginTop) + (s - gap % s) % s + "px";
+    // The wordmark stands on the slogan block, its feet just behind the block's front edge.
+    const h1 = feet.closest("h1");
+    h1.style.marginBottom = "";
+    h1.style.marginBottom = parseFloat(getComputedStyle(h1).marginBottom) - (lay(slEl).t - lay(feet).t) + .03 * parseFloat(getComputedStyle(h1).fontSize) + "px";
     shearX = lay(document.querySelector(".hero-body")).l;
     // That corner is the grid vertex i = j = (N - 1) / 2, mid-field, so the field covers the screen.
     const ib = lay(panel), [cx, cy] = sheared(ib.l, ib.b);
@@ -538,7 +562,7 @@ const CONFIG = {
     dock.mouth = P([ic, jd, .8]);
     // The hatch: the word "fly" on the slogan's face. Agents push out of it and drop to the field.
     const fl = lay(visible(".fly-word")), sr = sl.r;
-    const jAt = (x) => sl.jL - (x - sr.l) / w, hAt = (y) => (sr.b - y) / s;
+    const jAt = (x) => sl.jL - (x - sr.l) / s, hAt = (y) => (sr.b - y) / s;
     const corners = [[fl.l - 5, fl.t], [fl.r + 5, fl.t], [fl.r + 5, fl.b], [fl.l - 5, fl.b]].map(([x, y]) => P([sl.I, jAt(x), hAt(y)]));
     const xs = corners.map((q) => q[0]), ys = corners.map((q) => q[1]);
     hatch = {
@@ -550,7 +574,7 @@ const CONFIG = {
     const aspect = (bx1 - bx0) / (by1 - by0), box = inst.r;
     let height = (by1 - by0) * s / MARK_EDGE, left, bottom;
     if (wide) {
-      left = Math.max(sl.r.r, box.r) + 2.5 * w;
+      left = Math.max(sl.front[1][0], inst.front[1][0]) + 2.5 * w;
       height = Math.min(height, (W - 3 * w - left) / aspect);
       bottom = inst.front[1][1] - s;
     } else {
@@ -1151,6 +1175,8 @@ const CONFIG = {
   let width = hero.clientWidth;
   new ResizeObserver(() => { const fresh = hero.clientWidth !== width; width = hero.clientWidth; layout(fresh); draw(); }).observe(hero);
   new MutationObserver(() => { layout(false); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang"] });
+  // Web fonts move the wordmark's baseline and the blocks' widths without changing the hero's size.
+  if (document.fonts) document.fonts.ready.then(() => { layout(false); draw(); });
   if (still) return;
 
   let last = performance.now(), running = true, raf = 0;

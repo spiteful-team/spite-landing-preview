@@ -84,15 +84,17 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
 .logo-slot { display: block; flex: none; width: .9em; height: 1em; }
 .logo-slot > svg { display: block; height: 100%; width: auto; }
 .scene .logo-slot { display: none; }
-.wordmark { text-shadow: 0.87px -0.50px 0 #3a3633, 1.74px -1.00px 0 #373330, 2.61px -1.50px 0 #34312e, 3.48px -2.00px 0 #312e2b, 4.35px -2.50px 0 #2e2b29, 5.22px -3.00px 0 #2b2826, 6.09px -3.50px 0 #292624, 6.96px -4.00px 0 #262321, 7.83px -4.50px 0 #23201f, 8.70px -5.00px 0 #201d1c, 9.57px -5.50px 0 #1d1b1a, 10.44px -6.00px 0 #1a1817; }
+.wordmark { text-shadow: -0.87px -1.00px 0 #3a3633, -1.74px -2.00px 0 #373330, -2.61px -3.00px 0 #34312e, -3.48px -4.00px 0 #312e2b, -4.35px -5.00px 0 #2e2b29, -5.22px -6.00px 0 #2b2826, -6.09px -7.00px 0 #292624, -6.96px -8.00px 0 #262321, -7.83px -9.00px 0 #23201f, -8.70px -10.00px 0 #201d1c, -9.57px -11.00px 0 #1d1b1a, -10.44px -12.00px 0 #1a1817; }
 .slogan { display: inline-block; font: 600 clamp(22px, 2.6vw, 30px)/1.25 var(--display); margin: 0; padding: 14px 20px 16px; background: var(--panel); border: 1px solid var(--border); text-wrap: balance; }
 .slogan .lead-in { color: var(--text-muted); }
 /* one line on wide screens, so the block hugs the text */
-@media (min-width: 901px) { .slogan { white-space: nowrap; } }
+/* With the scene on, the hero column is a wall of the isometric field: sheared 30 degrees
+   along the floor's axis, its blocks extruded back and to the left. */
+.scene .hero-body { transform: skewY(-30deg); transform-origin: 0 100%; max-width: 500px; padding-top: 190px; }
 .sub { margin: 0; color: var(--text-muted); max-width: 46ch; }
 
 /* install panel */
-.install { margin-top: calc(3.6 * clamp(15px, 1.852vw, 24px)); background: var(--panel); border: 1px solid var(--border); transition: border-color .8s, box-shadow .8s; }
+.install { margin-top: calc(5 * clamp(15px, 1.852vw, 24px)); background: var(--panel); border: 1px solid var(--border); transition: border-color .8s, box-shadow .8s; }
 .install.dock { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 32px rgba(255, 77, 46, .3); transition: none; }
 .install .sub { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; max-width: none; }
 .tabs { display: flex; height: 36px; border-bottom: 1px solid var(--border); }
@@ -140,7 +142,8 @@ footer a:hover { color: var(--text); }
 
 @media (max-width: 900px) {
   .hero-body { padding-block: 36px 330px; }
-  .slogan, .install { max-width: calc(100% - 64px); }
+  /* room on the left for the blocks' end faces, a lane on the right for the agents */
+  .scene .hero-body { padding-right: 36px; padding-top: 150px; }
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
 }
 @media (max-width: 520px) {
@@ -312,7 +315,7 @@ const CONFIG = {
   }
 
   // Times are seconds: STEP per cell driven, ROLL per cell rolled, PLACE per cube carried.
-  const N = 256, NN = N * N, STEP = .1, ROLL = .15, PLACE = .8, EXIT = .6, ENTER = .55, HILL = .62, HILL_R2 = 2.8;
+  const N = 110, NN = N * N, STEP = .1, ROLL = .15, PLACE = .8, EXIT = .6, ENTER = .55, HILL = .62, HILL_R2 = 2.8;
   const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const hex = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));
   // The floor is graphite: neutral greys a touch cool, so the orange agents and trail stand alone.
@@ -338,7 +341,7 @@ const CONFIG = {
     mat[k] = m;
   }
 
-  let W = 0, H = 0, dpr = 1, s = 30, bx = 19, by = 11, ox = 0, oy = 0, wide = true;
+  let W = 0, H = 0, dpr = 1, s = 22, w = 19, ox = 0, oy = 0, wide = true;
   let logo = { x: 0, y: 0, sc: 1 }, logoBox = null, blocks = [], hatch = null, dock = null;
   let cells = [], agents = [], spawnQueue = [];
   let time = 0, phase = "rest", phaseT = 0, restDur = 2.2;
@@ -346,13 +349,8 @@ const CONFIG = {
   const slot = SLOTS.map(() => ({ state: "set" }));
   const id = (i, j) => i * N + j;
   const cellOf = (k) => [Math.floor(k / N), k % N];
-  // The floor uses the page blocks' own projection: i runs right along the screen, h runs up,
-  // and -j runs back, up and right at 30 degrees, DEPTH cube edges per cell. A cube's
-  // front face is a flat square, like the face of a block on the page.
-  // Block depths in cells; the install block needs 2.1 for its one-cell garage door.
-  const DEPTH = 1, SLOGAN_D = 1.2, INSTALL_D = 2.2;
-  const proj = (i, j, h) => [ox + i * s - j * bx, oy + j * by - h * s];
-  const P = (p) => proj(p[0], p[1], p[2]);
+  const iso = (i, j, h) => [ox + (i - j) * w, oy + (i + j) * s / 2 - h * s];
+  const P = (p) => iso(p[0], p[1], p[2]);
   const visible = (sel) => [...document.querySelectorAll(sel)].find((e) => e.getClientRects().length);
   const rel = (el) => {
     if (!el) return null;
@@ -378,15 +376,15 @@ const CONFIG = {
     }
     return best;
   }
-  // Does a cube standing on cell (i, j), riding a bump, touch the polygon on screen?
-  function spriteHits(i, j, pts) {
-    const corners = [[i - .5, j + .5, 0], [i + .5, j + .5, 0], [i + .5, j - .5, 0], [i + .5, j - .5, 1.7], [i - .5, j - .5, 1.7], [i - .5, j + .5, 1.7], [i, j, .85]].map(P);
+  // Does a cube standing on the ground point (x, y) touch the polygon on screen?
+  function spriteHits(x, y, pts) {
+    const top = y - 1.7 * s;
+    const corners = [[x, top - s / 2], [x + w, top], [x - w, top], [x + w, y], [x - w, y], [x, y + s / 2], [x, y]];
     if (corners.some(([px, py]) => inPoly(px, py, pts))) return true;
-    const xs = corners.map((q) => q[0]), ys = corners.map((q) => q[1]);
-    return pts.some(([px, py]) => px > Math.min(...xs) && px < Math.max(...xs) && py > Math.min(...ys) && py < Math.max(...ys));
+    return pts.some(([px, py]) => px > x - w && px < x + w && py > top - s / 2 && py < y + s / 2);
   }
 
-  // ---------- 3D cubes. A point is [i, j, h] in field units; the faces facing +i, +j and +h show.
+  // ---------- 3D cubes. A point is [i, j, h] in field units; the viewer looks along -(1, 1, 1).
   const FACES = [
     [[0, 0, 1], [[-.5, -.5, 1], [.5, -.5, 1], [.5, .5, 1], [-.5, .5, 1]]],
     [[0, 0, -1], [[-.5, -.5, 0], [.5, -.5, 0], [.5, .5, 0], [-.5, .5, 0]]],
@@ -431,17 +429,34 @@ const CONFIG = {
     }
   }
 
-  // A block is the element's box (front face) pushed back D cells along the field's -j axis.
-  // In field space its front face is the plane j = front and its right face the plane i = iR.
+  // An element's layout box in hero coordinates, before the column's shear.
+  function lay(el) {
+    if (!el || !el.getClientRects().length) return null;
+    let x = 0, y = 0;
+    for (let e = el; e; e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; }
+    for (let e = hero; e; e = e.offsetParent) { x -= e.offsetLeft; y -= e.offsetTop; }
+    return { l: x, t: y, r: x + el.offsetWidth, b: y + el.offsetHeight, w: el.offsetWidth, h: el.offsetHeight };
+  }
+  // The column shears 30 degrees about its left edge: a layout point moves up by tan(30) per pixel right.
+  const TAN = Math.tan(Math.PI / 6);
+  let shearX = 0;
+  const sheared = (x, y) => [x, y - (x - shearX) * TAN];
+  // A block is the element's face standing in the plane i = I, from j = jL (its left end) to jR,
+  // extruded D cells back along -i. Its top and its left end face show; the page draws the front.
   function makeBlock(el, D, look) {
-    const r = rel(el);
+    const r = lay(el);
     if (!r) return null;
-    const dx = D * bx, dy = D * by, front = (r.b - oy) / by;
+    // The face's bottom-left corner stands on the floor; it fixes the plane I and the end jL.
+    const [sx, sy] = sheared(r.l, r.b);
+    const a = (sx - ox) / w, c = (sy - oy) / (s / 2), Ib = (a + c) / 2, jb = (c - a) / 2;
+    const jR = jb - r.w / w, Ht = r.h / s;
+    const F = (j, hh) => P([Ib, j, hh]), B = (j, hh) => P([Ib - D, j, hh]);
     return {
-      r, look, front, iR: (r.r - ox + front * bx) / s, D,
-      top: [[r.l, r.t], [r.l + dx, r.t - dy], [r.r + dx, r.t - dy], [r.r, r.t]],
-      side: [[r.r, r.t], [r.r + dx, r.t - dy], [r.r + dx, r.b - dy], [r.r, r.b]],
-      hull: [[r.l, r.b], [r.l, r.t], [r.l + dx, r.t - dy], [r.r + dx, r.t - dy], [r.r + dx, r.b - dy], [r.r, r.b]],
+      r, look, I: Ib, jL: jb, jR, D, H: Ht,
+      front: [F(jb, 0), F(jR, 0), F(jR, Ht), F(jb, Ht)],
+      top: [F(jb, Ht), F(jR, Ht), B(jR, Ht), B(jb, Ht)],
+      side: [F(jb, 0), F(jb, Ht), B(jb, Ht), B(jb, 0)],
+      hull: [F(jb, 0), F(jR, 0), F(jR, Ht), B(jR, Ht), B(jb, Ht), B(jb, 0)],
     };
   }
   const free = (k) => inField[k] && !blocked[k] && loose[k] < 0 && !reserved[k];
@@ -449,7 +464,7 @@ const CONFIG = {
     let best = null, bd = 1e9;
     for (const c of cells) {
       if (!ok(c.k)) continue;
-      const [cx, cy] = proj(c.i, c.j, 0), d = (cx - x) ** 2 + ((cy - y) * 1.5) ** 2;
+      const [cx, cy] = iso(c.i, c.j, 0), d = (cx - x) ** 2 + ((cy - y) * 1.5) ** 2;
       if (d < bd) { bd = d; best = c; }
     }
     return best;
@@ -462,53 +477,57 @@ const CONFIG = {
     tw = Math.ceil(W / TILE); th = Math.ceil(H / TILE); wasDirty = new Uint8Array(tw * th); redrawAll = true;
     for (const [c, g] of [[field, ctx], [front, fctx], [base, bctx]]) { c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); }
     wide = W > 900;
-    s = clamp(W / 48, 16, 27); bx = s * DEPTH * .866; by = s * DEPTH * .5;
+    s = clamp(W / 54, 15, 24); w = s * .866;
 
-    // The slogan and install blocks take whole cells in width and sit whole rows apart, so their
-    // edges run along the floor's grid lines.
-    const slEl = visible(".slogan");
+    // The slogan and install blocks are whole cells long and whole rows apart, so once the grid
+    // passes through the install block's corner, every block edge runs along a floor line.
+    // Left of the column there must be room for the install block's end face and a lane past it.
+    const slEl = visible(".slogan"), hb = document.querySelector(".hero-body"), instD = wide ? 3 : 2;
+    hb.style.paddingLeft = "";
+    const pad = parseFloat(getComputedStyle(hb).paddingLeft), roomL = lay(hb).l + pad;
+    hb.style.paddingLeft = pad + Math.max(0, (instD + 1.6) * w - roomL) + "px";
     for (const el of [slEl, panel]) el.style.width = "";
     panel.style.marginTop = "";
-    // Past each block's right face a lane 4 cells wide stays open: going down beside a block,
-    // agents walk a staircase that drifts sideways by a depth step every row.
-    const blockL = slEl.getBoundingClientRect().left - hr.left, lane = (D) => W - blockL - D * bx - 4 * s;
-    const room = wide ? lane(SLOGAN_D) : Math.min(slEl.parentElement.clientWidth - 64, lane(SLOGAN_D)), slW = slEl.getBoundingClientRect().width;
-    const slCells = Math.ceil(slW / s - .01) * s > room ? Math.floor(Math.min(slW, room) / s) : Math.ceil(slW / s - .01);
-    slEl.style.width = slCells * s + "px";
-    panel.style.width = Math.floor(Math.min(panel.getBoundingClientRect().width, lane(INSTALL_D)) / s) * s + "px";
-    const gap = panel.getBoundingClientRect().bottom - slEl.getBoundingClientRect().bottom;
-    panel.style.marginTop = parseFloat(getComputedStyle(panel).marginTop) + (by - gap % by) % by + "px";
-    // The grid's lines pass through the install block's front bottom-left corner.
-    const ib = rel(panel), J = Math.round((ib.b - H / 2) / by) - .5;
-    oy = ib.b - (J + N / 2) * by;
-    const I = Math.round((ib.l - W / 2 + J * bx) / s) - .5;
-    ox = ib.l - (I + N / 2) * s + (J + N / 2) * bx;
+    for (const el of [slEl, panel]) el.style.width = Math.floor(el.offsetWidth / w) * w + "px";
+    const gap = lay(panel).b - lay(slEl).b;
+    panel.style.marginTop = parseFloat(getComputedStyle(panel).marginTop) + (s - gap % s) % s + "px";
+    shearX = lay(document.querySelector(".hero-body")).l;
+    // That corner is the grid vertex i = j = (N - 1) / 2, mid-field, so the field covers the screen.
+    const ib = lay(panel), [cx, cy] = sheared(ib.l, ib.b);
+    ox = cx; oy = cy - (N - 1) * s / 2;
 
-    const sl = makeBlock(slEl, SLOGAN_D, BLOCK_LOOK), inst = makeBlock(panel, INSTALL_D, BLOCK_LOOK);
-    blocks = [makeBlock(visible(".agent-chip"), .5, CHIP_LOOK), sl, inst].filter(Boolean);
+    const chipEl = visible(".agent-chip");
+    const sl = makeBlock(slEl, 1, BLOCK_LOOK), inst = makeBlock(panel, instD, BLOCK_LOOK);
+    blocks = [makeBlock(chipEl, .5, CHIP_LOOK), sl, inst].filter(Boolean);
 
-    // The garage: a door at the foot of the install block's right face, one cell wide.
-    const jd = Math.floor(inst.front - .55);
+    // The garage: a door in the install block's left end face, one cell wide, in a cell's column.
+    const ic = inst.I - (inst.D === 3 ? 1.5 : .5), half = inst.D === 3 ? .55 : .45, jd = inst.jL;
     dock = {
-      iR: inst.iR, cell: [Math.ceil(inst.iR + .5), jd], flash: dock ? dock.flash : 0,
-      poly: [[inst.iR, jd - .55, 0], [inst.iR, jd + .55, 0], [inst.iR, jd + .55, 1.6], [inst.iR, jd - .55, 1.6]].map(P),
+      jL: jd, cell: [Math.round(ic), Math.round(jd + .5)], flash: dock ? dock.flash : 0,
+      poly: [[ic - half, jd, 0], [ic + half, jd, 0], [ic + half, jd, 1.6], [ic - half, jd, 1.6]].map(P),
     };
-    dock.mouth = P([inst.iR, jd, .8]);
+    dock.mouth = P([ic, jd, .8]);
     // The hatch: the word "fly" on the slogan's face. Agents push out of it and drop to the field.
-    const fly = rel(visible(".fly-word"));
-    hatch = { rect: fly, c: sl.front, u: ((fly.l + fly.r) / 2 - ox + sl.front * bx) / s, h: Math.max(0, (sl.r.b - fly.b) / s), flash: hatch ? hatch.flash : 0 };
+    const fl = lay(visible(".fly-word")), sr = sl.r;
+    const jAt = (x) => sl.jL - (x - sr.l) / w, hAt = (y) => (sr.b - y) / s;
+    const corners = [[fl.l - 5, fl.t], [fl.r + 5, fl.t], [fl.r + 5, fl.b], [fl.l - 5, fl.b]].map(([x, y]) => P([sl.I, jAt(x), hAt(y)]));
+    const xs = corners.map((q) => q[0]), ys = corners.map((q) => q[1]);
+    hatch = {
+      corners, c: sl.I, u: jAt((fl.l + fl.r) / 2), h: Math.max(0, hAt(fl.b)), flash: hatch ? hatch.flash : 0,
+      rect: { l: Math.min(...xs), r: Math.max(...xs), t: Math.min(...ys), b: Math.max(...ys), w: Math.max(...xs) - Math.min(...xs) },
+    };
 
     // The mark hangs beside the blocks at the field's cube size; on phones, below the install block.
     const aspect = (bx1 - bx0) / (by1 - by0), box = inst.r;
     let height = (by1 - by0) * s / MARK_EDGE, left, bottom;
     if (wide) {
-      left = Math.max(sl.r.r + sl.D * bx, box.r + inst.D * bx) + 1.5 * s;
-      bottom = sl.r.b + s * .5;
-      height = Math.min(height, (W - 2 * s - left) / aspect, bottom - (rel(visible(".agent-chip"))?.t ?? s));
+      left = Math.max(sl.r.r, box.r) + 2.5 * w;
+      height = Math.min(height, (W - 3 * w - left) / aspect);
+      bottom = inst.front[1][1] - s;
     } else {
       height = Math.min(height, (W - 48) / aspect);
       left = (W - height * aspect) / 2;
-      bottom = box.b + s * 1.6 + height;
+      bottom = Math.max(...inst.front.map((q) => q[1])) + s * 2.2 + height;
     }
     const sc = height / (by1 - by0);
     logo = { sc, x: left - bx0 * sc, y: bottom - by1 * sc };
@@ -519,9 +538,9 @@ const CONFIG = {
     const quiet = [".brand", ".nav", "h1 .wordmark", ".legend"].map((q) => rel(visible(q))).filter(Boolean);
     inField.fill(0); blocked.fill(0); hidden.fill(0); roomy.fill(0); cells = [];
     for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
-      const [x, y] = proj(i, j, 0);
-      if (x < -s || x > W + s || y < -s || y > H + 2 * s) continue;
-      const k = id(i, j), c = { i, j, k, d: j };
+      const [x, y] = iso(i, j, 0);
+      if (x < -w || x > W + w || y < -s || y > H + 2 * s) continue;
+      const k = id(i, j), c = { i, j, k, d: i + j };
       inField[k] = 1; cells.push(c); cellRef[k] = c;
       // Text dims the floor under it; the blocks stand on a fully lit floor.
       let nearText = 1e9, near = 1e9;
@@ -529,27 +548,28 @@ const CONFIG = {
       for (const b of blocks) {
         const inside = inPoly(x, y, b.hull), e = edgeDist(x, y, b.hull);
         near = Math.min(near, inside ? 0 : e);
-        if (inside && e > s) hidden[k] = 1;
-        const inFront = i - .5 >= b.iR || j - .5 >= b.front;
-        if (inside || (!inFront && spriteHits(i, j, b.hull))) blocked[k] = 1;
+        const under = i > b.I - b.D && i < b.I && j > b.jR && j < b.jL;
+        if (under && i < b.I - 1 && j < b.jL - 1) hidden[k] = 1;
+        const inFront = i - .5 >= b.I || j - .5 >= b.jL;
+        if (under || (!inFront && spriteHits(x, y, b.hull))) blocked[k] = 1;
       }
       dim[k] = (.25 + .75 * smooth(0, 70, nearText)) * Math.min(smooth(0, H * .1, y), smooth(H, H - 70, y));
-      if (y > H - 2 * s || y < s * 2 || x < s || x > W - s) blocked[k] = 1;
+      if (y > H - 2 * s || y < s * 2 || x < w || x > W - w) blocked[k] = 1;
       // Fallen cubes keep off the lanes along the blocks, so they never wall the agents in.
-      roomy[k] = !blocked[k] && Math.min(near, nearText) > 2 * s && y < H - 3 * s ? 1 : 0;
+      roomy[k] = !blocked[k] && Math.min(near, nearText) > 2.4 * s && y < H - 3 * s ? 1 : 0;
     }
     cells.sort((a, b) => a.d - b.d || a.i - b.i);
     blocked[id(...dock.cell)] = 0;
 
     // Agents land on the first open row in front of the slogan, under the hatch.
-    const row0 = Math.ceil(hatch.c + .5);
+    const row0 = Math.round(hatch.c + .5);
     let best = null, bd = 1e9;
     for (const c of cells) {
-      if (blocked[c.k] || c.j < row0 || c.j > row0 + 1) continue;
-      const d = Math.abs(c.i - hatch.u) + (c.j - row0) * .5;
+      if (blocked[c.k] || c.i < row0 || c.i > row0 + 1) continue;
+      const d = Math.abs(c.j - hatch.u) + (c.i - row0) * .5;
       if (d < bd) { bd = d; best = c; }
     }
-    if (!best) best = nearestCell((fly.l + fly.r) / 2, sl.r.b + s, (k) => !blocked[k]);
+    if (!best) best = nearestCell(...P([hatch.c + 1, hatch.u, 0]), (k) => !blocked[k]);
     hatch.cell = [best.i, best.j];
 
     renderBase();
@@ -719,7 +739,7 @@ const CONFIG = {
       }
       if (reserved[id(...cur)]) continue;   // no room: this cube stays in the mark
       reserved[id(...cur)] = 1;
-      const [x0, y0] = slotPos(n), [, ye] = proj(h[0], h[1], SLOTS[n].k);
+      const [x0, y0] = slotPos(n), [, ye] = iso(h[0], h[1], SLOTS[n].k);
       Object.assign(slot[n], {
         state: "fall", t: -(.2 * (lb.b - y0) / (lb.b - lb.t) + Math.random() * .05), dur: Math.sqrt(2 * Math.max(ye - y0, s) / (110 * s)),
         from: [x0, y0], at: h, path, si: 0, u: -.6, cell: cur, assigned: false, landed: 0,
@@ -728,8 +748,8 @@ const CONFIG = {
     agents.forEach((a, n) => { if (a.state === "parked") spawnQueue.push([time + .35 + n * .22, a]); });
   }
   function fallPose(st, n) {
-    const u = clamp(st.t / st.dur, 0, 1), [x0, y0] = st.from, k = SLOTS[n].k, [xe, ye] = proj(st.at[0], st.at[1], hill(...st.at) + k);
-    return [lerp(x0, xe, u), y0 + (ye - y0) * u * u, lerp(kLogo(n), k, u), u];
+    const u = clamp(st.t / st.dur, 0, 1), [x0, y0] = st.from, k = SLOTS[n].k, [xe, ye] = iso(st.at[0], st.at[1], hill(...st.at) + k);
+    return [lerp(x0, xe, u), y0 + (ye - y0) * u * u, lerp(kLogo(n), k, u)];
   }
   function rollStep(st) {
     const from = st.at, to = st.path[st.si];
@@ -741,20 +761,20 @@ const CONFIG = {
     if (st.state === "fall") return fallPose(st, n);
     const r = st.state === "roll" && rollStep(st);
     if (r) {
-      const [x0, y0] = proj(r.from[0], r.from[1], hill(...r.from) + k), [x1, y1] = proj(r.from[0] + r.e[0], r.from[1] + r.e[1], k);
-      return [lerp(x0, x1, r.u), lerp(y0, y1, r.u) - Math.sin(Math.PI * r.u) * .2 * k * s, k, 1];
+      const [x0, y0] = iso(r.from[0], r.from[1], hill(...r.from) + k), [x1, y1] = iso(r.from[0] + r.e[0], r.from[1] + r.e[1], k);
+      return [lerp(x0, x1, r.u), lerp(y0, y1, r.u) - Math.sin(Math.PI * r.u) * .2 * k * s, k];
     }
     const c = st.state === "roll" ? st.at : st.cell;
-    return [...proj(c[0], c[1], hill(...c) + k), k, 1];
+    return [...iso(c[0], c[1], hill(...c) + k), k];
   }
   function placePose(a) {
     const p = a.timer / PLACE, q = ease(clamp((p - .18) / .7, 0, 1)), n = a.work.n;
-    const [sx, sy, k0, m0] = a.work.start, [ex, ey] = slotPos(n);
+    const [sx, sy, k0] = a.work.start, [ex, ey] = slotPos(n);
     const mx = (sx + ex) / 2, my = Math.min(sy, ey) - s * 3;
     return {
       p, n, reach: Math.min(1, p / .18), alpha: p > .88 ? (1 - p) / .12 : 1, slot: [ex, ey],
       pos: [(1 - q) * (1 - q) * sx + 2 * (1 - q) * q * mx + q * q * ex, (1 - q) * (1 - q) * sy + 2 * (1 - q) * q * my + q * q * ey],
-      k: lerp(k0, kLogo(n), q), m: lerp(m0, 0, q),
+      k: lerp(k0, kLogo(n), q),
     };
   }
 
@@ -830,35 +850,21 @@ const CONFIG = {
     for (const [x, y] of pts) { cx += x / 4; cy += y / 4; }
     g.fillStyle = color; poly(g, pts.map(([x, y]) => [cx + (x - cx) * .8, cy + (y - cy) * .8])); g.fill();
   }
-  // Top-face corners [back, right, front, left] of a cube whose top face is centred on (x, y).
-  // m = 1 is the floor's projection, m = 0 the mark's isometric one; in between a cube morphs.
-  function corners(x, y, k, m) {
-    const E = s * k, hw = E / 2, dx = bx * k / 2, dy = by * k / 2, half = .866 * E;
-    const iso = [[x, y - E / 2], [x + half, y], [x, y + E / 2], [x - half, y]];
-    const flat = [[x - hw + dx, y - dy], [x + hw + dx, y - dy], [x + hw - dx, y + dy], [x - hw - dx, y + dy]];
-    return iso.map((p, q) => [lerp(p[0], flat[q][0], m), lerp(p[1], flat[q][1], m)]);
-  }
-  function hexPath(g, x, y, k = 1, m = 1) {
-    const [B, R, F, L] = corners(x, y, k, m), E = s * k;
-    poly(g, [B, R, [R[0], R[1] + E], [F[0], F[1] + E], [L[0], L[1] + E], L]);
-  }
-  // A floor tile's top: the seam keeps a fixed 1.2 px on every side, so thin rows stay calm.
-  function tile(g, color, [B, R, F, L]) {
-    const eu = .6 / s, ev = .6 / by, at = (u, v) => [L[0] + (F[0] - L[0]) * u + (B[0] - L[0]) * v, L[1] + (F[1] - L[1]) * u + (B[1] - L[1]) * v];
-    g.fillStyle = color; poly(g, [at(eu, 1 - ev), at(1 - eu, 1 - ev), at(1 - eu, ev), at(eu, ev)]); g.fill();
+  function hexPath(g, x, y, k = 1) {
+    const S = s * k, Wd = w * k, t = S / 2;
+    poly(g, [[x, y - t], [x + Wd, y], [x + Wd, y + S], [x, y + t + S], [x - Wd, y + S], [x - Wd, y]]);
   }
   function topFace(g, x, y, color) {
-    const c = corners(x, y, 1, 1);
-    g.fillStyle = SEAM; poly(g, c); g.fill();
-    tile(g, color, c);
+    const t = s / 2;
+    g.fillStyle = SEAM; poly(g, [[x, y - t], [x + w, y], [x, y + t], [x - w, y]]); g.fill();
+    quad(g, color, [[x, y - t], [x + w, y], [x, y + t], [x - w, y]]);
   }
-  // faces: [top, front (+j), right (+i)].
-  function cube(g, x, y, [top, front, right], k = 1, m = 1, floor = false) {
-    const [B, R, F, L] = corners(x, y, k, m), E = s * k, dn = (p) => [p[0], p[1] + E];
-    g.fillStyle = SEAM; hexPath(g, x, y, k, m); g.fill();
-    (floor ? tile : quad)(g, top, [B, R, F, L]);
-    quad(g, front, [L, F, dn(F), dn(L)]);
-    quad(g, right, [F, R, dn(R), dn(F)]);
+  function cube(g, x, y, [top, left, right], k = 1) {
+    const S = s * k, Wd = w * k, t = S / 2;
+    g.fillStyle = SEAM; hexPath(g, x, y, k); g.fill();
+    quad(g, top, [[x, y - t], [x + Wd, y], [x, y + t], [x - Wd, y]]);
+    quad(g, left, [[x - Wd, y], [x, y + t], [x, y + t + S], [x - Wd, y + S]]);
+    quad(g, right, [[x, y + t], [x + Wd, y], [x + Wd, y + S], [x, y + t + S]]);
   }
   function glowAt(g, x, y, r, a) {
     const grad = g.createRadialGradient(x, y, 0, x, y, r);
@@ -875,9 +881,9 @@ const CONFIG = {
     const em = clamp((gl - .1) / .9, 0, 1), a = smooth(0, .3, em);
     const heat = em > .5 ? mix(RED, HOT, (em - .5) * 2) : mix(EMBER, RED, em * 2);
     const face = (k) => rgb(mix(tint.map((v) => v * lit), heat, a), k);
-    const [x, y] = proj(c.i, c.j, h);
+    const [x, y] = iso(c.i, c.j, h);
     if (topOnly) return topFace(g, x, y, face(1));
-    cube(g, x, y, [face(1), face(.66), face(.42)], 1, 1, true);
+    cube(g, x, y, [face(1), face(.66), face(.42)]);
   }
   function drawBlocks(g) {
     for (const b of blocks) {
@@ -897,13 +903,13 @@ const CONFIG = {
     agents = saved;
   }
 
-  function markCube(g, n, x, y, k, lying, m = 1) {
+  function markCube(g, n, x, y, k, lying) {
     const faces = n === LIT && lying ? LIT_LYING : SLOTS[n].c;
-    cube(g, x, lying ? y - (k - 1) * s : y, faces, k, m);
+    cube(g, x, lying ? y - (k - 1) * s : y, faces, k);
   }
   function agentCube(g, x, y, k = 1, alpha = 1) {
     g.save(); g.globalAlpha = alpha;
-    glowAt(g, x, y + s * k / 2, s * 2 * k, .38);
+    glowAt(g, x, y + s * k / 2, s * 2.4 * k, .38);
     cube(g, x, y, AGENT_FACES, k);
     g.restore();
   }
@@ -926,7 +932,7 @@ const CONFIG = {
     for (const pts of outline.slice(1)) { ctx.moveTo(pts[0], pts[1]); for (let q = 2; q < pts.length; q += 2) ctx.lineTo(pts[q], pts[q + 1]); ctx.closePath(); }
     ctx.stroke(); ctx.restore();
   }
-  function command(src, targets, ks, ms, reach, alpha) {
+  function command(src, targets, ks, reach, alpha) {
     ctx.save(); ctx.strokeStyle = AGENT; ctx.lineCap = "round";
     for (const [ex, ey] of targets) {
       const tx = lerp(src[0], ex, reach), ty = lerp(src[1], ey, reach);
@@ -935,7 +941,7 @@ const CONFIG = {
     }
     if (reach >= 1) {
       ctx.globalAlpha = alpha; ctx.lineWidth = 1.2;
-      targets.forEach(([x, y], n) => { hexPath(ctx, x, y, ks[n], ms[n]); ctx.stroke(); });
+      targets.forEach(([x, y], n) => { hexPath(ctx, x, y, ks[n]); ctx.stroke(); });
       ctx.globalAlpha = alpha * .7; ctx.lineWidth = 1; ctx.setLineDash([4, 5]); ctx.lineDashOffset = -time * 24;
       ctx.beginPath(); ctx.moveTo(...targets[0]); ctx.lineTo(...targets[1]); ctx.stroke(); ctx.setLineDash([]);
     }
@@ -950,33 +956,38 @@ const CONFIG = {
     let at;
     if (v < .5) {
       const q = easeOut(v / .5);
-      at = [lerp(hatch.u, ci, q), lerp(hatch.c - .5, cj, q), hatch.h];
+      at = [lerp(hatch.c - .5, ci, q), lerp(hatch.u, cj, q), hatch.h];
     } else {
       const q = (v - .5) / .5;
       at = [ci, cj, lerp(hatch.h, hill(ci, cj), q * q)];
     }
     const [x, y] = P([at[0], at[1], at[2] + .5]);
-    glowAt(g, x, y, s * 2, .38 * smooth(0, .3, v));
-    solid(g, at, 1, AGENT_RGB, null, [0, 1, 0, hatch.c]);
+    glowAt(g, x, y, s * 2.4, .38 * smooth(0, .3, v));
+    solid(g, at, 1, AGENT_RGB, null, [1, 0, 0, hatch.c]);
   }
-  // An agent driving into the garage: the part still outside the block's right face shows in full,
+  // An agent driving into the garage: the part still outside the block's left face shows in full,
   // the part inside shows dimly through the door.
   function drawEnter(g, a) {
-    const v = clamp(a.timer / ENTER, 0, 1), [ci, cj] = dock.cell, at = [lerp(ci, dock.iR - .6, ease(v)), cj, hill(ci, cj)];
+    const v = clamp(a.timer / ENTER, 0, 1), [ci, cj] = dock.cell, at = [ci, lerp(cj, dock.jL - .6, ease(v)), hill(ci, cj)];
     const [x, y] = P([at[0], at[1], at[2] + .5]);
-    glowAt(g, x, y, s * 2, .38 * (1 - v));
-    solid(g, at, 1, AGENT_RGB, null, [1, 0, 0, dock.iR]);
+    glowAt(g, x, y, s * 2.4, .38 * (1 - v));
+    solid(g, at, 1, AGENT_RGB, null, [0, 1, 0, dock.jL]);
     g.save(); poly(g, dock.poly); g.clip(); g.globalAlpha = .4 * (1 - v);
-    solid(g, at, 1, AGENT_RGB, null, [-1, 0, 0, -dock.iR]);
+    solid(g, at, 1, AGENT_RGB, null, [0, -1, 0, -dock.jL]);
     g.restore();
   }
   // Corner marks on the word "fly": the hatch in the slogan's face.
   function drawHatch(g) {
-    const r = hatch.rect, x0 = r.l - 5, x1 = r.r + 5, y0 = r.t, y1 = r.b, c = 6;
+    const q = hatch.corners, c = 6, r = hatch.rect;
     g.save(); g.strokeStyle = `rgba(255,77,46,${.4 + .6 * hatch.flash})`; g.lineWidth = 1.5; g.beginPath();
-    for (const [x, y, sx, sy] of [[x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1]]) { g.moveTo(x + sx * c, y); g.lineTo(x, y); g.lineTo(x, y + sy * c); }
+    q.forEach((p, n) => {
+      for (const o of [q[(n + 1) % 4], q[(n + 3) % 4]]) {
+        const dx = o[0] - p[0], dy = o[1] - p[1], len = Math.hypot(dx, dy) || 1;
+        g.moveTo(p[0], p[1]); g.lineTo(p[0] + dx / len * c, p[1] + dy / len * c);
+      }
+    });
     g.stroke();
-    if (hatch.flash > 0) glowAt(g, (x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) * .9, .35 * hatch.flash);
+    if (hatch.flash > 0) glowAt(g, (r.l + r.r) / 2, (r.t + r.b) / 2, r.w * .9, .35 * hatch.flash);
     g.restore();
   }
 
@@ -997,7 +1008,7 @@ const CONFIG = {
     for (let ty = c; ty <= e; ty++) for (let tx = a; tx <= b; tx++) if (d[ty * tw + tx]) return true;
     return false;
   }
-  const cellBox = (k) => { const [x, y] = proj(cellRef[k].i, cellRef[k].j, 0), hx = (s + bx) / 2 + 2; return [x - hx, y - by / 2 - 2.6 * s, x + hx, y + by / 2 + s + 2]; };
+  const cellBox = (k) => { const [x, y] = iso(cellRef[k].i, cellRef[k].j, 0); return [x - w - 2, y - 3.2 * s, x + w + 2, y + 1.6 * s]; };
 
   function draw() {
     // Cells to redraw: those near agents, trail cells whose shade stepped, any trail cell on a
@@ -1020,16 +1031,16 @@ const CONFIG = {
     const items = [], places = [];
     for (const a of agents) {
       if (!driving(a)) continue;
-      items.push({ key: a.y + .6 + a.x * 1e-4, draw: (g) => agentCube(g, ...P([a.x, a.y, hill(a.x, a.y) + 1])) });
+      items.push({ key: a.x + a.y + .6, draw: (g) => agentCube(g, ...P([a.x, a.y, hill(a.x, a.y) + 1])) });
       if (a.state === "place") places.push([a, placePose(a)]);
     }
     slot.forEach((st, n) => {
       if (st.state === "loose") {
         const [i, j] = st.cell, b = st.landed < .6 ? s * .35 * Math.exp(-7 * st.landed) * Math.abs(Math.sin(12 * st.landed)) : 0;
-        items.push({ key: j + .5 + i * 1e-4, draw: (g) => { const [x, y] = proj(i, j, hill(i, j) + 1); markCube(g, n, x, y - b, SLOTS[n].k, true); } });
+        items.push({ key: i + j + .5, draw: (g) => { const [x, y] = iso(i, j, hill(i, j) + 1); markCube(g, n, x, y - b, SLOTS[n].k, true); } });
       } else if (st.state === "roll") {
         const r = rollStep(st), [i, j] = st.at, colors = n === LIT ? LIT_RGB : SLOT_RGB[n];
-        items.push({ key: j + (r ? r.e[1] * r.u : 0) + .5 + i * 1e-4, draw: (g) => solid(g, [i, j, hill(i, j)], SLOTS[n].k, colors, r && { e: r.e, a: Math.PI / 2 * ease(r.u) }) });
+        items.push({ key: i + j + (r ? (r.e[0] + r.e[1]) * r.u : 0) + .5, draw: (g) => solid(g, [i, j, hill(i, j)], SLOTS[n].k, colors, r && { e: r.e, a: Math.PI / 2 * ease(r.u) }) });
       }
     });
     items.sort((p, q) => p.key - q.key);
@@ -1038,8 +1049,8 @@ const CONFIG = {
     const cur = new Uint8Array(tw * th), L = MARK_EDGE * logo.sc, pad = Math.max(2.8 * L, 2 * s);
     for (const k of active) mark(cur, ...cellBox(k));
     for (const k of stepped) mark(cur, ...cellBox(k));
-    for (const a of agents) if (a.state !== "parked") around(cur, P([a.x, a.y, .5]), 2.6 * s);
-    if (hatch.flash > 0 || doors.some((a) => a.state === "exit")) { const r = hatch.rect, m = Math.max(2.6 * s, r.w); mark(cur, r.l - m, r.t - m, r.r + m, r.b + m); }
+    for (const a of agents) if (a.state !== "parked") around(cur, P([a.x, a.y, .5]), 3.4 * s);
+    if (hatch.flash > 0 || doors.some((a) => a.state === "exit")) { const r = hatch.rect, m = Math.max(3.4 * s, r.w); mark(cur, r.l - m, r.t - m, r.r + m, r.b + m); }
     if (dock.flash > 0) { const xs = dock.poly.map((q) => q[0]), ys = dock.poly.map((q) => q[1]); mark(cur, Math.min(...xs) - 2 * s, Math.min(...ys) - 2 * s, Math.max(...xs) + 2 * s, Math.max(...ys) + 2 * s); }
     mark(cur, logoBox.l - pad, logoBox.t - pad, logoBox.r + pad, logoBox.b + pad);
     slot.forEach((st, n) => {
@@ -1088,16 +1099,16 @@ const CONFIG = {
 
     if (phase === "build") slot.forEach((st, n) => { if (st.state !== "set") ghostSlot(n); });
     slot.forEach((st, n) => { if (st.state === "set" || (st.state === "fall" && st.t < 0)) drawSlot(n); });
-    slot.forEach((st, n) => { if (st.state === "fall" && st.t >= 0) { const [x, y, k, m] = fallPose(st, n); markCube(ctx, n, x, y, k, false, m); } });
-    for (const [, pose] of places) if (pose.p < .88) markCube(ctx, pose.n, ...pose.pos, pose.k, false, pose.m);
-    for (const [a, pose] of places) command(P([a.x, a.y, hill(a.x, a.y) + 1]), [pose.pos, pose.slot], [pose.k, kLogo(pose.n)], [pose.m, 0], pose.reach, pose.alpha);
+    slot.forEach((st, n) => { if (st.state === "fall" && st.t >= 0) { const [x, y, k] = fallPose(st, n); markCube(ctx, n, x, y, k, false); } });
+    for (const [, pose] of places) if (pose.p < .88) markCube(ctx, pose.n, ...pose.pos, pose.k, false);
+    for (const [a, pose] of places) command(P([a.x, a.y, hill(a.x, a.y) + 1]), [pose.pos, pose.slot], [pose.k, kLogo(pose.n)], pose.reach, pose.alpha);
     ctx.restore();
 
     // The page's blocks cover the field canvas; whatever stands in front of their faces is drawn again on top.
     fctx.save();
     clipRuns(fctx);
     fctx.beginPath();
-    for (const b of blocks) fctx.rect(b.r.l, b.r.t, b.r.w, b.r.h);
+    for (const b of blocks) { const f = b.front; fctx.moveTo(...f[0]); for (const q of f.slice(1)) fctx.lineTo(...q); fctx.closePath(); }
     fctx.clip();
     for (const it of items) it.draw(fctx);
     drawDoors(fctx);

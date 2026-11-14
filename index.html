@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap">
 <style>
 /* SPITE Forge (doc-52, assets/ui/forge/tokens.json), dark theme.
-   Layout: quiet left column over a live field of mark-style cubes that agent cubes rearrange; below, statement + claim list.
+   Layout: quiet left column over a live field of mark-style cubes; the mark hangs above it, falls apart, and agent cubes spawned from the word "fly" rebuild it; below, statement + claim list.
    Rules kept: accent only for interactive and selected; square panels and tabs; 2px radius on buttons and fields; hard offset shadows; uppercase only in display and code styles. */
 :root {
   --ground: #0d0c0b;
@@ -57,6 +57,9 @@ html[data-lang="en"] .ru, html[data-lang="ru"] .en { display: none !important; }
   -webkit-mask-composite: source-in;
   mask-image: linear-gradient(90deg, transparent 22%, #000 64%), linear-gradient(180deg, transparent 4%, #000 26%, #000 80%, transparent 100%);
   mask-composite: intersect; }
+#fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 2; }
+.fly-word { transition: color .25s, text-shadow .25s; }
+.fly-word.spawn { color: var(--accent); text-shadow: 0 0 14px rgba(255, 77, 46, .7); transition: none; }
 .legend { position: absolute; right: max(28px, env(safe-area-inset-right, 0px)); bottom: 20px; display: flex; gap: 16px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 8px; height: 8px; }
@@ -129,7 +132,7 @@ footer a:hover { color: var(--text); }
 
 @media (max-width: 900px) {
   #field { -webkit-mask-image: linear-gradient(180deg, transparent 40%, #000 72%, #000 92%, transparent 100%); mask-image: linear-gradient(180deg, transparent 40%, #000 72%, #000 92%, transparent 100%); -webkit-mask-composite: source-over; mask-composite: add; opacity: .8; }
-  .hero-body { padding-block: 36px 240px; }
+  .hero-body { padding-block: 36px 300px; }
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
 }
 @media (max-width: 520px) {
@@ -145,6 +148,7 @@ footer a:hover { color: var(--text); }
 <body>
 <section class="hero">
   <canvas id="field" aria-hidden="true"></canvas>
+  <canvas id="fx" aria-hidden="true"></canvas>
   <div class="legend code" aria-hidden="true"><span class="on"><i></i><span class="en">Agent</span><span class="ru">Агент</span></span><span class="cmd-l"><i></i><span class="en">Agent command</span><span class="ru">Команда агента</span></span></div>
   <header class="wrap bar">
     <a class="brand" href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 314 64" role="img" aria-label="SPITE Engine"><rect width="314" height="64" rx="0" fill="none"/><svg x="0" y="0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="64" height="64"><defs><filter id="glow-logo" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="7"/></filter></defs><path d="M102.8,72L64.7,94L64.7,50L102.8,28ZM26.6,72L26.6,28L64.7,50L64.7,94ZM64.7,6L102.8,28L64.7,50L26.6,28Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,68.9L70.1,84.8L70.1,53.1L97.5,37.2Z" fill="#45413e"/><path d="M32,68.9L32,37.2L59.4,53.1L59.4,84.8Z" fill="#6f6a65"/><path d="M64.7,12.2L92.2,28L64.7,43.8L37.3,28Z" fill="#a9a39f"/><path d="M140.9,94L102.8,116L102.8,72L140.9,50ZM64.7,94L64.7,50L102.8,72L102.8,116ZM102.8,28L140.9,50L102.8,72L64.7,50Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M135.6,90.9L108.2,106.8L108.2,75.1L135.6,59.2Z" fill="#45413e"/><path d="M70.1,90.9L70.1,59.2L97.5,75.1L97.5,106.8Z" fill="#6f6a65"/><path d="M102.8,34.2L130.3,50L102.8,65.8L75.4,50Z" fill="#a9a39f"/><path d="M179.1,116L140.9,138L140.9,94L179.1,72ZM102.8,116L102.8,72L140.9,94L140.9,138ZM140.9,50L179.1,72L140.9,94L102.8,72Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M173.7,112.9L146.3,128.8L146.3,97.1L173.7,81.2Z" fill="#45413e"/><path d="M108.2,112.9L108.2,81.2L135.6,97.1L135.6,128.8Z" fill="#6f6a65"/><path d="M140.9,56.2L168.4,72L140.9,87.8L113.5,72Z" fill="#a9a39f"/><path d="M217.2,138L179.1,160L179.1,116L217.2,94ZM140.9,138L140.9,94L179.1,116L179.1,160ZM179.1,72L217.2,94L179.1,116L140.9,94Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M211.8,134.9L184.4,150.8L184.4,119.1L211.8,103.2Z" fill="#45413e"/><path d="M146.3,134.9L146.3,103.2L173.7,119.1L173.7,150.8Z" fill="#6f6a65"/><path d="M179.1,78.2L206.5,94L179.1,109.8L151.6,94Z" fill="#a9a39f"/><path d="M255.3,160L217.2,182L217.2,138L255.3,116ZM179.1,160L179.1,116L217.2,138L217.2,182ZM217.2,94L255.3,116L217.2,138L179.1,116Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M249.9,156.9L222.5,172.8L222.5,141.1L249.9,125.2Z" fill="#45413e"/><path d="M184.4,156.9L184.4,125.2L211.8,141.1L211.8,172.8Z" fill="#6f6a65"/><path d="M217.2,100.2L244.6,116L217.2,131.8L189.7,116Z" fill="#a9a39f"/><path d="M293.4,182L255.3,204L255.3,160L293.4,138ZM217.2,182L217.2,138L255.3,160L255.3,204ZM255.3,116L293.4,138L255.3,160L217.2,138Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M288,178.9L260.6,194.8L260.6,163.1L288,147.2Z" fill="#35322f"/><path d="M222.5,178.9L222.5,147.2L249.9,163.1L249.9,194.8Z" fill="#5a5551"/><path d="M255.3,122.2L282.7,138L255.3,153.8L227.8,138Z" fill="#8a847f"/><path d="M255.3,204L217.2,226L217.2,182L255.3,160ZM179.1,204L179.1,160L217.2,182L217.2,226ZM217.2,138L255.3,160L217.2,182L179.1,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M249.9,200.9L222.5,216.8L222.5,185.1L249.9,169.2Z" fill="#35322f"/><path d="M184.4,200.9L184.4,169.2L211.8,185.1L211.8,216.8Z" fill="#5a5551"/><path d="M217.2,144.2L244.6,160L217.2,175.8L189.7,160Z" fill="#8a847f"/><path d="M217.2,226L179.1,248L179.1,204L217.2,182ZM140.9,226L140.9,182L179.1,204L179.1,248ZM179.1,160L217.2,182L179.1,204L140.9,182Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M211.8,222.9L184.4,238.8L184.4,207.1L211.8,191.2Z" fill="#35322f"/><path d="M146.3,222.9L146.3,191.2L173.7,207.1L173.7,238.8Z" fill="#5a5551"/><path d="M179.1,166.2L206.5,182L179.1,197.8L151.6,182Z" fill="#8a847f"/><path d="M179.1,248L140.9,270L140.9,226L179.1,204ZM102.8,248L102.8,204L140.9,226L140.9,270ZM140.9,182L179.1,204L140.9,226L102.8,204Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M173.7,244.9L146.3,260.8L146.3,229.1L173.7,213.2Z" fill="#35322f"/><path d="M108.2,244.9L108.2,213.2L135.6,229.1L135.6,260.8Z" fill="#5a5551"/><path d="M140.9,188.2L168.4,204L140.9,219.8L113.5,204Z" fill="#8a847f"/><path d="M140.9,270L102.8,292L102.8,248L140.9,226ZM64.7,270L64.7,226L102.8,248L102.8,292ZM102.8,204L140.9,226L102.8,248L64.7,226Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M135.6,266.9L108.2,282.8L108.2,251.1L135.6,235.2Z" fill="#35322f"/><path d="M70.1,266.9L70.1,235.2L97.5,251.1L97.5,282.8Z" fill="#5a5551"/><path d="M102.8,210.2L130.3,226L102.8,241.8L75.4,226Z" fill="#8a847f"/><path d="M102.8,292L64.7,314L64.7,270L102.8,248ZM26.6,292L26.6,248L64.7,270L64.7,314ZM64.7,226L102.8,248L64.7,270L26.6,248Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,288.9L70.1,304.8L70.1,273.1L97.5,257.2Z" fill="#2a2725"/><path d="M32,288.9L32,257.2L59.4,273.1L59.4,304.8Z" fill="#45413e"/><path d="M64.7,232.2L92.2,248L64.7,263.8L37.3,248Z" fill="#6f6a65"/><path d="M102.8,248L64.7,270L64.7,226L102.8,204ZM26.6,248L26.6,204L64.7,226L64.7,270ZM64.7,182L102.8,204L64.7,226L26.6,204Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,244.9L70.1,260.8L70.1,229.1L97.5,213.2Z" fill="#2a2725"/><path d="M32,244.9L32,213.2L59.4,229.1L59.4,260.8Z" fill="#45413e"/><path d="M64.7,188.2L92.2,204L64.7,219.8L37.3,204Z" fill="#6f6a65"/><path d="M102.8,204L64.7,226L64.7,182L102.8,160ZM26.6,204L26.6,160L64.7,182L64.7,226ZM64.7,138L102.8,160L64.7,182L26.6,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,200.9L70.1,216.8L70.1,185.1L97.5,169.2Z" fill="#2a2725"/><path d="M32,200.9L32,169.2L59.4,185.1L59.4,216.8Z" fill="#45413e"/><path d="M64.7,144.2L92.2,160L64.7,175.8L37.3,160Z" fill="#6f6a65"/><path d="M102.8,160L64.7,182L64.7,138L102.8,116ZM26.6,160L64.7,138L64.7,182ZM26.6,160L26.6,116L64.7,138ZM64.7,94L102.8,116L64.7,138L26.6,116Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M97.5,156.9L70.1,172.8L70.1,142L97.5,126.2ZM70.1,142L70.1,141.1L97.5,125.2L97.5,126.2Z" fill="#2a2725"/><path d="M59.4,148.2L59.4,172.8L38.1,160.5ZM32,156.9L32,125.2L59.4,141.1L59.4,148.2L38.1,160.5Z" fill="#45413e"/><path d="M91.3,116.5L64.7,131.8L37.3,116L63.9,100.6Z" fill="#6f6a65"/><path d="M102.8,116L64.7,138L64.7,94ZM26.6,116L64.7,94L64.7,138ZM26.6,116L26.6,72L64.7,94Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M91.3,116.5L70.1,128.8L70.1,104.2Z" fill="#2a2725"/><path d="M59.4,104.2L59.4,128.8L38.1,116.5ZM32,112.9L32,82.2L59.4,98L59.4,104.2L38.1,116.5Z" fill="#45413e"/><path d="M179.7,189.7L128.2,219.4L128.2,160L179.7,130.3ZM76.8,189.7L76.8,130.3L128.2,160L128.2,219.4ZM128.2,100.6L179.7,130.3L128.2,160L76.8,130.3Z" fill="#ff6a4d" filter="url(#glow-logo)"/><path d="M179.7,189.7L128.2,219.4L128.2,160L179.7,130.3ZM76.8,189.7L76.8,130.3L128.2,160L128.2,219.4ZM128.2,100.6L179.7,130.3L128.2,160L76.8,130.3Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M172.5,185.5L135.4,206.9L135.4,164.2L172.5,142.8Z" fill="#9e4230"/><path d="M84,185.5L84,142.8L121,164.2L121,206.9Z" fill="#cc3e25"/><path d="M128.2,108.9L165.3,130.3L128.2,151.7L91.2,130.3Z" fill="#ff4d2e"/></svg>
@@ -159,7 +163,7 @@ footer a:hover { color: var(--text); }
     <div class="hero-body">
       <span class="agent-chip section-title"><span class="lamp"></span><span class="en">Agent-native game engine</span><span class="ru">Нативно агентный движок</span></span>
       <h1><svg xmlns="http://www.w3.org/2000/svg" viewBox="26.4 6.0 267.2 308.0" aria-hidden="true"><defs><filter id="glow-hero" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="7"/></filter></defs><path d="M86.9,58.7L57.6,75.6L57.6,41.8L86.9,24.9ZM28.4,58.7L28.4,24.9L57.6,41.8L57.6,75.6ZM57.6,8L86.9,24.9L57.6,41.8L28.4,24.9Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,56.3L61.7,68.5L61.7,44.1L82.8,32Z" fill="#45413e"/><path d="M32.5,56.3L32.5,32L53.5,44.1L53.5,68.5Z" fill="#6f6a65"/><path d="M57.6,12.7L78.7,24.9L57.6,37L36.6,24.9Z" fill="#a9a39f"/><path d="M116.1,75.6L86.9,92.4L86.9,58.7L116.1,41.8ZM57.6,75.6L57.6,41.8L86.9,58.7L86.9,92.4ZM86.9,24.9L116.1,41.8L86.9,58.7L57.6,41.8Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M112,73.2L91,85.4L91,61L112,48.9Z" fill="#45413e"/><path d="M61.7,73.2L61.7,48.9L82.8,61L82.8,85.4Z" fill="#6f6a65"/><path d="M86.9,29.6L107.9,41.8L86.9,53.9L65.8,41.8Z" fill="#a9a39f"/><path d="M145.4,92.4L116.1,109.3L116.1,75.6L145.4,58.7ZM86.9,92.4L86.9,58.7L116.1,75.6L116.1,109.3ZM116.1,41.8L145.4,58.7L116.1,75.6L86.9,58.7Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M141.3,90.1L120.2,102.2L120.2,77.9L141.3,65.8Z" fill="#45413e"/><path d="M91,90.1L91,65.8L112,77.9L112,102.2Z" fill="#6f6a65"/><path d="M116.1,46.5L137.2,58.7L116.1,70.8L95.1,58.7Z" fill="#a9a39f"/><path d="M174.6,109.3L145.4,126.2L145.4,92.4L174.6,75.6ZM116.1,109.3L116.1,75.6L145.4,92.4L145.4,126.2ZM145.4,58.7L174.6,75.6L145.4,92.4L116.1,75.6Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M170.5,107L149.5,119.1L149.5,94.8L170.5,82.6Z" fill="#45413e"/><path d="M120.2,107L120.2,82.6L141.3,94.8L141.3,119.1Z" fill="#6f6a65"/><path d="M145.4,63.4L166.4,75.6L145.4,87.7L124.3,75.6Z" fill="#a9a39f"/><path d="M203.9,126.2L174.6,143.1L174.6,109.3L203.9,92.4ZM145.4,126.2L145.4,92.4L174.6,109.3L174.6,143.1ZM174.6,75.6L203.9,92.4L174.6,109.3L145.4,92.4Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M199.8,123.9L178.7,136L178.7,111.7L199.8,99.5Z" fill="#45413e"/><path d="M149.5,123.9L149.5,99.5L170.5,111.7L170.5,136Z" fill="#6f6a65"/><path d="M174.6,80.3L195.7,92.4L174.6,104.6L153.6,92.4Z" fill="#a9a39f"/><path d="M233.1,143.1L203.9,160L203.9,126.2L233.1,109.3ZM174.6,143.1L174.6,109.3L203.9,126.2L203.9,160ZM203.9,92.4L233.1,109.3L203.9,126.2L174.6,109.3Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M229,140.7L208,152.9L208,128.6L229,116.4Z" fill="#45413e"/><path d="M178.7,140.7L178.7,116.4L199.8,128.6L199.8,152.9Z" fill="#6f6a65"/><path d="M203.9,97.2L224.9,109.3L203.9,121.5L182.8,109.3Z" fill="#a9a39f"/><path d="M262.4,160L233.1,176.9L233.1,143.1L262.4,126.2ZM203.9,160L203.9,126.2L233.1,143.1L233.1,176.9ZM233.1,109.3L262.4,126.2L233.1,143.1L203.9,126.2Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M258.3,157.6L237.2,169.8L237.2,145.5L258.3,133.3Z" fill="#45413e"/><path d="M208,157.6L208,133.3L229,145.5L229,169.8Z" fill="#6f6a65"/><path d="M233.1,114.1L254.2,126.2L233.1,138.4L212.1,126.2Z" fill="#a9a39f"/><path d="M291.6,176.9L262.4,193.8L262.4,160L291.6,143.1ZM233.1,176.9L233.1,143.1L262.4,160L262.4,193.8ZM262.4,126.2L291.6,143.1L262.4,160L233.1,143.1Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M287.5,174.5L266.5,186.7L266.5,162.4L287.5,150.2Z" fill="#35322f"/><path d="M237.2,174.5L237.2,150.2L258.3,162.4L258.3,186.7Z" fill="#5a5551"/><path d="M262.4,131L283.4,143.1L262.4,155.3L241.3,143.1Z" fill="#8a847f"/><path d="M262.4,193.8L233.1,210.7L233.1,176.9L262.4,160ZM203.9,193.8L203.9,160L233.1,176.9L233.1,210.7ZM233.1,143.1L262.4,160L233.1,176.9L203.9,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M258.3,191.4L237.2,203.6L237.2,179.3L258.3,167.1Z" fill="#35322f"/><path d="M208,191.4L208,167.1L229,179.3L229,203.6Z" fill="#5a5551"/><path d="M233.1,147.8L254.2,160L233.1,172.2L212.1,160Z" fill="#8a847f"/><path d="M233.1,210.7L203.9,227.6L203.9,193.8L233.1,176.9ZM174.6,210.7L174.6,176.9L203.9,193.8L203.9,227.6ZM203.9,160L233.1,176.9L203.9,193.8L174.6,176.9Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M229,208.3L208,220.5L208,196.1L229,184Z" fill="#35322f"/><path d="M178.7,208.3L178.7,184L199.8,196.1L199.8,220.5Z" fill="#5a5551"/><path d="M203.9,164.7L224.9,176.9L203.9,189L182.8,176.9Z" fill="#8a847f"/><path d="M203.9,227.6L174.6,244.4L174.6,210.7L203.9,193.8ZM145.4,227.6L145.4,193.8L174.6,210.7L174.6,244.4ZM174.6,176.9L203.9,193.8L174.6,210.7L145.4,193.8Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M199.8,225.2L178.7,237.4L178.7,213L199.8,200.9Z" fill="#35322f"/><path d="M149.5,225.2L149.5,200.9L170.5,213L170.5,237.4Z" fill="#5a5551"/><path d="M174.6,181.6L195.7,193.8L174.6,205.9L153.6,193.8Z" fill="#8a847f"/><path d="M174.6,244.4L145.4,261.3L145.4,227.6L174.6,210.7ZM116.1,244.4L116.1,210.7L145.4,227.6L145.4,261.3ZM145.4,193.8L174.6,210.7L145.4,227.6L116.1,210.7Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M170.5,242.1L149.5,254.2L149.5,229.9L170.5,217.8Z" fill="#35322f"/><path d="M120.2,242.1L120.2,217.8L141.3,229.9L141.3,254.2Z" fill="#5a5551"/><path d="M145.4,198.5L166.4,210.7L145.4,222.8L124.3,210.7Z" fill="#8a847f"/><path d="M145.4,261.3L116.1,278.2L116.1,244.4L145.4,227.6ZM86.9,261.3L86.9,227.6L116.1,244.4L116.1,278.2ZM116.1,210.7L145.4,227.6L116.1,244.4L86.9,227.6Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M141.3,259L120.2,271.1L120.2,246.8L141.3,234.6Z" fill="#35322f"/><path d="M91,259L91,234.6L112,246.8L112,271.1Z" fill="#5a5551"/><path d="M116.1,215.4L137.2,227.6L116.1,239.7L95.1,227.6Z" fill="#8a847f"/><path d="M116.1,278.2L86.9,295.1L86.9,261.3L116.1,244.4ZM57.6,278.2L57.6,244.4L86.9,261.3L86.9,295.1ZM86.9,227.6L116.1,244.4L86.9,261.3L57.6,244.4Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M112,275.9L91,288L91,263.7L112,251.5Z" fill="#35322f"/><path d="M61.7,275.9L61.7,251.5L82.8,263.7L82.8,288Z" fill="#5a5551"/><path d="M86.9,232.3L107.9,244.4L86.9,256.6L65.8,244.4Z" fill="#8a847f"/><path d="M86.9,295.1L57.6,312L57.6,278.2L86.9,261.3ZM28.4,295.1L28.4,261.3L57.6,278.2L57.6,312ZM57.6,244.4L86.9,261.3L57.6,278.2L28.4,261.3Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,292.7L61.7,304.9L61.7,280.6L82.8,268.4Z" fill="#2a2725"/><path d="M32.5,292.7L32.5,268.4L53.5,280.6L53.5,304.9Z" fill="#45413e"/><path d="M57.6,249.2L78.7,261.3L57.6,273.5L36.6,261.3Z" fill="#6f6a65"/><path d="M86.9,261.3L57.6,278.2L57.6,244.4L86.9,227.6ZM28.4,261.3L28.4,227.6L57.6,244.4L57.6,278.2ZM57.6,210.7L86.9,227.6L57.6,244.4L28.4,227.6Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,259L61.7,271.1L61.7,246.8L82.8,234.6Z" fill="#2a2725"/><path d="M32.5,259L32.5,234.6L53.5,246.8L53.5,271.1Z" fill="#45413e"/><path d="M57.6,215.4L78.7,227.6L57.6,239.7L36.6,227.6Z" fill="#6f6a65"/><path d="M86.9,227.6L57.6,244.4L57.6,210.7L86.9,193.8ZM28.4,227.6L28.4,193.8L57.6,210.7L57.6,244.4ZM57.6,176.9L86.9,193.8L57.6,210.7L28.4,193.8Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,225.2L61.7,237.4L61.7,213L82.8,200.9Z" fill="#2a2725"/><path d="M32.5,225.2L32.5,200.9L53.5,213L53.5,237.4Z" fill="#45413e"/><path d="M57.6,181.6L78.7,193.8L57.6,205.9L36.6,193.8Z" fill="#6f6a65"/><path d="M86.9,193.8L57.6,210.7L57.6,176.9L86.9,160ZM28.4,193.8L28.4,160L57.6,176.9L57.6,210.7ZM57.6,143.1L86.9,160L57.6,176.9L28.4,160Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,191.4L61.7,203.6L61.7,179.3L82.8,167.1Z" fill="#2a2725"/><path d="M32.5,191.4L32.5,167.1L53.5,179.3L53.5,203.6Z" fill="#45413e"/><path d="M57.6,147.8L78.7,160L57.6,172.2L36.6,160Z" fill="#6f6a65"/><path d="M86.9,160L57.6,176.9L57.6,143.1L86.9,126.2ZM28.4,160L28.4,126.2L57.6,143.1L57.6,176.9ZM57.6,109.3L86.9,126.2L57.6,143.1L28.4,126.2Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,157.6L61.7,169.8L61.7,145.5L82.8,133.3Z" fill="#2a2725"/><path d="M32.5,157.6L32.5,133.3L53.5,145.5L53.5,169.8Z" fill="#45413e"/><path d="M57.6,114.1L78.7,126.2L57.6,138.4L36.6,126.2Z" fill="#6f6a65"/><path d="M86.9,126.2L57.6,143.1L57.6,109.3L86.9,92.4ZM28.4,126.2L57.6,109.3L57.6,143.1ZM28.4,126.2L28.4,92.4L57.6,109.3ZM57.6,75.6L86.9,92.4L57.6,109.3L28.4,92.4Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M82.8,123.9L61.7,136L61.7,112.4L82.8,100.3ZM61.7,112.4L61.7,111.7L82.8,99.5L82.8,100.3Z" fill="#2a2725"/><path d="M53.5,117.2L53.5,136L37.2,126.6ZM32.5,123.9L32.5,99.5L53.5,111.7L53.5,117.2L37.2,126.6Z" fill="#45413e"/><path d="M78,92.8L57.6,104.6L36.6,92.4L57,80.7Z" fill="#6f6a65"/><path d="M86.9,92.4L57.6,109.3L57.6,75.6ZM28.4,92.4L57.6,75.6L57.6,109.3ZM28.4,92.4L28.4,58.7L57.6,75.6Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M78,92.8L61.7,102.2L61.7,83.4Z" fill="#2a2725"/><path d="M53.5,83.4L53.5,102.2L37.2,92.8ZM32.5,90.1L32.5,66.5L53.5,78.7L53.5,83.4L37.2,92.8Z" fill="#45413e"/><path d="M168.3,184.5L125.9,209L125.9,160L168.3,135.5ZM83.5,184.5L83.5,135.5L125.9,160L125.9,209ZM125.9,111L168.3,135.5L125.9,160L83.5,135.5Z" fill="#ff6a4d" filter="url(#glow-hero)"/><path d="M168.3,184.5L125.9,209L125.9,160L168.3,135.5ZM83.5,184.5L83.5,135.5L125.9,160L125.9,209ZM125.9,111L168.3,135.5L125.9,160L83.5,135.5Z" fill="#141312" stroke="#141312" stroke-width="0.8" stroke-linejoin="round"/><path d="M162.3,181.1L131.8,198.7L131.8,163.4L162.3,145.8Z" fill="#9e4230"/><path d="M89.4,181.1L89.4,145.8L119.9,163.4L119.9,198.7Z" fill="#cc3e25"/><path d="M125.9,117.9L156.4,135.5L125.9,153.1L95.3,135.5Z" fill="#ff4d2e"/></svg>SPITE</h1>
-      <p class="slogan"><span class="en"><span class="lead-in">Your agent builds the game.</span> SPITE runs it.</span><span class="ru"><span class="lead-in">Игру собирает агент.</span> Запускает SPITE.</span></p>
+      <p class="slogan"><span class="en"><span class="lead-in">Your agent builds the game.</span> SPITE makes it <span class="fly-word">fly</span>.</span><span class="ru"><span class="lead-in">Игру собирает агент.</span> С SPITE она <span class="fly-word">летает</span>.</span></p>
       <p class="sub"><span class="en">One command installs the engine, the editor and the SDK.</span><span class="ru">Одна команда ставит движок, редактор и SDK.</span></p>
 
       <div class="install">
@@ -257,21 +261,27 @@ const CONFIG = {
   setLang(load("spite-lang") || (/^ru\b/i.test(navigator.language) ? "ru" : "en"));
 })();
 
-// Agent field: an isometric field of cubes drawn like the SPITE mark. Orange agent cubes walk it,
-// lift a smooth hill under themselves, light their trail and swap cubes; every swap is an agent
-// command, shown as violet beams to both cubes and a dashed triangle between them.
+// Agent field: an isometric field of cubes drawn like the SPITE mark, with the mark itself hanging
+// above it. The mark wobbles, falls apart, and orange agent cubes, spawned from the word "fly",
+// carry its cubes back into place. Every agent action is a command: violet beams, outlines and a
+// dashed edge between what the agent touches. Between rebuilds the agents swap field cubes.
 (() => {
-  const canvas = document.getElementById("field"), ctx = canvas.getContext("2d");
+  const field = document.getElementById("field"), fx = document.getElementById("fx");
+  const ctx = field.getContext("2d"), fctx = fx.getContext("2d");
   const css = getComputedStyle(document.documentElement);
   const AGENT = css.getPropertyValue("--agent").trim();
-  const SEAM = "#141312";
-  const ORANGE = [255, 77, 46];
-  const AGENT_CUBE = { top: "#ff4d2e", left: "#cc3e25", right: "#9e4230" };
+  const SEAM = "#141312", ORANGE = [255, 77, 46];
+  const AGENT_FACES = ["#ff4d2e", "#cc3e25", "#9e4230"];
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const N = 72, STEP = .34, WORK = 1.9, HILL = .62, HILL_R2 = 2.8;
+  // Slots of the mark, in its SVG drawing order (the order makes the triangle impossible).
+  // x, y: top-face centre relative to the mark's centre, in mark units (one cube edge = 33.8);
+  // k: cube size; c: top/left/right colours; p: the exact polygons [fill, [x,y,...], ...].
+  const SLOTS = [{"x":-102.4,"y":-118.2,"k":1.0,"c":["#a9a39f","#6f6a65","#45413e"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.0],[-29.2,33.8,-29.2,0.0,0.0,16.9,0.0,50.7],[0.0,-16.9,29.3,0.0,0.0,16.9,-29.2,0.0]],["#45413e",[25.2,31.4,4.1,43.6,4.1,19.2,25.2,7.1]],["#6f6a65",[-25.1,31.4,-25.1,7.1,-4.1,19.2,-4.1,43.6]],["#a9a39f",[0.0,-12.2,21.1,0.0,0.0,12.1,-21.0,0.0]]]},{"x":-73.1,"y":-101.2,"k":0.997,"c":["#a9a39f","#6f6a65","#45413e"],"p":[["#141312",[29.2,33.7,0.0,50.6,0.0,16.9,29.2,-0.1],[-29.3,33.7,-29.3,-0.1,0.0,16.9,0.0,50.6],[0.0,-17.0,29.2,-0.1,0.0,16.9,-29.3,-0.1]],["#45413e",[25.1,31.4,4.1,43.6,4.1,19.1,25.1,7.0]],["#6f6a65",[-25.2,31.4,-25.2,7.0,-4.1,19.1,-4.1,43.6]],["#a9a39f",[0.0,-12.2,21.0,-0.1,0.0,12.0,-21.1,-0.1]]]},{"x":-43.9,"y":-84.3,"k":0.997,"c":["#a9a39f","#6f6a65","#45413e"],"p":[["#141312",[29.3,33.7,0.0,50.6,0.0,16.9,29.3,-0.0],[-29.2,33.7,-29.2,-0.0,0.0,16.9,0.0,50.6],[0.0,-16.9,29.3,-0.0,0.0,16.9,-29.2,-0.0]],["#45413e",[25.2,31.4,4.1,43.5,4.1,19.2,25.2,7.1]],["#6f6a65",[-25.1,31.4,-25.1,7.1,-4.1,19.2,-4.1,43.5]],["#a9a39f",[0.0,-12.2,21.1,-0.0,0.0,12.1,-21.0,-0.0]]]},{"x":-14.6,"y":-67.6,"k":1.0,"c":["#a9a39f","#6f6a65","#45413e"],"p":[["#141312",[29.2,33.8,0.0,50.7,0.0,16.9,29.2,0.1],[-29.3,33.8,-29.3,0.1,0.0,16.9,0.0,50.7],[0.0,-16.8,29.2,0.1,0.0,16.9,-29.3,0.1]],["#45413e",[25.1,31.5,4.1,43.6,4.1,19.3,25.1,7.1]],["#6f6a65",[-25.2,31.5,-25.2,7.1,-4.1,19.3,-4.1,43.6]],["#a9a39f",[0.0,-12.1,21.0,0.1,0.0,12.2,-21.1,0.1]]]},{"x":14.6,"y":-50.7,"k":1.0,"c":["#a9a39f","#6f6a65","#45413e"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.0],[-29.2,33.8,-29.2,0.0,0.0,16.9,0.0,50.7],[0.0,-16.8,29.3,0.0,0.0,16.9,-29.2,0.0]],["#45413e",[25.2,31.5,4.1,43.6,4.1,19.3,25.2,7.1]],["#6f6a65",[-25.1,31.5,-25.1,7.1,-4.1,19.3,-4.1,43.6]],["#a9a39f",[0.0,-12.1,21.1,0.0,0.0,12.2,-21.0,0.0]]]},{"x":43.9,"y":-33.8,"k":1.0,"c":["#a9a39f","#6f6a65","#45413e"],"p":[["#141312",[29.2,33.8,0.0,50.7,0.0,16.9,29.2,-0.0],[-29.3,33.8,-29.3,-0.0,0.0,16.9,0.0,50.7],[0.0,-16.9,29.2,-0.0,0.0,16.9,-29.3,-0.0]],["#45413e",[25.1,31.4,4.1,43.6,4.1,19.3,25.1,7.1]],["#6f6a65",[-25.2,31.4,-25.2,7.1,-4.1,19.3,-4.1,43.6]],["#a9a39f",[0.0,-12.1,21.0,-0.0,0.0,12.2,-21.1,-0.0]]]},{"x":73.1,"y":-16.9,"k":1.0,"c":["#a9a39f","#6f6a65","#45413e"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.0],[-29.2,33.8,-29.2,0.0,0.0,16.9,0.0,50.7],[0.0,-16.9,29.3,0.0,0.0,16.9,-29.2,0.0]],["#45413e",[25.2,31.4,4.1,43.6,4.1,19.3,25.2,7.1]],["#6f6a65",[-25.1,31.4,-25.1,7.1,-4.1,19.3,-4.1,43.6]],["#a9a39f",[0.0,-12.1,21.1,0.0,0.0,12.2,-21.0,0.0]]]},{"x":102.4,"y":0.0,"k":1.0,"c":["#8a847f","#5a5551","#35322f"],"p":[["#141312",[29.2,33.8,0.0,50.7,0.0,16.9,29.2,0.0],[-29.3,33.8,-29.3,0.0,0.0,16.9,0.0,50.7],[0.0,-16.9,29.2,0.0,0.0,16.9,-29.3,0.0]],["#35322f",[25.1,31.4,4.1,43.6,4.1,19.3,25.1,7.1]],["#5a5551",[-25.2,31.4,-25.2,7.1,-4.1,19.3,-4.1,43.6]],["#8a847f",[0.0,-12.1,21.0,0.0,0.0,12.2,-21.1,0.0]]]},{"x":73.1,"y":16.9,"k":1.0,"c":["#8a847f","#5a5551","#35322f"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.0],[-29.2,33.8,-29.2,0.0,0.0,16.9,0.0,50.7],[0.0,-16.9,29.3,0.0,0.0,16.9,-29.2,0.0]],["#35322f",[25.2,31.4,4.1,43.6,4.1,19.3,25.2,7.1]],["#5a5551",[-25.1,31.4,-25.1,7.1,-4.1,19.3,-4.1,43.6]],["#8a847f",[0.0,-12.2,21.1,0.0,0.0,12.2,-21.0,0.0]]]},{"x":43.9,"y":33.8,"k":1.0,"c":["#8a847f","#5a5551","#35322f"],"p":[["#141312",[29.2,33.8,0.0,50.7,0.0,16.9,29.2,-0.0],[-29.3,33.8,-29.3,-0.0,0.0,16.9,0.0,50.7],[0.0,-16.9,29.2,-0.0,0.0,16.9,-29.3,-0.0]],["#35322f",[25.1,31.4,4.1,43.6,4.1,19.2,25.1,7.1]],["#5a5551",[-25.2,31.4,-25.2,7.1,-4.1,19.2,-4.1,43.6]],["#8a847f",[0.0,-12.2,21.0,-0.0,0.0,12.1,-21.1,-0.0]]]},{"x":14.6,"y":50.8,"k":0.997,"c":["#8a847f","#5a5551","#35322f"],"p":[["#141312",[29.3,33.8,0.0,50.6,0.0,16.9,29.3,-0.0],[-29.2,33.8,-29.2,-0.0,0.0,16.9,0.0,50.6],[0.0,-16.9,29.3,-0.0,0.0,16.9,-29.2,-0.0]],["#35322f",[25.2,31.4,4.1,43.6,4.1,19.2,25.2,7.1]],["#5a5551",[-25.1,31.4,-25.1,7.1,-4.1,19.2,-4.1,43.6]],["#8a847f",[0.0,-12.2,21.1,-0.0,0.0,12.1,-21.0,-0.0]]]},{"x":-14.6,"y":67.7,"k":0.997,"c":["#8a847f","#5a5551","#35322f"],"p":[["#141312",[29.2,33.7,0.0,50.6,0.0,16.8,29.2,-0.1],[-29.3,33.7,-29.3,-0.1,0.0,16.8,0.0,50.6],[0.0,-16.9,29.2,-0.1,0.0,16.8,-29.3,-0.1]],["#35322f",[25.1,31.3,4.1,43.4,4.1,19.2,25.1,7.1]],["#5a5551",[-25.2,31.3,-25.2,7.1,-4.1,19.2,-4.1,43.4]],["#8a847f",[0.0,-12.2,21.0,-0.1,0.0,12.1,-21.1,-0.1]]]},{"x":-43.9,"y":84.4,"k":1.0,"c":["#8a847f","#5a5551","#35322f"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.1],[-29.2,33.8,-29.2,0.1,0.0,16.9,0.0,50.7],[0.0,-16.8,29.3,0.1,0.0,16.9,-29.2,0.1]],["#35322f",[25.2,31.5,4.1,43.6,4.1,19.3,25.2,7.1]],["#5a5551",[-25.1,31.5,-25.1,7.1,-4.1,19.3,-4.1,43.6]],["#8a847f",[0.0,-12.1,21.1,0.1,0.0,12.2,-21.0,0.1]]]},{"x":-73.1,"y":101.3,"k":1.0,"c":["#8a847f","#5a5551","#35322f"],"p":[["#141312",[29.2,33.8,0.0,50.7,0.0,16.9,29.2,0.0],[-29.3,33.8,-29.3,0.0,0.0,16.9,0.0,50.7],[0.0,-16.8,29.2,0.0,0.0,16.9,-29.3,0.0]],["#35322f",[25.1,31.5,4.1,43.6,4.1,19.3,25.1,7.1]],["#5a5551",[-25.2,31.5,-25.2,7.1,-4.1,19.3,-4.1,43.6]],["#8a847f",[0.0,-12.1,21.0,0.0,0.0,12.2,-21.1,0.0]]]},{"x":-102.4,"y":118.2,"k":1.0,"c":["#6f6a65","#45413e","#2a2725"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.0],[-29.2,33.8,-29.2,0.0,0.0,16.9,0.0,50.7],[0.0,-16.9,29.3,0.0,0.0,16.9,-29.2,0.0]],["#2a2725",[25.2,31.4,4.1,43.6,4.1,19.3,25.2,7.1]],["#45413e",[-25.1,31.4,-25.1,7.1,-4.1,19.3,-4.1,43.6]],["#6f6a65",[0.0,-12.1,21.1,0.0,0.0,12.2,-21.0,0.0]]]},{"x":-102.4,"y":84.4,"k":1.0,"c":["#6f6a65","#45413e","#2a2725"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.1],[-29.2,33.8,-29.2,0.1,0.0,16.9,0.0,50.7],[0.0,-16.8,29.3,0.1,0.0,16.9,-29.2,0.1]],["#2a2725",[25.2,31.5,4.1,43.6,4.1,19.3,25.2,7.1]],["#45413e",[-25.1,31.5,-25.1,7.1,-4.1,19.3,-4.1,43.6]],["#6f6a65",[0.0,-12.1,21.1,0.1,0.0,12.2,-21.0,0.1]]]},{"x":-102.4,"y":50.8,"k":0.997,"c":["#6f6a65","#45413e","#2a2725"],"p":[["#141312",[29.3,33.8,0.0,50.6,0.0,16.9,29.3,-0.0],[-29.2,33.8,-29.2,-0.0,0.0,16.9,0.0,50.6],[0.0,-16.9,29.3,-0.0,0.0,16.9,-29.2,-0.0]],["#2a2725",[25.2,31.4,4.1,43.6,4.1,19.2,25.2,7.1]],["#45413e",[-25.1,31.4,-25.1,7.1,-4.1,19.2,-4.1,43.6]],["#6f6a65",[0.0,-12.2,21.1,-0.0,0.0,12.1,-21.0,-0.0]]]},{"x":-102.4,"y":16.9,"k":1.0,"c":["#6f6a65","#45413e","#2a2725"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.0],[-29.2,33.8,-29.2,0.0,0.0,16.9,0.0,50.7],[0.0,-16.9,29.3,0.0,0.0,16.9,-29.2,0.0]],["#2a2725",[25.2,31.4,4.1,43.6,4.1,19.3,25.2,7.1]],["#45413e",[-25.1,31.4,-25.1,7.1,-4.1,19.3,-4.1,43.6]],["#6f6a65",[0.0,-12.2,21.1,0.0,0.0,12.2,-21.0,0.0]]]},{"x":-102.4,"y":-16.9,"k":1.0,"c":["#6f6a65","#45413e","#2a2725"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.0],[-29.2,33.8,-29.2,0.0,0.0,16.9,0.0,50.7],[0.0,-16.9,29.3,0.0,0.0,16.9,-29.2,0.0]],["#2a2725",[25.2,31.4,4.1,43.6,4.1,19.3,25.2,7.1]],["#45413e",[-25.1,31.4,-25.1,7.1,-4.1,19.3,-4.1,43.6]],["#6f6a65",[0.0,-12.1,21.1,0.0,0.0,12.2,-21.0,0.0]]]},{"x":-102.4,"y":-50.7,"k":1.0,"c":["#6f6a65","#45413e","#2a2725"],"p":[["#141312",[29.3,33.8,0.0,50.7,0.0,16.9,29.3,0.0],[-29.2,33.8,0.0,16.9,0.0,50.7],[-29.2,33.8,-29.2,0.0,0.0,16.9],[0.0,-16.8,29.3,0.0,0.0,16.9,-29.2,0.0]],["#2a2725",[25.2,31.5,4.1,43.6,4.1,20.0,25.2,7.9],[4.1,20.0,4.1,19.3,25.2,7.1,25.2,7.9]],["#45413e",[-4.1,24.8,-4.1,43.6,-20.4,34.2],[-25.1,31.5,-25.1,7.1,-4.1,19.3,-4.1,24.8,-20.4,34.2]],["#6f6a65",[20.4,0.4,0.0,12.2,-21.0,0.0,-0.6,-11.7]]]},{"x":-102.4,"y":-84.3,"k":0.997,"c":["#6f6a65","#45413e","#2a2725"],"p":[["#141312",[29.3,33.7,0.0,50.6,0.0,16.9],[-29.2,33.7,0.0,16.9,0.0,50.6],[-29.2,33.7,-29.2,-0.0,0.0,16.9]],["#2a2725",[20.4,34.1,4.1,43.5,4.1,24.7]],["#45413e",[-4.1,24.7,-4.1,43.5,-20.4,34.1],[-25.1,31.4,-25.1,7.8,-4.1,20.0,-4.1,24.7,-20.4,34.1]]]},{"x":-34.1,"y":-7.6,"k":1.45,"c":["#ff4d2e","#cc3e25","#9e4230"],"p":[["#141312",[42.4,49.0,0.0,73.5,0.0,24.5,42.4,0.0],[-42.4,49.0,-42.4,0.0,0.0,24.5,0.0,73.5],[0.0,-24.5,42.4,0.0,0.0,24.5,-42.4,0.0]],["#9e4230",[36.4,45.6,5.9,63.2,5.9,27.9,36.4,10.3]],["#cc3e25",[-36.5,45.6,-36.5,10.3,-6.0,27.9,-6.0,63.2]],["#ff4d2e",[0.0,-17.6,30.5,0.0,0.0,17.6,-30.6,0.0]]]}];
+  const MARK_EDGE = 33.8, LIT = SLOTS.length - 1;
+
+  const N = 72, STEP = .3, SWAP = 1.9, PLACE = 1.6, HILL = .62, HILL_R2 = 2.8, HOLD = 9;
   const hex = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));
-  // Top-face colours: the mark's greys first, then the editor's data and mode hues for variety.
   const MATERIALS = [["#a9a39f", 7], ["#8a847f", 5], ["#e6dfd0", 1.6], ["#9ccbff", 1.3], ["#b8c4d6", 1.3], ["#7fe3f0", .8], ["#5ccb8a", .7], ["#ffc93d", .5]]
     .map(([h, w]) => ({ rgb: hex(h), w }));
   const TOTAL = MATERIALS.reduce((n, m) => n + m.w, 0);
@@ -279,26 +289,35 @@ const CONFIG = {
   let seed = 7;
   const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-  const mat = new Uint8Array(N * N), glow = new Float32Array(N * N), moving = new Uint8Array(N * N), inField = new Uint8Array(N * N);
-  for (let k = 0; k < N * N; k++) {
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const ease = (t) => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  const NN = N * N;
+  const mat = new Uint8Array(NN), glow = new Float32Array(NN), moving = new Uint8Array(NN), inField = new Uint8Array(NN);
+  const loose = new Int16Array(NN).fill(-1), reserved = new Uint8Array(NN);
+  for (let k = 0; k < NN; k++) {
     let r = rand() * TOTAL, m = 0;
     while ((r -= MATERIALS[m].w) > 0) m++;
     mat[k] = m;
   }
 
-  let W = 0, H = 0, s = 24, w = 20.8, ox = 0, oy = 0, cells = [], goals = [], agents = [], time = 0;
+  let W = 0, H = 0, s = 24, w = 20.8, ox = 0, oy = 0, LX = 0, LY = 0, sc = 1, wide = true;
+  let cells = [], goals = [], agents = [], time = 0, phase = "hover", phaseT = 0, hoverDur = 2.6, spawned = false, spawnQueue = [];
+  const slot = SLOTS.map(() => ({ state: "set" }));
   const id = (i, j) => i * N + j;
+  const cellOf = (k) => [Math.floor(k / N), k % N];
   const iso = (i, j, h) => [ox + (i - j) * w, oy + (i + j) * s / 2 - h * s];
-  const ease = (t) => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
-  function layout() {
-    const dpr = Math.min(devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect();
-    W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const wide = W > 900;
-    s = Math.max(16, Math.min(28, W / 46)); w = s * .866;
+  function layout(fresh) {
+    for (const c of [field, fx]) {
+      const dpr = Math.min(devicePixelRatio || 1, 2), r = c.getBoundingClientRect();
+      W = r.width; H = r.height; c.width = W * dpr; c.height = H * dpr;
+      c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    wide = W > 900;
+    s = Math.max(16, Math.min(28, W / 46)); w = s * .866; sc = s / MARK_EDGE;
     const cx = W * (wide ? .7 : .5), cy = H * (wide ? .52 : .7);
     ox = cx; oy = cy - N * s / 2;
+    LX = W * (wide ? .75 : .5); LY = H * (wide ? .38 : .8);
     const x0 = wide ? W * .2 : -w, y0 = wide ? -2 * s : H * .22;
     cells = []; goals = []; inField.fill(0);
     for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
@@ -306,173 +325,400 @@ const CONFIG = {
       if (x < x0 - w || x > W + w || y < y0 || y > H + 2 * s) continue;
       cells.push({ i, j, k: id(i, j), d: i + j });
       inField[id(i, j)] = 1;
-      const inner = x > w * 2 && x < W - w * 3 && (wide ? x > W * .58 && y > H * .28 && y < H * .78 : y > H * .74 && y < H * .9);
+      const inner = x > w * 2 && x < W - w * 3 && (wide ? x > W * .58 && y > H * .52 && y < H * .86 : y > H * .84 && y < H * .93);
       if (inner) goals.push([i, j]);
     }
     cells.sort((a, b) => a.d - b.d || a.i - b.i);
     if (!goals.length) goals = cells.map((c) => [c.i, c.j]);
-    const count = wide ? 4 : 3;
-    agents = agents.filter((a, n) => {
-      const keep = n < count && inField[id(...a.to)];
-      if (!keep && a.work) moving[id(...a.work.A)] = moving[id(...a.work.B)] = 0;
-      return keep;
+    if (fresh) reset();
+  }
+
+  // Back to a finished mark; agents that already spawned stay on the field.
+  function reset() {
+    loose.fill(-1); reserved.fill(0); moving.fill(0);
+    slot.forEach((st) => { st.state = "set"; });
+    phase = spawned ? "hold" : "hover"; phaseT = spawned ? HOLD - 3 : 0;
+    const count = wide ? 5 : 3;
+    agents = agents.filter((a) => a.state !== "fly").slice(0, count);
+    for (const a of agents) place(a, freeGoal());
+  }
+  function place(a, c) {
+    Object.assign(a, { from: c, to: c, x: c[0], y: c[1], t: 1, path: [], state: "walk", task: -1, work: null, wandered: false, wait: 0 });
+  }
+
+  const agentAt = (k, self) => agents.some((a) => a !== self && a.state !== "fly" && (id(...a.to) === k || id(...a.from) === k));
+  const passable = (k, self) => inField[k] && loose[k] < 0 && !reserved[k] && !moving[k] && !agentAt(k, self);
+  const adjacent = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
+  function freeGoal() {
+    for (let n = 0; n < 50; n++) { const g = pick(goals); if (passable(id(...g), null)) return g; }
+    return pick(goals);
+  }
+
+  const prev = new Int32Array(NN), seen = new Uint32Array(NN);
+  let stamp = 0;
+  function bfs(a, isGoal) {
+    stamp++;
+    const start = id(...a.to), queue = [start];
+    seen[start] = stamp; prev[start] = -1;
+    for (let q = 0; q < queue.length; q++) {
+      const k = queue[q], [i, j] = cellOf(k);
+      if (k !== start && isGoal([i, j])) {
+        const path = [];
+        for (let c = k; c !== start; c = prev[c]) path.unshift(cellOf(c));
+        return path;
+      }
+      for (const [ni, nj] of [[i + 1, j], [i - 1, j], [i, j + 1], [i, j - 1]]) {
+        if (ni < 0 || nj < 0 || ni >= N || nj >= N) continue;
+        const nk = id(ni, nj);
+        if (seen[nk] === stamp || !passable(nk, a)) continue;
+        seen[nk] = stamp; prev[nk] = k; queue.push(nk);
+      }
+    }
+    return null;
+  }
+
+  // ---- the mark: hover, wobble, collapse
+  function wobble(n) {
+    const bob = Math.sin(time * 1.7) * s * .12;
+    if (phase !== "hover") return [0, bob];
+    const amp = clamp((phaseT - (hoverDur - 1.2)) / 1.2, 0, 1) * s * .14;
+    return [Math.sin(time * 17 + n * 1.7) * amp * .6, bob + Math.cos(time * 15 + n * 2.3) * amp];
+  }
+  function slotPos(n) {
+    const [dx, dy] = wobble(n);
+    return [LX + SLOTS[n].x * sc + dx, LY + SLOTS[n].y * sc + dy];
+  }
+  function landingCell(X, Y) {
+    for (let extra = 2 + Math.floor(Math.random() * 7); extra < 44; extra++) {
+      for (const da of [0, 1, -1, 2, -2]) {
+        const a = Math.round((X - ox) / w) + da;
+        let b = Math.ceil((Y - oy + 2 * s) / (s / 2)) + extra;
+        if ((a + b) % 2) b++;
+        const i = (a + b) / 2, j = (b - a) / 2, k = id(i, j);
+        if (i >= 0 && j >= 0 && i < N && j < N && inField[k] && loose[k] < 0 && !reserved[k] && !agentAt(k, null)) return [i, j];
+      }
+    }
+    return null;
+  }
+  function collapse() {
+    phase = "build"; phaseT = 0;
+    SLOTS.forEach((_, n) => {
+      const st = slot[n], from = slotPos(n), cell = landingCell(...from);
+      if (!cell) return;
+      reserved[id(...cell)] = 1;
+      Object.assign(st, { state: "fall", t: -(n === LIT ? .1 : .08 + Math.random() * .55), dur: .5 + Math.random() * .25, from, cell, assigned: false, landed: 0 });
     });
-    while (agents.length < count) {
-      const c = pick(goals);
-      agents.push({ from: c, to: c, x: c[0], y: c[1], t: 1, goal: pick(goals), state: "walk", work: null, timer: 0 });
+    if (!spawned) {
+      spawned = true;
+      const count = wide ? 5 : 3;
+      for (let n = 0; n < count; n++) spawnQueue.push(time + .5 + n * .45);
     }
   }
-
-  const taken = (c, self) => agents.some((a) => a !== self && ((a.to[0] === c[0] && a.to[1] === c[1]) || (a.from[0] === c[0] && a.from[1] === c[1])));
-  const free = (c, self) => c[0] >= 0 && c[1] >= 0 && c[0] < N && c[1] < N && inField[id(...c)] && !moving[id(...c)] && !taken(c, self);
-  const around = ([i, j]) => [[i + 1, j], [i - 1, j], [i, j + 1], [i, j - 1]].sort(() => Math.random() - .5);
-
-  function nextStep(a) {
-    const [i, j] = a.to, [gi, gj] = a.goal, toward = [];
-    if (gi !== i) toward.push([i + Math.sign(gi - i), j]);
-    if (gj !== j) toward.push([i, j + Math.sign(gj - j)]);
-    toward.sort(() => Math.random() - .5);
-    return toward.concat(around(a.to)).find((c) => free(c, a)) || null;
+  const restPos = (st) => { const [i, j] = st.cell; return iso(i, j, hill(i, j) + 1); };
+  function fallPos(st) {
+    const u = clamp(st.t / st.dur, 0, 1), [lx, ly] = restPos(st), [fx0, fy0] = st.from;
+    return [fx0 + (lx - fx0) * u, fy0 + (ly - fy0) * u * u - s * 1.1 * Math.sin(Math.PI * u) * (1 - u)];
   }
 
-  function startWork(a) {
-    const A = around(a.to).find((c) => free(c, a));
+  // ---- agents
+  function flyWord() {
+    return [...document.querySelectorAll(".fly-word")].find((e) => e.getClientRects().length);
+  }
+  function spawnAgent() {
+    const word = flyWord(), c = fx.getBoundingClientRect();
+    let sx = W * .45, sy = H * .4;
+    if (word) {
+      const r = word.getBoundingClientRect();
+      sx = r.left - c.left + r.width * (.2 + .6 * Math.random()); sy = r.top - c.top + r.height * .5;
+      word.classList.add("spawn"); setTimeout(() => word.classList.remove("spawn"), 260);
+    }
+    const target = freeGoal(), a = { trail: [] };
+    place(a, target);
+    a.state = "fly"; a.fly = { sx, sy, t: 0, dur: 1.15 };
+    agents.push(a);
+  }
+
+  function pickTask(a) {
+    const othersLeft = slot.some((st, n) => n !== LIT && st.state !== "set");
+    let best = -1, bestD = 1e9;
+    slot.forEach((st, n) => {
+      if (st.state !== "loose" || st.assigned || (n === LIT && othersLeft)) return;
+      const d = Math.abs(st.cell[0] - a.to[0]) + Math.abs(st.cell[1] - a.to[1]);
+      if (d < bestD) { bestD = d; best = n; }
+    });
+    if (best >= 0) slot[best].assigned = true;
+    return best;
+  }
+
+  function decide(a) {
+    if (a.task < 0) a.task = pickTask(a);
+    if (a.task >= 0) {
+      const L = slot[a.task].cell;
+      if (adjacent(a.to, L)) return startPlace(a);
+      const path = bfs(a, (c) => adjacent(c, L));
+      if (path) { a.path = path; return; }
+      slot[a.task].assigned = false; a.task = -1;
+    }
+    if (a.wandered) { a.wandered = false; return startSwap(a); }
+    const g = freeGoal(), path = bfs(a, (c) => c[0] === g[0] && c[1] === g[1]);
+    a.path = path || []; a.wandered = true;
+  }
+
+  function startSwap(a) {
+    const around = [[1, 0], [-1, 0], [0, 1], [0, -1]].sort(() => Math.random() - .5).map(([di, dj]) => [a.to[0] + di, a.to[1] + dj]);
+    const A = around.find((c) => passable(id(...c), a));
     const near = [];
     for (let di = -3; di <= 3; di++) for (let dj = -3; dj <= 3; dj++) {
       const c = [a.to[0] + di, a.to[1] + dj], dist = Math.abs(di) + Math.abs(dj);
-      if (dist >= 2 && dist <= 4 && free(c, a) && (!A || c[0] !== A[0] || c[1] !== A[1])) near.push(c);
+      if (dist >= 2 && dist <= 4 && c[0] >= 0 && c[1] >= 0 && c[0] < N && c[1] < N && passable(id(...c), a) && (!A || id(...c) !== id(...A))) near.push(c);
     }
-    if (!A || !near.length) { a.goal = pick(goals); return; }
+    if (!A || !near.length) return;
     const B = pick(near);
     moving[id(...A)] = moving[id(...B)] = 1;
-    a.state = "work"; a.timer = 0; a.work = { A, B };
+    a.state = "swap"; a.timer = 0; a.work = { A, B };
+  }
+  function finishSwap(a) {
+    const ka = id(...a.work.A), kb = id(...a.work.B);
+    [mat[ka], mat[kb]] = [mat[kb], mat[ka]];
+    glow[ka] = glow[kb] = 1; moving[ka] = moving[kb] = 0;
+    a.state = "walk"; a.work = null;
   }
 
-  function finishWork(a) {
-    const { A, B } = a.work, ka = id(...A), kb = id(...B);
-    [mat[ka], mat[kb]] = [mat[kb], mat[ka]];
-    glow[ka] = glow[kb] = 1;
-    moving[ka] = moving[kb] = 0;
-    a.state = "walk"; a.work = null;
-    let g; do g = pick(goals); while (goals.length > 1 && Math.abs(g[0] - a.to[0]) + Math.abs(g[1] - a.to[1]) < 4 && Math.random() < .9);
-    a.goal = g;
+  function startPlace(a) {
+    const st = slot[a.task];
+    loose[id(...st.cell)] = -1;
+    st.state = "carried";
+    a.state = "place"; a.timer = 0; a.work = { n: a.task, cell: st.cell };
+  }
+  function placePose(a) {
+    const p = a.timer / PLACE, q = ease(clamp((p - .18) / .7, 0, 1)), n = a.work.n;
+    const [sx, sy] = iso(a.work.cell[0], a.work.cell[1], hill(...a.work.cell) + 1), [ex, ey] = slotPos(n);
+    const mx = (sx + ex) / 2, my = Math.min(sy, ey) - s * 3;
+    const pos = [(1 - q) * (1 - q) * sx + 2 * (1 - q) * q * mx + q * q * ex, (1 - q) * (1 - q) * sy + 2 * (1 - q) * q * my + q * q * ey];
+    return { p, reach: Math.min(1, p / .18), alpha: p > .88 ? (1 - p) / .12 : 1, pos, slot: [ex, ey], n };
   }
 
   function update(dt) {
-    time += dt;
+    time += dt; phaseT += dt;
     const fade = Math.exp(-dt / 3.2);
     for (const c of cells) glow[c.k] *= fade;
+
+    if (phase === "hover" && phaseT >= hoverDur) collapse();
+    else if (phase === "hold" && phaseT >= HOLD) { phase = "hover"; phaseT = 0; hoverDur = 1.6; }
+    else if (phase === "build" && slot.every((st) => st.state === "set")) { phase = "hold"; phaseT = 0; }
+
+    for (const st of slot) {
+      if (st.state === "fall" && (st.t += dt) >= st.dur) {
+        const k = id(...st.cell);
+        reserved[k] = 0; loose[k] = slot.indexOf(st); glow[k] = 1;
+        st.state = "loose"; st.landed = 0;
+      } else if (st.state === "loose" && (st.landed += dt) > 18 && !st.assigned) {
+        // Nobody could reach it: put it back so the mark always completes.
+        loose[id(...st.cell)] = -1; st.state = "set";
+      }
+    }
+    while (spawnQueue.length && spawnQueue[0] <= time) { spawnQueue.shift(); spawnAgent(); }
+
     for (const a of agents) {
-      if (a.state === "walk") {
-        a.t = Math.min(1, a.t + dt / STEP);
-        const e = ease(a.t);
-        a.x = a.from[0] + (a.to[0] - a.from[0]) * e;
-        a.y = a.from[1] + (a.to[1] - a.from[1]) * e;
-        if (a.t < 1) continue;
-        glow[id(...a.to)] = 1;
-        if (a.to[0] === a.goal[0] && a.to[1] === a.goal[1]) { startWork(a); continue; }
-        const n = nextStep(a);
+      if (a.state === "fly") {
+        a.fly.t += dt;
+        if (a.fly.t < a.fly.dur) continue;
+        if (!passable(id(...a.to), a)) place(a, freeGoal());
+        a.state = "walk"; glow[id(...a.to)] = 1;
+      } else if (a.state === "walk") {
+        if (a.t < 1) {
+          a.t = Math.min(1, a.t + dt / STEP);
+          const e = ease(a.t);
+          a.x = a.from[0] + (a.to[0] - a.from[0]) * e; a.y = a.from[1] + (a.to[1] - a.from[1]) * e;
+          if (a.t === 1) glow[id(...a.to)] = 1;
+          continue;
+        }
         a.from = a.to;
-        if (n) { a.to = n; a.t = 0; } else a.goal = pick(goals);
-      } else if ((a.timer += dt) >= WORK) finishWork(a);
+        if (a.path.length) {
+          if (passable(id(...a.path[0]), a)) { a.to = a.path.shift(); a.t = 0; a.wait = 0; }
+          else if ((a.wait += dt) > .6) { a.wait = 0; a.path = []; }
+        } else decide(a);
+      } else if (a.state === "swap") {
+        if ((a.timer += dt) >= SWAP) finishSwap(a);
+      } else if (a.state === "place") {
+        a.timer += dt;
+        const st = slot[a.work.n];
+        if (a.timer / PLACE >= .88 && st.state === "carried") { st.state = "set"; st.assigned = false; }
+        if (a.timer >= PLACE) { a.state = "walk"; a.task = -1; a.work = null; }
+      }
     }
   }
 
   function hill(i, j) {
     let h = 0;
-    for (const a of agents) { const di = i - a.x, dj = j - a.y; h += HILL * Math.exp(-(di * di + dj * dj) / HILL_R2); }
+    for (const a of agents) {
+      if (a.state === "fly") continue;
+      const di = i - a.x, dj = j - a.y; h += HILL * Math.exp(-(di * di + dj * dj) / HILL_R2);
+    }
     return h;
   }
 
-  // Work timeline: beams reach out (0–.18), cubes rise, cross and land (.18–.82), beams fade (.82–1).
-  function workPose(a) {
-    const p = a.timer / WORK, q = ease(Math.min(1, Math.max(0, (p - .18) / .64)));
-    const lift = 1.25 * Math.sin(Math.PI * q);
+  // ---- drawing
+  const mix = (c, t, g) => c.map((v, n) => v + (t[n] - v) * g);
+  const rgb = (c, k) => `rgb(${c[0] * k | 0},${c[1] * k | 0},${c[2] * k | 0})`;
+  function quad(g, color, pts) {
+    let cx = 0, cy = 0;
+    for (const [x, y] of pts) { cx += x / 4; cy += y / 4; }
+    g.fillStyle = color; g.beginPath();
+    pts.forEach(([x, y], n) => { const px = cx + (x - cx) * .8, py = cy + (y - cy) * .8; n ? g.lineTo(px, py) : g.moveTo(px, py); });
+    g.fill();
+  }
+  function hexPath(g, x, y, k = 1) {
+    const S = s * k, Wd = w * k, t = S / 2; g.beginPath();
+    g.moveTo(x, y - t); g.lineTo(x + Wd, y); g.lineTo(x + Wd, y + S); g.lineTo(x, y + t + S); g.lineTo(x - Wd, y + S); g.lineTo(x - Wd, y); g.closePath();
+  }
+  function cube(g, x, y, [top, left, right], k = 1) {
+    const S = s * k, Wd = w * k, t = S / 2;
+    g.fillStyle = SEAM; hexPath(g, x, y, k); g.fill();
+    quad(g, top, [[x, y - t], [x + Wd, y], [x, y + t], [x - Wd, y]]);
+    quad(g, left, [[x - Wd, y], [x, y + t], [x, y + t + S], [x - Wd, y + S]]);
+    quad(g, right, [[x, y + t], [x + Wd, y], [x + Wd, y + S], [x, y + t + S]]);
+  }
+  function glowAt(g, x, y, r, a) {
+    const grad = g.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, `rgba(255,106,77,${a})`); grad.addColorStop(1, "rgba(255,106,77,0)");
+    g.fillStyle = grad; g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  function fieldCube(i, j, h, k, raised) {
+    const g = glow[k], up = Math.min(1, h / HILL), lit = Math.min(1, .26 + .74 * up + .3 * g + raised);
+    const raw = MATERIALS[mat[k]].rgb, grey = (raw[0] + raw[1] + raw[2]) / 3;
+    const base = mix([grey, grey, grey], raw, Math.min(1, .3 + .7 * up + g + raised)), top = mix(base, ORANGE, g * .6);
+    const [x, y] = iso(i, j, h);
+    cube(ctx, x, y, [rgb(top, lit), rgb(mix(base, ORANGE, g * .45), lit * .66), rgb(mix(base, ORANGE, g * .35), lit * .42)]);
+  }
+  // A mark cube off its slot: lit cube dims while it lies on the field.
+  function markCube(g, n, x, y, lying) {
+    const S = SLOTS[n], k = S.k;
+    const faces = n === LIT && lying ? ["#b8452e", "#8f3b27", "#6a2f22"] : S.c;
+    cube(g, x, lying ? y - (k - 1) * s : y, faces, k);
+  }
+  function agentCube(g, x, y, k = 1) {
+    glowAt(g, x, y + s / 2, s * 2.4 * k, .38);
+    cube(g, x, y, AGENT_FACES, k);
+  }
+  function drawSlot(n) {
+    const S = SLOTS[n], [x, y] = slotPos(n);
+    if (n === LIT) glowAt(ctx, x, y + s * .7, s * 2.6, phase === "hold" ? .45 + .15 * Math.sin(time * 2.4) : .4);
+    ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+    for (const [fill, ...subs] of S.p) {
+      ctx.fillStyle = fill; ctx.beginPath();
+      for (const pts of subs) { ctx.moveTo(pts[0], pts[1]); for (let q = 2; q < pts.length; q += 2) ctx.lineTo(pts[q], pts[q + 1]); ctx.closePath(); }
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  function ghostSlot(n) {
+    const [x, y] = slotPos(n), outline = SLOTS[n].p[0];
+    ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+    ctx.strokeStyle = AGENT; ctx.globalAlpha = .22; ctx.lineWidth = 1 / sc; ctx.setLineDash([3 / sc, 4 / sc]);
+    ctx.beginPath();
+    for (const pts of outline.slice(1)) { ctx.moveTo(pts[0], pts[1]); for (let q = 2; q < pts.length; q += 2) ctx.lineTo(pts[q], pts[q + 1]); ctx.closePath(); }
+    ctx.stroke(); ctx.restore();
+  }
+  function beam(g, [sx, sy], [ex, ey], reach, alpha) {
+    const tx = sx + (ex - sx) * reach, ty = sy + (ey - sy) * reach;
+    g.strokeStyle = AGENT; g.lineCap = "round";
+    g.globalAlpha = alpha * .25; g.lineWidth = 6; g.beginPath(); g.moveTo(sx, sy); g.lineTo(tx, ty); g.stroke();
+    g.globalAlpha = alpha; g.lineWidth = 1.3; g.beginPath(); g.moveTo(sx, sy); g.lineTo(tx, ty); g.stroke();
+  }
+  function command(src, targets, reach, alpha, k = []) {
+    ctx.save();
+    for (const t of targets) beam(ctx, src, t, reach, alpha);
+    if (reach >= 1) {
+      ctx.globalAlpha = alpha; ctx.lineWidth = 1.2; ctx.strokeStyle = AGENT;
+      targets.forEach(([x, y], n) => { hexPath(ctx, x, y, k[n] || 1); ctx.stroke(); });
+      ctx.globalAlpha = alpha * .7; ctx.lineWidth = 1; ctx.setLineDash([4, 5]); ctx.lineDashOffset = -time * 24;
+      ctx.beginPath(); ctx.moveTo(...targets[0]); ctx.lineTo(...targets[1]); ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.fillStyle = AGENT; ctx.globalAlpha = alpha;
+    ctx.beginPath(); ctx.arc(src[0], src[1], 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  const agentTop = (a) => iso(a.x, a.y, hill(a.x, a.y) + 1);
+  function swapPose(a) {
+    const p = a.timer / SWAP, q = ease(clamp((p - .18) / .64, 0, 1)), lift = 1.25 * Math.sin(Math.PI * q);
     const { A, B } = a.work;
     const at = (P, Q) => { const i = P[0] + (Q[0] - P[0]) * q, j = P[1] + (Q[1] - P[1]) * q; return { i, j, h: hill(i, j) + lift }; };
     return { reach: Math.min(1, p / .18), alpha: p > .82 ? (1 - p) / .18 : 1, a: at(A, B), b: at(B, A), ka: id(...A), kb: id(...B) };
   }
 
-  const mix = (c, t, g) => c.map((v, n) => v + (t[n] - v) * g);
-  const rgb = (c, k) => `rgb(${c[0] * k | 0},${c[1] * k | 0},${c[2] * k | 0})`;
-
-  function quad(color, pts) {
-    let cx = 0, cy = 0;
-    for (const [x, y] of pts) { cx += x / 4; cy += y / 4; }
-    ctx.fillStyle = color; ctx.beginPath();
-    pts.forEach(([x, y], n) => { const px = cx + (x - cx) * .8, py = cy + (y - cy) * .8; n ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
-    ctx.fill();
-  }
-  function hexPath(x, y) {
-    const t = s / 2; ctx.beginPath();
-    ctx.moveTo(x, y - t); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + s); ctx.lineTo(x, y + t + s); ctx.lineTo(x - w, y + s); ctx.lineTo(x - w, y); ctx.closePath();
-  }
-  function cube(x, y, top, left, right) {
-    const t = s / 2;
-    ctx.fillStyle = SEAM; hexPath(x, y); ctx.fill();
-    quad(top, [[x, y - t], [x + w, y], [x, y + t], [x - w, y]]);
-    quad(left, [[x - w, y], [x, y + t], [x, y + t + s], [x - w, y + s]]);
-    quad(right, [[x, y + t], [x + w, y], [x + w, y + s], [x, y + t + s]]);
-  }
-  function fieldCube(i, j, h, k, raised) {
-    // Resting cubes stay dim and greyed; the hill and the trail bring their colour up.
-    const g = glow[k], up = Math.min(1, h / HILL), lit = Math.min(1, .26 + .74 * up + .3 * g + raised);
-    const raw = MATERIALS[mat[k]].rgb, grey = (raw[0] + raw[1] + raw[2]) / 3;
-    const base = mix([grey, grey, grey], raw, Math.min(1, .3 + .7 * up + g + raised)), top = mix(base, ORANGE, g * .6);
-    const [x, y] = iso(i, j, h);
-    cube(x, y, rgb(top, lit), rgb(mix(base, ORANGE, g * .45), lit * .66), rgb(mix(base, ORANGE, g * .35), lit * .42));
-  }
-  function agentCube(a) {
-    const h = hill(a.x, a.y) + 1, [x, y] = iso(a.x, a.y, h);
-    const r = s * 2.4, g = ctx.createRadialGradient(x, y + s / 2, 0, x, y + s / 2, r);
-    g.addColorStop(0, "rgba(255,106,77,.38)"); g.addColorStop(1, "rgba(255,106,77,0)");
-    ctx.fillStyle = g; ctx.fillRect(x - r, y + s / 2 - r, 2 * r, 2 * r);
-    cube(x, y, AGENT_CUBE.top, AGENT_CUBE.left, AGENT_CUBE.right);
-  }
-
-  function beams(a, pose) {
-    const [sx, sy] = iso(a.x, a.y, hill(a.x, a.y) + 1);
-    const ends = [pose.a, pose.b].map((c) => iso(c.i, c.j, c.h));
-    ctx.save(); ctx.strokeStyle = AGENT; ctx.lineCap = "round";
-    for (const [ex, ey] of ends) {
-      const tx = sx + (ex - sx) * pose.reach, ty = sy + (ey - sy) * pose.reach;
-      ctx.globalAlpha = pose.alpha * .25; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(tx, ty); ctx.stroke();
-      ctx.globalAlpha = pose.alpha; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(tx, ty); ctx.stroke();
-      if (pose.reach >= 1) { hexPath(ex, ey); ctx.lineWidth = 1.2; ctx.stroke(); }
-    }
-    if (pose.reach >= 1) {
-      ctx.globalAlpha = pose.alpha * .7; ctx.lineWidth = 1; ctx.setLineDash([4, 5]); ctx.lineDashOffset = -time * 24;
-      ctx.beginPath(); ctx.moveTo(...ends[0]); ctx.lineTo(...ends[1]); ctx.stroke(); ctx.setLineDash([]);
-    }
-    ctx.fillStyle = AGENT; ctx.globalAlpha = pose.alpha;
-    ctx.beginPath(); ctx.arc(sx, sy, 2.4, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-  }
-
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    const dyn = [], working = [];
+    const dyn = [], swaps = [], places = [];
     for (const a of agents) {
-      dyn.push({ key: a.x + a.y + .6, draw: () => agentCube(a) });
-      if (a.state !== "work") continue;
-      const pose = workPose(a);
-      working.push([a, pose]);
-      for (const [c, k] of [[pose.a, pose.ka], [pose.b, pose.kb]]) dyn.push({ key: c.i + c.j + .3, draw: () => fieldCube(c.i, c.j, c.h, k, .35) });
+      if (a.state === "fly") continue;
+      dyn.push({ key: a.x + a.y + .6, draw: () => agentCube(ctx, ...agentTop(a)) });
+      if (a.state === "swap") {
+        const pose = swapPose(a); swaps.push([a, pose]);
+        for (const [c, k] of [[pose.a, pose.ka], [pose.b, pose.kb]]) dyn.push({ key: c.i + c.j + .3, draw: () => fieldCube(c.i, c.j, c.h, k, .35) });
+      } else if (a.state === "place") places.push([a, placePose(a)]);
     }
+    slot.forEach((st, n) => {
+      if (st.state !== "loose") return;
+      const [i, j] = st.cell, bounce = st.landed < .6 ? s * .35 * Math.exp(-7 * st.landed) * Math.abs(Math.sin(12 * st.landed)) : 0;
+      dyn.push({ key: i + j + .5, draw: () => { const [x, y] = iso(i, j, hill(i, j) + 1); markCube(ctx, n, x, y - bounce, true); } });
+    });
     dyn.sort((p, q) => p.key - q.key);
-    let n = 0;
+    let d = 0;
     for (const c of cells) {
-      while (n < dyn.length && dyn[n].key < c.d) dyn[n++].draw();
+      while (d < dyn.length && dyn[d].key < c.d) dyn[d++].draw();
       if (!moving[c.k]) fieldCube(c.i, c.j, hill(c.i, c.j), c.k, 0);
     }
-    while (n < dyn.length) dyn[n++].draw();
-    for (const [a, pose] of working) beams(a, pose);
+    while (d < dyn.length) dyn[d++].draw();
+
+    // the mark hangs above the field
+    if (phase === "build") slot.forEach((st, n) => { if (st.state !== "set") ghostSlot(n); });
+    slot.forEach((st, n) => { if (st.state === "set") drawSlot(n); });
+    slot.forEach((st, n) => {
+      if (st.state !== "fall") return;
+      if (st.t < 0) return drawSlot(n);
+      const [x, y] = fallPos(st); markCube(ctx, n, x, y, false);
+    });
+    for (const [, pose] of places) if (pose.p < .88) markCube(ctx, pose.n, ...pose.pos, false);
+
+    for (const [a, pose] of swaps) command(agentTop(a), [iso(pose.a.i, pose.a.j, pose.a.h), iso(pose.b.i, pose.b.j, pose.b.h)], pose.reach, pose.alpha);
+    for (const [a, pose] of places) command(agentTop(a), [pose.pos, pose.slot], pose.reach, pose.alpha, [SLOTS[pose.n].k, SLOTS[pose.n].k]);
+
+    // agents flying out of the word "fly" draw above the page text
+    fctx.clearRect(0, 0, W, H);
+    for (const a of agents) {
+      if (a.state !== "fly") continue;
+      const f = a.fly, [ex, ey] = agentTop(a);
+      const at = (u) => {
+        u = clamp(u, 0, 1);
+        const e = ease(u), mx = (f.sx + ex) / 2, my = Math.min(f.sy, ey) - s * 5;
+        return [(1 - e) * (1 - e) * f.sx + 2 * (1 - e) * e * mx + e * e * ex, (1 - e) * (1 - e) * f.sy + 2 * (1 - e) * e * my + e * e * ey];
+      };
+      const u = f.t / f.dur;
+      for (let n = 5; n >= 1; n--) {
+        const [tx, ty] = at(u - n * .035);
+        fctx.globalAlpha = (1 - n / 6) * .5; fctx.fillStyle = "#ff4d2e";
+        const r = s * .12 * (1 - n / 7); fctx.fillRect(tx - r, ty - r, 2 * r, 2 * r);
+      }
+      fctx.globalAlpha = 1;
+      const [x, y] = at(u);
+      agentCube(fctx, x, y, .35 + .65 * Math.min(1, u * 1.3));
+    }
   }
 
-  layout();
-  for (let k = 0; k < 150; k++) update(1 / 50);
+  layout(true);
+  if (still) {
+    spawned = true;
+    for (let n = 0; n < (wide ? 5 : 3); n++) { const a = {}; place(a, freeGoal()); agents.push(a); }
+    phase = "hold";
+  }
   draw();
-  new ResizeObserver(() => { layout(); draw(); }).observe(canvas);
+  // A new width rebuilds the scene; a new height (fonts loading, language switch) only moves it.
+  let width = field.clientWidth;
+  new ResizeObserver(() => {
+    const fresh = field.clientWidth !== width;
+    width = field.clientWidth; layout(fresh); draw();
+  }).observe(field);
   if (still) return;
 
   let last = performance.now(), running = true, raf = 0;
@@ -484,7 +730,7 @@ const CONFIG = {
   new IntersectionObserver(([e]) => {
     running = e.isIntersecting;
     if (running && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
-  }).observe(canvas);
+  }).observe(field);
 })();
 </script>
 </body>

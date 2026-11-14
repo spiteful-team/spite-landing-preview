@@ -247,28 +247,24 @@ footer a:hover { color: var(--text); }
   <section class="wrap technical" id="technology" aria-labelledby="technology-title">
     <div class="about-grid">
       <div>
-        <div class="section-title"><span class="en">Inside the engine</span><span class="ru">Внутри движка</span></div>
-        <h2 id="technology-title"><span class="en"><span class="lead-in">Performance</span> by design</span><span class="ru"><span class="lead-in">Производительность</span> по замыслу</span></h2>
-        <p class="lead"><span class="en">A closer look at how scene data is organized, how geometry reaches the screen, and what you can inspect inside a running frame.</span><span class="ru">Как устроены данные сцены, как геометрия попадает на экран и что можно исследовать внутри кадра работающего движка.</span></p>
+        <div class="section-title"><span class="en">Built for your world</span><span class="ru">Для вашего мира</span></div>
+        <h2 id="technology-title"><span class="en"><span class="lead-in">Big worlds.</span> Your rules.</span><span class="ru"><span class="lead-in">Большие миры.</span> Ваши правила.</span></h2>
+        <p class="lead"><span class="en">From demanding games to industrial simulations, SPITE gives you a foundation for worlds with more going on.</span><span class="ru">От требовательных игр до промышленных симуляций — SPITE даёт основу для миров, в которых происходит больше.</span></p>
         <!-- Placeholder repository URL; replace when the benchmarks repository is available. -->
         <div class="technical-nav"><a class="secondary" href="https://github.com/spiteful-team/spite-benchmarks" target="_blank" rel="noopener"><span class="en">Benchmarks</span><span class="ru">Бенчмарки</span> ↗</a></div>
       </div>
       <ul class="claims">
-        <li><span class="code">ECS</span><div>
-          <h3><span class="en">Process components together</span><span class="ru">Компоненты обрабатываются вместе</span></h3>
-          <p><span class="en">Entities with the same set of components are grouped together. Systems query the component data they need and process it in batches, giving custom game logic the same data-oriented foundation as the engine’s own systems.</span><span class="ru">Сущности с одинаковым набором компонентов хранятся группами. Системы запрашивают нужные данные и обрабатывают их пакетами. Пользовательская игровая логика работает на той же ориентированной на данные основе, что и системы движка.</span></p>
+        <li><span class="code"><span class="en">Rendering</span><span class="ru">Рендеринг</span></span><div>
+          <h3><span class="en">Detail at scale</span><span class="ru">Детализация в масштабе</span></h3>
+          <p><span class="en">Build rich 3D environments with detailed geometry and large numbers of moving objects. SPITE’s renderer is designed for large, dynamic scenes.</span><span class="ru">Создавайте насыщенные 3D-миры с детализированной геометрией и множеством движущихся объектов. Рендерер SPITE рассчитан на большие динамические сцены.</span></p>
         </div></li>
-        <li><span class="code">GPU</span><div>
-          <h3><span class="en">Update changes. Cull geometry.</span><span class="ru">Обновляются изменения. Отсекается геометрия.</span></h3>
-          <p><span class="en">The renderer keeps a persistent GPU scene and sends per-object updates only when something changes. Models are split into meshlets; the GPU selects detail at the cluster level and culls geometry outside the view or hidden behind other objects.</span><span class="ru">Рендерер сохраняет сцену на GPU и передаёт обновления объектов только при изменениях. Модели разбиваются на мешлеты: GPU выбирает детализацию на уровне кластеров и отсекает геометрию вне поля зрения или за другими объектами.</span></p>
-        </div></li>
-        <li><span class="code"><span class="en">Inspect</span><span class="ru">Анализ</span></span><div>
-          <h3><span class="en">Trace a frame down to its data</span><span class="ru">От кадра к его данным</span></h3>
-          <p><span class="en">Frame captures, profiling, pixel inspection, and GPU buffer readbacks expose the data behind the image. The editor, command-line tools, and agents use the same runtime control interface to investigate a rendering result.</span><span class="ru">Захваты кадров, профилирование, анализ пикселей и чтение GPU-буферов открывают доступ к данным, из которых складывается изображение. Редактор, командная строка и агенты исследуют результат рендеринга через единый интерфейс управления движком.</span></p>
+        <li><span class="code"><span class="en">Simulation</span><span class="ru">Симуляция</span></span><div>
+          <h3><span class="en">Make the world behave your way</span><span class="ru">Задавайте миру свои правила</span></h3>
+          <p><span class="en">Add your own game and simulation logic through a simple API. City traffic, factory fleets, or something nobody has built yet — you define how it works.</span><span class="ru">Добавляйте игровую логику и симуляцию через простой API. Городской трафик, фабричный транспорт или то, чего ещё никто не создавал, — правила задаёте вы.</span></p>
         </div></li>
         <li><span class="code"><span class="en">Modules</span><span class="ru">Модули</span></span><div>
-          <h3><span class="en">One foundation, separate hosts</span><span class="ru">Общая основа, разные приложения</span></h3>
-          <p><span class="en">The editor and standalone game share the same engine foundation, so a game can run without the editor. Physics, audio, and rendering are modules that can be replaced with your own implementations.</span><span class="ru">Редактор и самостоятельная игра используют одну основу движка, поэтому игра может работать без редактора. Физику, звук и рендеринг можно заменить модулями с собственной реализацией.</span></p>
+          <h3><span class="en">Use what fits. Replace what doesn't.</span><span class="ru">Берите нужное. Меняйте остальное.</span></h3>
+          <p><span class="en">Start with the built-in systems and swap in your own physics, audio, or rendering as your project needs. The engine can adapt to your project.</span><span class="ru">Начните со встроенных систем и заменяйте физику, звук или рендеринг своими решениями по мере необходимости. Движок можно адаптировать под ваш проект.</span></p>
         </div></li>
       </ul>
     </div>

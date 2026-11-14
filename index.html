@@ -283,7 +283,7 @@ const CONFIG = {
   const base = document.createElement("canvas"), bctx = base.getContext("2d");
   const css = getComputedStyle(document.documentElement);
   const AGENT = css.getPropertyValue("--agent").trim();
-  const SEAM = "#141312", ORANGE = [255, 77, 46];
+  const SEAM = "#141312", HOT = [255, 120, 80], RED = [214, 62, 36], EMBER = [92, 30, 18];
   const AGENT_FACES = ["#ff4d2e", "#cc3e25", "#9e4230"], LIT_LYING = ["#b8452e", "#8f3b27", "#6a2f22"];
   const BLOCK_LOOK = ["#232120", "#171615", "#45413e"], CHIP_LOOK = ["#2c2541", "#1d1830", "rgba(183,148,255,.45)"];
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -303,7 +303,8 @@ const CONFIG = {
   const N = 110, NN = N * N, STEP = .1, ROLL = .15, PLACE = .8, EXIT = .6, ENTER = .55, HILL = .62, HILL_R2 = 2.8;
   const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const hex = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));
-  const MATERIALS = [["#a9a39f", 7], ["#8a847f", 5], ["#e6dfd0", 1.6], ["#9ccbff", 1.3], ["#b8c4d6", 1.3], ["#7fe3f0", .8], ["#5ccb8a", .7], ["#ffc93d", .5]]
+  // The floor is graphite: neutral greys a touch cool, so the orange agents and trail stand alone.
+  const MATERIALS = [["#a6a9ae", 6], ["#8e9196", 6], ["#b8babe", 3], ["#76797e", 3], ["#c8cacd", 1]]
     .map(([h, w]) => ({ rgb: hex(h), w }));
   const TOTAL = MATERIALS.reduce((n, m) => n + m.w, 0);
   const AGENT_RGB = AGENT_FACES.map(hex), LIT_RGB = LIT_LYING.map(hex), SLOT_RGB = SLOTS.map((S) => S.c.map(hex));
@@ -740,7 +741,7 @@ const CONFIG = {
   // ---------- simulation
   function update(dt) {
     time += dt; phaseT += dt;
-    const fade = Math.exp(-dt / 6);
+    const fade = Math.exp(-dt / 4);
     for (const k of glowing) if ((glow[k] *= fade) < .02) { glow[k] = 0; glowing.delete(k); }
     dock.flash = Math.max(0, dock.flash - dt * 1.8); hatch.flash = Math.max(0, hatch.flash - dt * 1.8);
 
@@ -815,12 +816,16 @@ const CONFIG = {
 
   function drawCell(g, c, topOnly) {
     const h = hill(c.i, c.j), gl = glow[c.k], up = Math.min(1, h / HILL), dm = dim[c.k];
-    const lit = Math.min(1.15, .26 + .74 * up + .6 * gl) * (dm + (1 - dm) * Math.max(up, gl));
+    const lit = Math.min(1, .26 + .74 * up) * (dm + (1 - dm) * up);
     const raw = MATERIALS[mat[c.k]].rgb, grey = (raw[0] + raw[1] + raw[2]) / 3;
-    const tint = mix([grey, grey, grey], raw, Math.min(1, .3 + .7 * up + gl)), top = mix(tint, [255, 120, 90], gl * .85);
+    const tint = mix([grey, grey, grey], raw, Math.min(1, .3 + .7 * up));
+    // The trail cools like hot metal: orange, red, a dark ember, then plain grey again.
+    const em = clamp((gl - .1) / .9, 0, 1), a = smooth(0, .3, em);
+    const heat = em > .5 ? mix(RED, HOT, (em - .5) * 2) : mix(EMBER, RED, em * 2);
+    const face = (k) => rgb(mix(tint.map((v) => v * lit), heat, a), k);
     const [x, y] = iso(c.i, c.j, h);
-    if (topOnly) return topFace(g, x, y, rgb(top, lit));
-    cube(g, x, y, [rgb(top, lit), rgb(mix(tint, ORANGE, gl * .6), lit * .66), rgb(mix(tint, ORANGE, gl * .5), lit * .42)]);
+    if (topOnly) return topFace(g, x, y, face(1));
+    cube(g, x, y, [face(1), face(.66), face(.42)]);
   }
   function drawBlocks(g) {
     for (const b of blocks) {

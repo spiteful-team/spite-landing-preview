@@ -217,21 +217,14 @@ html.scene[data-lang="ru"] .agent-chip { font-size: 11.5px; letter-spacing: .04e
 .technical-nav { display: flex; flex-wrap: wrap; gap: 12px; }
 .technical-nav .secondary { margin-top: 24px; }
 
-/* core diagram: heading, the isometric core, a bus of wires drawn by script, the module cards */
+/* technology heading and module cards */
 .tech-head { max-width: 760px; margin: 0 auto 56px; text-align: center; }
 .tech-head .lead { margin-inline: auto; }
 .tech-head .technical-nav { justify-content: center; }
-.tech-diagram { position: relative; display: flex; flex-direction: column; align-items: center; gap: 104px; }
-.tech-core { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.tech-core .code { color: var(--text); }
 .modules { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 20px; }
 .modules li { position: relative; z-index: 1; background: var(--panel); border: 1px solid var(--border); padding: 18px 20px 20px; box-shadow: 5px 5px 0 var(--hard-shadow); }
 .modules .code { display: block; margin-bottom: 8px; color: var(--agent); }
 .modules p { font-size: 14px; }
-.tech-wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-.tech-wires path { fill: none; stroke: var(--text-faint); stroke-width: 1; stroke-dasharray: 4 4; animation: wire-flow 2.4s linear infinite; }
-.tech-wires rect { fill: var(--text-faint); }
-@keyframes wire-flow { to { stroke-dashoffset: -16; } }
 
 /* agent log: reusable roadmap. ol.log > li.log-step[data-state=now|next|done] > .log-chip, .log-status, .log-card */
 .log-layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 72px; }
@@ -310,9 +303,6 @@ footer a:hover { color: var(--text); }
   .about > .about-grid .lead { grid-row: 3; align-self: start; margin-top: 20px; }
   .about > .about-grid .claims { grid-row: 4; margin-top: 32px; }
   .claims { grid-template-columns: 1fr; }
-  .tech-diagram { gap: 28px; }
-  .tech-core svg { width: 150px; height: auto; }
-  .tech-wires { display: none; }
   .modules { grid-auto-flow: row; grid-template-columns: 1fr; }
   .log-layout { grid-template-columns: 1fr; gap: 40px; }
   .log-side { position: static; }
@@ -325,8 +315,6 @@ footer a:hover { color: var(--text); }
   .log-step { padding-left: 34px; }
   .team-principles > div { grid-template-columns: 1fr; gap: 4px; }
 }
-html[data-motion="light"] .tech-wires path,
-html[data-motion="static"] .tech-wires path { animation: none; }
 html[data-motion="static"] *, html[data-motion="static"] *::before,
 html[data-motion="static"] *::after { transition: none !important; }
 html.theming *, html.theming *::before, html.theming *::after { transition: none !important; }
@@ -430,9 +418,6 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
       <!-- Placeholder repository URL; replace when the benchmarks repository is available. -->
       <div class="technical-nav"><a class="secondary" href="https://github.com/spiteful-team/spite-benchmarks" target="_blank" rel="noopener"><span class="en">Benchmarks</span><span class="ru">Бенчмарки</span> ↗</a></div>
     </div>
-    <div class="tech-diagram" id="tech-diagram">
-      <svg class="tech-wires" aria-hidden="true"></svg>
-      <div class="tech-core"><span class="code"><span class="en">SPITE core</span><span class="ru">Ядро SPITE</span></span></div>
       <ul class="modules">
         <li><span class="code"><span class="en">Rendering</span><span class="ru">Рендеринг</span></span><div>
           <h3><span class="en">Detail at scale</span><span class="ru">Детализация в масштабе</span></h3>
@@ -447,7 +432,6 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
           <p><span class="en">Start with the built-in systems and swap in your own engine parts as your project needs. The engine can adapt.</span><span class="ru">Начните со встроенных систем и заменяйте части движка своими решениями по мере необходимости. Движок можно адаптировать под ваш проект.</span></p>
         </div></li>
       </ul>
-    </div>
   </section>
   <section class="wrap technical" id="roadmap" aria-labelledby="roadmap-title">
     <div class="log-layout">
@@ -1660,7 +1644,7 @@ const CONFIG = {
 })();
 </script>
 <script>
-// Icons for the About panels and the technology core diagram. Separate from the hero script so a failure in one cannot take the other down.
+// Icons for the About panels. Separate from the hero script so a failure in one cannot take the other down.
 (() => {
   // Isometric cubes as SVG, same projection as the hero. Painter order: far to near by x+y+z, then z.
   // Cube kinds: n grey, g grey with opacity, a ink, o dashed outline. Colours come from the current look.
@@ -1692,42 +1676,17 @@ const CONFIG = {
     [[0, 0, 0], [0, 0, 1], [0, 0, 2, "a"], [1, 0, 2, "o"]],
     [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0, "a"], [0, 0, 1]],
   ];
-  const claimIcons = [...document.querySelectorAll("#about .claims > li")].map((li, i) => {
+  const icons = [...document.querySelectorAll("#about .claims > li")].map((li, i) => {
     const el = document.createElement("div");
     el.className = "claim-icon"; el.setAttribute("aria-hidden", "true");
     li.prepend(el);
     return () => { el.innerHTML = iso(ICONS[i % ICONS.length], 18); };
   });
 
-  // Technology: the SPITE core (3x3 base, one accent cube on top) and wires to every card.
-  const diagram = document.getElementById("tech-diagram"), core = diagram.querySelector(".tech-core");
-  const wires = diagram.querySelector(".tech-wires"), cards = [...diagram.querySelectorAll(".modules > li")];
-  const base = [];
-  for (let x = 0; x < 3; x++) for (let y = 0; y < 3; y++) base.push([x, y, 0]);
-  const coreIcon = document.createElement("div");
-  core.prepend(coreIcon);
-  const icons = [...claimIcons, () => { coreIcon.innerHTML = iso([...base, [1, 1, 1, "a"]], 40); }];
   const paintIcons = () => icons.forEach((paint) => paint());
   paintIcons();
   new MutationObserver(paintIcons).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-  // Orthogonal wires: one trunk from the core down to a bus, one branch from the bus to the top centre of each card.
-  // Each subpath runs from the card toward the core, so the dash flow reads as data moving into the core.
-  function drawWires() {
-    if (getComputedStyle(wires).display === "none") return;
-    const box = diagram.getBoundingClientRect(), c = core.getBoundingClientRect();
-    const cx = Math.round(c.left + c.width / 2 - box.left), y0 = Math.round(c.bottom - box.top) + 8;
-    const ends = cards.map((li) => { const r = li.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2 - box.left), y: Math.round(r.top - box.top) - 3 }; });
-    const bus = Math.round((y0 + Math.min(...ends.map((e) => e.y))) / 2) + .5;
-    let d = `M${cx + .5} ${bus}V${y0}`, squares = "";
-    for (const e of ends) {
-      d += `M${e.x + .5} ${e.y}V${bus}H${cx + .5}`;
-      squares += `<rect x="${e.x - 2}" y="${e.y - 2}" width="5" height="5"/>`;
-    }
-    wires.innerHTML = `<path d="${d}"/>${squares}`;
-  }
-  new ResizeObserver(drawWires).observe(diagram);
-  document.fonts?.ready.then(drawWires);
 })();
 </script>
 </body>

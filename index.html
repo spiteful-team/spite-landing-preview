@@ -99,7 +99,7 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
    45 degree shear. */
 .roof { display: none; }
 .scene .install { position: relative; }
-.scene .roof { position: absolute; left: -1px; bottom: calc(100% + 1px); width: calc(100% + 2px); height: var(--roof, 70px); transform: skewX(45deg); transform-origin: 0 100%; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 16px; pointer-events: none; }
+.scene .roof { position: absolute; left: -1px; bottom: calc(100% + 1px); width: calc(100% + 2px); height: var(--roof, 70px); transform: skewX(45deg); transform-origin: 0 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 8px; pointer-events: none; }
 .roof-btn { pointer-events: auto; display: inline-flex; align-items: stretch; min-width: 0; max-width: 100%; height: 46px; padding: 0; border: 1px solid var(--border-strong); border-radius: 2px; background: var(--raised); color: var(--text); cursor: pointer; box-shadow: 3px 3px 0 var(--ground); transition: transform .06s, box-shadow .06s, border-color .1s; }
 .roof-btn:hover { border-color: var(--accent); }
 .roof-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ground); }
@@ -133,8 +133,6 @@ h1 { display: flex; align-items: center; font: 700 clamp(64px, 10vw, 124px)/.95 
 .primary .done-l, .primary.done .idle-l { display: none; }
 .primary.done .done-l { display: inline; }
 .meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 11px 2px 0; font: 500 13.5px/1.4 var(--body); color: var(--text-muted); }
-.meta a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 3px; }
-.meta a:hover { color: var(--accent-hover); }
 
 /* about */
 .about { padding-block: 96px 104px; }
@@ -306,7 +304,6 @@ footer a:hover { color: var(--text); }
           </div>
           <div class="meta">
             <span id="req"></span>
-            <span><span class="en">Or get the script:</span><span class="ru">Или возьмите скрипт:</span> <a id="script-link" href="#"></a></span>
           </div>
         </div>
       </div>
@@ -444,20 +441,19 @@ footer a:hover { color: var(--text); }
 const CONFIG = {
   github: "https://github.com/spiteful-team",
   platforms: {
-    windows: { script: "https://github.com/spiteful-team/spite-engine/releases/latest/download/install.ps1", command: (u) => `powershell -c "irm ${u} | iex"`, prompt: "PS>", shell: "PowerShell", file: "install.ps1", req: { en: "Windows 10+ x64 · Vulkan 1.3 GPU", ru: "Windows 10+ x64 · GPU с Vulkan 1.3" } },
-    linux:   { script: "https://github.com/spiteful-team/spite-engine/releases/latest/download/install.sh",  command: (u) => `curl -fsSL ${u} | sh`, prompt: "$", shell: "sh", file: "install.sh", req: { en: "Ubuntu 24.04+ x86-64 · Vulkan 1.3 GPU", ru: "Ubuntu 24.04+ x86-64 · GPU с Vulkan 1.3" } },
+    windows: { script: "https://github.com/spiteful-team/spite-engine/releases/latest/download/install.ps1", command: (u) => `powershell -c "irm ${u} | iex"`, prompt: "PS>", shell: "PowerShell", req: { en: "Windows 10+ x64 · Vulkan 1.3 GPU", ru: "Windows 10+ x64 · GPU с Vulkan 1.3" } },
+    linux:   { script: "https://github.com/spiteful-team/spite-engine/releases/latest/download/install.sh",  command: (u) => `curl -fsSL ${u} | sh`, prompt: "$", shell: "sh", req: { en: "Ubuntu 24.04+ x86-64 · Vulkan 1.3 GPU", ru: "Ubuntu 24.04+ x86-64 · GPU с Vulkan 1.3" } },
   },
 };
 (() => {
   const root = document.documentElement, $ = (s) => document.querySelector(s), $$ = (s) => document.querySelectorAll(s);
   let os = /linux|x11/i.test(navigator.userAgent) && !/android/i.test(navigator.userAgent) ? "linux" : "windows";
   function render() {
-    const p = CONFIG.platforms[os], lang = root.dataset.lang, cmd = $("#cmd"), link = $("#script-link");
+    const p = CONFIG.platforms[os], lang = root.dataset.lang, cmd = $("#cmd");
     // The command may wrap after a slash, never inside a word.
     cmd.textContent = ""; cmd.dataset.prompt = p.prompt;
     p.command(p.script).split(/(?<=\w\/)(?=\w)/).forEach((part, n) => { if (n) cmd.append(document.createElement("wbr")); cmd.append(part); });
     $("#req").textContent = p.req[lang];
-    link.href = p.script; link.textContent = p.file;
     $$(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.os === os)));
   }
   $$(".tab").forEach((t) => t.addEventListener("click", () => { os = t.dataset.os; render(); }));
@@ -753,12 +749,13 @@ const CONFIG = {
       rect: { l: Math.min(...xs), r: Math.max(...xs), t: Math.min(...ys), b: Math.max(...ys), w: Math.max(...xs) - Math.min(...xs) },
     };
 
-    // The mark hangs beside the blocks at the field's cube size; on phones, below the install block.
+    // The mark hangs at the field's cube size in the middle of the free field right of the blocks; on phones, below the install block.
     const aspect = (bx1 - bx0) / (by1 - by0), box = inst.r;
     let height = (by1 - by0) * s / MARK_EDGE, left, bottom;
     if (wide) {
-      left = Math.max(sl.front[1][0], inst.front[1][0]) + 2.5 * w;
-      height = Math.min(height, (W - 3 * w - left) / aspect);
+      const free = Math.max(sl.front[1][0], inst.front[1][0]) + 2.5 * w;
+      height = Math.min(height, (W - 3 * w - free) / aspect);
+      left = Math.max(free, (free - 2.5 * w + W - height * aspect) / 2);
       bottom = inst.front[1][1] - s;
     } else {
       height = Math.min(height, (W - 48) / aspect);

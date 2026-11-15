@@ -516,6 +516,51 @@ const LOOKS = {
     icon: { n: ["#a9a39f", "#6f6a65", "#45413e"], a: ["#f2efed", "#f2efed", "#f2efed"], seam: "#141312", ghost: "#8a847f" },
   },
 };
+
+// TEMPORARY accent switcher for the dark theme, for review only. Open the page with ?accents to show it.
+// Remove this block, "data-accent" in the two attributeFilter lists, and the mark.core / glow / coreGlow reads in the hero.
+(() => {
+  const VARIANTS = {"M0":{"name":"Сейчас","look":{},"css":""},"M1":{"name":"Глубина","look":{"seam":"#0b0a0a","floor":{"bg":"#000000","rest":0.15,"shade":[1,0.62,0.38]},"heat":{"ember":"#242220","mid":"#6f6a65","hot":"#ffffff"},"block":{"top":"#171615","side":"#0f0e0d","edge":"#2a2725"},"agent":["#ffffff","#ffffff","#ffffff"],"mark":{"face":"#ffffff","seam":"#000000"},"beam":"#ffffff","stroke":"#ffffff"},"css":"html[data-theme=dark]{--ground:#070606;--panel:#0e0d0c;--raised:#161514;--field:#050404;--border:#211f1d;--border-strong:#3a3633;--text-muted:#8f8984;--accent:#ffffff;--agent:#ffffff}"},"M2":{"name":"Белое ядро со свечением","look":{"agent":["#ffffff","#ffffff","#ffffff"],"loose":["#8a847f","#8a847f","#8a847f"],"mark":{"face":"#8a847f","seam":"#0d0c0b","core":"#ffffff"},"glow":"rgba(255,255,255,.65)","heat":{"ember":"#2e2c2a","mid":"#6f6a65","hot":"#d9d5d1"}},"css":"html[data-theme=dark]{--accent:#ffffff}html[data-theme=dark] .primary,html[data-theme=dark] .roof-btn:hover{box-shadow:0 0 18px rgba(255,255,255,.35)}"},"C1":{"name":"Красное ядро","look":{"mark":{"face":"#f2efed","seam":"#0d0c0b","core":"#ff4d2e"},"coreGlow":"rgba(255,77,46,.55)"},"css":"html[data-theme=dark]{--accent:#ff4d2e;--accent-hover:#ff6a4d;--accent-pressed:#e0351a;--focus-ring:rgba(255,77,46,.4)}html[data-theme=dark] .agent-chip{color:#0d0c0b}html[data-theme=dark] .primary{color:#1f0603}"},"C2":{"name":"Forge: красные агенты","look":{"agent":["#ff4d2e","#cc3e25","#9e4230"],"loose":["#a9a39f","#6f6a65","#45413e"],"mark":{"face":"#a9a39f","seam":"#0d0c0b","core":"#ff4d2e"},"glow":"rgba(255,77,46,.55)","heat":{"ember":"#3a1d16","mid":"#9e4230","hot":"#ff6a4d"},"beam":"#ff6a4d","stroke":"#ff4d2e"},"css":"html[data-theme=dark]{--accent:#ff4d2e;--accent-hover:#ff6a4d;--accent-pressed:#e0351a;--focus-ring:rgba(255,77,46,.4)}html[data-theme=dark] .agent-chip{color:#0d0c0b}html[data-theme=dark] .primary{color:#1f0603}"},"C3":{"name":"Forge: красный + фиолетовый","look":{"agent":["#ff4d2e","#cc3e25","#9e4230"],"loose":["#a9a39f","#6f6a65","#45413e"],"mark":{"face":"#a9a39f","seam":"#0d0c0b","core":"#ff4d2e"},"glow":"rgba(255,77,46,.55)","heat":{"ember":"#3a1d16","mid":"#9e4230","hot":"#ff6a4d"},"beam":"#b794ff","stroke":"#ff4d2e","chip":{"top":"#2c2541","side":"#1d1830","edge":"rgba(183,148,255,.45)"}},"css":"html[data-theme=dark]{--accent:#ff4d2e;--accent-hover:#ff6a4d;--accent-pressed:#e0351a;--focus-ring:rgba(255,77,46,.4)}html[data-theme=dark] .agent-chip{background:rgba(183,148,255,.08);border-color:#b794ff;color:#b794ff}html[data-theme=dark] .primary{color:#1f0603}"},"M2+C1":{"name":"Серый трибар, белые агенты, красное ядро","look":{"agent":["#ffffff","#ffffff","#ffffff"],"loose":["#8a847f","#8a847f","#8a847f"],"mark":{"face":"#8a847f","seam":"#0d0c0b","core":"#ff4d2e"},"glow":"rgba(255,255,255,.65)","coreGlow":"rgba(255,77,46,.6)","heat":{"ember":"#2e2c2a","mid":"#6f6a65","hot":"#d9d5d1"}},"css":"html[data-theme=dark]{--accent:#ff4d2e;--accent-hover:#ff6a4d;--accent-pressed:#e0351a;--focus-ring:rgba(255,77,46,.4)}html[data-theme=dark] .agent-chip{color:#0d0c0b}html[data-theme=dark] .primary{color:#1f0603}"}};
+  const BASE = structuredClone(LOOKS.dark), root = document.documentElement;
+  const merge = (t, s) => { for (const k in s) { if (s[k] && typeof s[k] === "object" && !Array.isArray(s[k])) merge(t[k] = t[k] || {}, s[k]); else t[k] = s[k]; } return t; };
+  const read = (k) => { try { return localStorage.getItem(k); } catch (_) { return null; } };
+  const write = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
+  const params = new URLSearchParams(location.search);
+  if (params.has("accents")) write("spite-accents-panel", "1");
+  const style = document.createElement("style");
+  document.head.append(style);
+  function apply(key) {
+    if (!VARIANTS[key]) key = "M0";
+    LOOKS.dark = merge(structuredClone(BASE), VARIANTS[key].look);
+    style.textContent = VARIANTS[key].css;
+    root.dataset.accent = key;
+    document.querySelectorAll(".accent-panel button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.key === key)));
+    const label = document.querySelector(".accent-panel span");
+    if (label) label.textContent = VARIANTS[key].name;
+  }
+  if (read("spite-accents-panel") !== "1") { apply("M0"); return; }
+  apply(VARIANTS[params.get("accents")] ? params.get("accents") : read("spite-accent"));
+  const css = document.createElement("style");
+  css.textContent = ".accent-panel{position:fixed;z-index:50;right:12px;bottom:12px;display:flex;flex-direction:column;gap:6px;max-width:min(320px,calc(100vw - 24px));padding:10px;background:var(--panel);border:1px solid var(--border-strong);border-radius:2px;box-shadow:4px 4px 0 var(--hard-shadow);font:500 11px/1.3 var(--mono);color:var(--text)}.accent-panel b{font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}.accent-panel div{display:flex;flex-wrap:wrap;gap:4px}.accent-panel button{padding:5px 8px;border:1px solid var(--border-strong);border-radius:2px;background:var(--raised);color:var(--text);font:inherit;cursor:pointer}.accent-panel button[aria-pressed=true]{background:var(--text);color:var(--ground);border-color:var(--text)}.accent-panel span{color:var(--text-muted)}.accent-panel a{color:var(--text-muted)}";
+  document.head.append(css);
+  const panel = document.createElement("div");
+  panel.className = "accent-panel";
+  panel.innerHTML = "<b>Акценты тёмной темы · временно</b><div></div><span></span><a href='#'>скрыть панель</a>";
+  for (const key of Object.keys(VARIANTS)) {
+    const b = document.createElement("button");
+    b.type = "button"; b.dataset.key = key; b.textContent = key; b.title = VARIANTS[key].name;
+    b.addEventListener("click", () => {
+      write("spite-accent", key);
+      if (root.dataset.theme !== "dark") { write("spite-theme", "dark"); root.dataset.theme = "dark"; }
+      apply(key);
+    });
+    panel.querySelector("div").append(b);
+  }
+  panel.querySelector("a").addEventListener("click", (e) => { e.preventDefault(); write("spite-accents-panel", "0"); panel.remove(); apply("M0"); });
+  document.body.append(panel);
+  apply(root.dataset.accent);
+})();
+// END TEMPORARY accent switcher
 // The header button flips the theme, remembers the choice, and never animates the change.
 (() => {
   const root = document.documentElement, btn = document.getElementById("theme-toggle");
@@ -1243,7 +1288,7 @@ const CONFIG = {
     cube(g, x, lying ? y - (k - 1) * s : y, L.loose, k);
   }
   function agentCube(g, x, y, k = 1, alpha = 1) {
-    g.save(); g.globalAlpha = alpha;
+    g.save(); g.globalAlpha = alpha; if (L.glow) { g.shadowColor = L.glow; g.shadowBlur = 14; }
     cube(g, x, y, L.agent, k);
     g.restore();
   }
@@ -1251,7 +1296,7 @@ const CONFIG = {
     const S = SLOTS[n], [x, y] = slotPos(n);
     ctx.save(); ctx.translate(x, y); ctx.scale(logo.sc, logo.sc);
     for (const [face, ...subs] of S.p) {
-      ctx.fillStyle = face ? L.mark.face : L.mark.seam; ctx.beginPath();
+      const core = face && n === LIT && L.mark.core; ctx.fillStyle = face ? core || L.mark.face : L.mark.seam; ctx.shadowColor = (core && (L.coreGlow || L.glow)) || "transparent"; ctx.shadowBlur = core && (L.coreGlow || L.glow) ? 22 : 0; ctx.beginPath();
       for (const pts of subs) { ctx.moveTo(pts[0], pts[1]); for (let q = 2; q < pts.length; q += 2) ctx.lineTo(pts[q], pts[q + 1]); ctx.closePath(); }
       ctx.fill();
     }
@@ -1468,7 +1513,7 @@ const CONFIG = {
   let width = hero.clientWidth;
   function refit(fresh) { layout(fresh); draw(); resetSample(performance.now()); }
   new ResizeObserver(() => { const fresh = hero.clientWidth !== width; width = hero.clientWidth; refit(fresh); }).observe(hero);
-  new MutationObserver(() => { useLook(); refit(false); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang", "data-theme"] });
+  new MutationObserver(() => { useLook(); refit(false); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang", "data-theme", "data-accent"] });
   // Web fonts move the wordmark's baseline and the blocks' widths without changing the hero's size.
   if (document.fonts) document.fonts.ready.then(() => refit(false));
   let last = 0, lastTick = 0, nextPaint = 0, visibleHero = false, raf = 0;
@@ -1601,7 +1646,7 @@ const CONFIG = {
   const icons = [...claimIcons, () => { coreIcon.innerHTML = iso([...base, [1, 1, 1, "a"]], 40); }];
   const paintIcons = () => icons.forEach((paint) => paint());
   paintIcons();
-  new MutationObserver(paintIcons).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  new MutationObserver(paintIcons).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-accent"] });
 
   // Orthogonal wires: one trunk from the core down to a bus, one branch from the bus to the top centre of each card.
   // Each subpath runs from the card toward the core, so the dash flow reads as data moving into the core.

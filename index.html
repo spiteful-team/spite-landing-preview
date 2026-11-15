@@ -312,6 +312,10 @@ footer a:hover { color: var(--text); }
 html[data-motion="static"] *, html[data-motion="static"] *::before,
 html[data-motion="static"] *::after { transition: none !important; }
 html.theming *, html.theming *::before, html.theming *::after { transition: none !important; }
+@media (max-width: 380px) {
+  /* iPhone SE and mini: the English address is 4px wider than the roof */
+  .roof-text { font-size: 11px; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }

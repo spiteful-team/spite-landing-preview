@@ -265,10 +265,12 @@ footer a:hover { color: var(--text); }
   .claims li > div { grid-column: 1; grid-row: 2; }
   .log-step { padding-left: 34px; }
 }
-@media (prefers-reduced-motion: reduce) { .lamp { animation: none; } }
+html[data-motion="light"] .lamp, html[data-motion="light"] .tech-wires path,
+html[data-motion="static"] .lamp, html[data-motion="static"] .tech-wires path { animation: none; }
+html[data-motion="static"] *, html[data-motion="static"] *::before,
+html[data-motion="static"] *::after { transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .claims li { transition: none; }
-  .tech-wires path { animation: none; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 </style>
 </head>
@@ -483,7 +485,7 @@ const CONFIG = {
   $("#roof-copy").addEventListener("click", () => copyContact(1800));
   // The contact button at the bottom copies the same address and scrolls up to the roof, where "Copied" shows.
   $("#contact-copy").addEventListener("click", () => {
-    scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    scrollTo({ top: 0, behavior: document.documentElement.dataset.motion === "static" || matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     copyContact(3200);
   });
 
@@ -520,7 +522,10 @@ const CONFIG = {
   const SEAM = "#141312", HOT = [255, 120, 80], RED = [214, 62, 36], EMBER = [92, 30, 18];
   const AGENT_FACES = ["#ff4d2e", "#cc3e25", "#9e4230"], LIT_LYING = ["#b8452e", "#8f3b27", "#6a2f22"];
   const BLOCK_LOOK = ["#2b2826", "#1c1a19", "#45413e"], CHIP_LOOK = ["#2c2541", "#1d1830", "rgba(183,148,255,.45)"];
-  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
+  let quality = "full";
+  const motionMode = () => motionPreference.matches ? "static" : quality;
+  document.documentElement.dataset.motion = motionMode();
   // An empty inline box sits on the wordmark's baseline: it tells where the letters' feet are.
   const feet = document.createElement("i");
   feet.style.cssText = "display:inline-block;width:0;height:0";
@@ -698,7 +703,7 @@ const CONFIG = {
   // ---------- layout
   function layout(fresh) {
     const hr = hero.getBoundingClientRect();
-    W = hr.width; H = hr.height; dpr = devicePixelRatio >= 1.5 ? 2 : 1;
+    W = hr.width; H = hr.height; dpr = motionMode() === "full" && devicePixelRatio >= 1.5 ? 2 : 1;
     tw = Math.ceil(W / TILE); th = Math.ceil(H / TILE); wasDirty = new Uint8Array(tw * th); redrawAll = true;
     for (const [c, g] of [[field, ctx], [front, fctx], [base, bctx]]) { c.width = W * dpr; c.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); }
     wide = W > 900;
@@ -1016,6 +1021,7 @@ const CONFIG = {
 
   // How much an agent lifts the field under it: fully while driving, fading in and out at the doors.
   function bump(a) {
+    if (motionMode() !== "full") return 0;
     if (a.state === "walk" || a.state === "home" || a.state === "place") return 1;
     if (a.state === "exit") return smooth(.5, 1, a.timer / EXIT);
     if (a.state === "enter") return 1 - smooth(0, .4, a.timer / ENTER);
@@ -1374,22 +1380,78 @@ const CONFIG = {
   draw();
   // A new width rebuilds the scene; a new height (fonts loading, language switch) only refits it.
   let width = hero.clientWidth;
-  new ResizeObserver(() => { const fresh = hero.clientWidth !== width; width = hero.clientWidth; layout(fresh); draw(); }).observe(hero);
-  new MutationObserver(() => { layout(false); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang"] });
+  function refit(fresh) { layout(fresh); draw(); resetSample(performance.now()); }
+  new ResizeObserver(() => { const fresh = hero.clientWidth !== width; width = hero.clientWidth; refit(fresh); }).observe(hero);
+  new MutationObserver(() => refit(false)).observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang"] });
   // Web fonts move the wordmark's baseline and the blocks' widths without changing the hero's size.
-  if (document.fonts) document.fonts.ready.then(() => { layout(false); draw(); });
-  if (still) return;
-
-  let last = performance.now(), running = true, raf = 0;
-  function frame(now) {
-    update(Math.min(.05, (now - last) / 1000)); last = now;
+  if (document.fonts) document.fonts.ready.then(() => refit(false));
+  let last = 0, lastTick = 0, nextPaint = 0, visibleHero = false, raf = 0;
+  let sampleStart = 0, ticks = 0, slowTicks = 0, paints = 0, paintCost = 0, slowWindows = 0;
+  const shouldRun = () => visibleHero && !document.hidden && motionMode() !== "static";
+  function resetSample(now) {
+    // Ignore startup, scene rebuilds and the first frames after a tab becomes visible.
+    sampleStart = now + 1500;
+    ticks = slowTicks = paints = paintCost = slowWindows = 0;
+  }
+  function syncMotion() {
+    document.documentElement.dataset.motion = motionMode();
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    if (shouldRun()) {
+      last = lastTick = nextPaint = performance.now();
+      resetSample(last);
+      raf = requestAnimationFrame(frame);
+    }
+  }
+  function changeMotion() {
+    syncMotion();
+    time = 0;
+    reset();
+    dock.flash = hatch.flash = 0;
+    panel.classList.remove("dock");
+    document.querySelectorAll(".fly-word.spawn").forEach((el) => el.classList.remove("spawn"));
+    layout(false);
     draw();
-    raf = running ? requestAnimationFrame(frame) : 0;
+  }
+  function frame(now) {
+    raf = 0;
+    if (!shouldRun()) return;
+    const gap = now - lastTick;
+    lastTick = now;
+    const sampling = now >= sampleStart;
+    if (sampling) {
+      ticks++;
+      if (gap > (quality === "full" ? 25 : 50)) slowTicks++;
+    }
+    if (now >= nextPaint - .5) {
+      const start = performance.now();
+      update(Math.min(.05, (now - last) / 1000)); last = now;
+      draw();
+      const interval = 1000 / (quality === "full" ? 60 : 30);
+      nextPaint = Math.max(nextPaint + interval, now);
+      if (sampling) { paints++; paintCost += performance.now() - start; }
+    }
+    if (sampling && now - sampleStart >= 2000) {
+      // Two bad windows avoid reacting to a single stall. Only downgrade this visit,
+      // otherwise a static scene would look fast and repeatedly turn animation back on.
+      const slow = slowTicks / ticks >= .3 || paintCost / paints > (quality === "full" ? 10 : 20);
+      slowWindows = slow ? slowWindows + 1 : 0;
+      sampleStart = now;
+      ticks = slowTicks = paints = paintCost = 0;
+      if (slowWindows >= 2) {
+        quality = quality === "full" ? "light" : "static";
+        changeMotion();
+        return;
+      }
+    }
+    raf = requestAnimationFrame(frame);
   }
   new IntersectionObserver(([e]) => {
-    running = e.isIntersecting;
-    if (running && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+    visibleHero = e.isIntersecting;
+    syncMotion();
   }).observe(hero);
+  document.addEventListener("visibilitychange", syncMotion);
+  motionPreference.addEventListener("change", changeMotion);
 })();
 </script>
 <script>

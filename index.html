@@ -12,12 +12,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap">
 <style>
-/* SPITE Mono: the design code of the mono logo, in two themes (html[data-theme]).
-   Every cube face of the logo is one ink; the form is drawn by paper-coloured seams. So the page has two inks per theme:
-   ink (--accent, --agent) marks what is active, interactive or selected, greys carry the structure. No hue, no glow.
-   Layout: one isometric scene under the whole hero; the slogan and install panel are blocks standing on the cube field, agents push out of the word "fly", rebuild the mark beside the blocks and drive into a garage in the install block; below, statement + claim list.
-   Rules kept: ink only for interactive and selected; square panels and tabs; 2px radius on buttons and fields; hard offset shadows; uppercase only in display and code styles.
-   The canvas scene and the iso icons take their colours from LOOKS in the script, not from these tokens. */
 :root {
   --display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
   --body: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -371,7 +365,6 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
 <main class="about" id="about">
   <div class="wrap about-grid">
     <div>
-      <div class="section-title"><span class="en">About the engine</span><span class="ru">О движке</span></div>
       <h2><span class="en"><span class="lead-in">Agent-native.</span> Built for performance.</span><span class="ru"><span class="lead-in">Нативно агентный.</span> Создан для скорости.</span></h2>
       <p class="lead"><span class="en"><span class="lead-in">AI agents speed up game development every month, and conventional engine architecture caps that speed.</span> SPITE removes the limits.</span><span class="ru"><span class="lead-in">ИИ-агенты ускоряют разработку игр с каждым месяцем, а архитектура классических движков ограничивает эту скорость.</span> SPITE снимает ограничения.</span></p>
     </div>
@@ -386,7 +379,7 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
       <li>
         <span class="code"><span class="en">Speed</span><span class="ru">Скорость</span></span>
         <div>
-          <h3><span class="en">An order of magnitude faster</span><span class="ru">Производительность на порядок выше</span></h3>
+          <h3><span class="en">Maximum performance by default</span><span class="ru">Максимальная производительность по умолчанию</span></h3>
           <p><span class="en">In our benchmarks the SPITE core outperforms the engines we compared it with by an order of magnitude. We stand behind these numbers, the engine is open for independent testing on any scene.</span><span class="ru">В наших бенчмарках ядро SPITE на порядок опережает движки, с которыми мы его сравнивали. Мы уверены в этих цифрах, движок открыт для независимой проверки на любых сценах.</span></p>
         </div>
       </li>
@@ -402,7 +395,6 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
         <div>
           <h3><span class="en">An environment where assets come to life</span><span class="ru">Среда, в которой ассеты оживают</span></h3>
           <p><span class="en">Models, textures and prototypes can be made anywhere, in any tool or engine, and then brought into SPITE. The engine turns them into a simulation that runs at full speed. All tooling around the core is open and extensible.</span><span class="ru">Модели, текстуры и прототипы можно создавать где угодно, в любом инструменте или движке, а затем перенести в SPITE. Движок превращает их в симуляцию, которая работает на полной скорости. Весь инструментарий вокруг ядра открыт и расширяем.</span></p>
-          <a class="secondary" href="https://github.com/spiteful-team" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.3 18.3 4.6 18.3 4.6c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg>github.com/spiteful-team</a>
         </div>
       </li>
     </ul>
@@ -415,8 +407,6 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
       <div class="section-title"><span class="en">Built for your big world</span><span class="ru">Сделан для вашего большого мира</span></div>
       <h2 id="technology-title"><span class="en"><span class="lead-in"></span></span><span class="ru"><span class="lead-in"></span></span></h2>
       <p class="lead"><span class="en">From demanding games to industrial simulations, SPITE gives you a foundation for ambitious worlds.</span><span class="ru">От требовательных игр до промышленных симуляций — SPITE даёт основу для амбициозных миров.</span></p>
-      <!-- Placeholder repository URL; replace when the benchmarks repository is available. -->
-      <div class="technical-nav"><a class="secondary" href="https://github.com/spiteful-team/spite-benchmarks" target="_blank" rel="noopener"><span class="en">Benchmarks</span><span class="ru">Бенчмарки</span> ↗</a></div>
     </div>
       <ul class="modules">
         <li><span class="code"><span class="en">Rendering</span><span class="ru">Рендеринг</span></span><div>
@@ -436,7 +426,6 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
   <section class="wrap technical" id="roadmap" aria-labelledby="roadmap-title">
     <div class="log-layout">
       <div class="log-side">
-        <div class="section-title"><span class="en">Development direction</span><span class="ru">Направление развития</span></div>
         <h2 id="roadmap-title"><span class="en"><span class="lead-in">What comes</span> next.</span><span class="ru"><span class="lead-in">Что</span> дальше.</span></h2>
         <p class="lead"><span class="en">SPITE is early in development, we have a lot to do and fix. We’re expanding where SPITE runs, how it connects to your tools, and what you can build on top of it.</span><span class="ru">SPITE находится на ранней стадии разработки, и нам предстоит многое сделать и починить. Мы расширяем список платформ SPITE, его связь с вашими инструментами и возможности для создания собственных решений на его основе.</span></p>
     </div>
@@ -473,7 +462,6 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
     </div>
   </section>
   <section class="wrap together" id="contact">
-    <div class="section-title"><span class="en">Partnership</span><span class="ru">Сотрудничество</span></div>
     <h2><span class="en"><span class="lead-in">Partner</span> with SPITE</span><span class="ru"><span class="lead-in">Партнёрство</span> со SPITE</span></h2>
     <p class="lead"><span class="en">We work with game studios, content creators and maintainers of software products. To integrate the SPITE core into your project, contact us.</span><span class="ru">Мы сотрудничаем со студиями, авторами контента и разработчиками программных продуктов. Чтобы встроить ядро SPITE в свой проект, свяжитесь с нами.</span></p>
     <button class="secondary contact-copy" id="contact-copy" type="button"><span class="en">Contact us</span><span class="ru">Связаться</span></button>

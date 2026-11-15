@@ -253,6 +253,22 @@ html.scene[data-lang="ru"] .agent-chip { font-size: 11.5px; letter-spacing: .04e
 .log-card { flex: 0 0 100%; margin-top: 4px; background: var(--panel); border: 1px solid var(--border); padding: 20px 22px 22px; }
 .log-step[data-state="now"] .log-card { border-color: var(--border-strong); }
 
+.info-layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 72px; }
+.faq-list { border-top: 1px solid var(--border-strong); }
+.faq-list details { border-bottom: 1px solid var(--border); }
+.faq-list summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 0; cursor: pointer; list-style: none; font: 600 20px/1.35 var(--display); }
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary::after { content: "+"; flex: none; color: var(--text-faint); font: 400 22px/1 var(--mono); }
+.faq-list details[open] summary::after { content: "−"; }
+.faq-list summary:hover { color: var(--text-faint); }
+.faq-list p { margin: 0; padding: 0 32px 24px 0; color: var(--text-muted); }
+.faq-list a { text-underline-offset: 3px; }
+.team-copy > p { margin: 0 0 20px; color: var(--text-muted); font-size: 16px; }
+.team-principles { margin: 32px 0 0; border-top: 1px solid var(--border-strong); }
+.team-principles > div { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+.team-principles dt { font: 600 16px/1.6 var(--display); }
+.team-principles dd { margin: 0; color: var(--text-muted); }
+
 footer { border-top: 1px solid var(--border); background: var(--panel); }
 footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 14px 18px; }
 footer a { color: var(--text-faint); }
@@ -300,12 +316,14 @@ footer a:hover { color: var(--text); }
   .modules { grid-auto-flow: row; grid-template-columns: 1fr; }
   .log-layout { grid-template-columns: 1fr; gap: 40px; }
   .log-side { position: static; }
+  .info-layout { grid-template-columns: 1fr; gap: 32px; }
 }
 @media (max-width: 520px) {
   .claims li { grid-template-columns: 1fr; gap: 14px; padding-inline: 18px; }
   .claims li > .claim-icon { justify-content: flex-start; }
   .claims li > div { grid-column: 1; grid-row: 2; }
   .log-step { padding-left: 34px; }
+  .team-principles > div { grid-template-columns: 1fr; gap: 4px; }
 }
 html[data-motion="light"] .tech-wires path,
 html[data-motion="static"] .tech-wires path { animation: none; }
@@ -476,6 +494,60 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
     <p class="lead"><span class="en">We work with game studios, content creators and maintainers of software products. To integrate the SPITE core into your project, contact us.</span><span class="ru">Мы сотрудничаем со студиями, авторами контента и разработчиками программных продуктов. Чтобы встроить ядро SPITE в свой проект, свяжитесь с нами.</span></p>
     <button class="secondary contact-copy" id="contact-copy" type="button"><span class="en">Contact us</span><span class="ru">Связаться</span></button>
     <div class="contact-links" id="contact-links"></div>
+  </section>
+  <section class="wrap technical" id="faq" aria-labelledby="faq-title">
+    <div class="info-layout">
+      <div>
+        <div class="section-title"><span class="en">Before you build</span><span class="ru">Перед стартом</span></div>
+        <h2 id="faq-title"><span class="en">FAQ</span><span class="ru">Вопросы и ответы</span></h2>
+        <p class="lead"><span class="en">A few things to know about building with SPITE. Have another question? <a href="#contact">Get in touch.</a></span><span class="ru">Что стоит знать перед началом работы со SPITE. Остались вопросы? <a href="#contact">Свяжитесь с нами.</a></span></p>
+      </div>
+      <div class="faq-list">
+        <details open>
+          <summary><span class="en">How do I get started?</span><span class="ru">С чего начать?</span></summary>
+          <p><span class="en">Choose your operating system in the install panel at the top of this page, then copy and run the command in your terminal. Start with a small project to explore the engine and its workflow.</span><span class="ru">Выберите операционную систему в блоке установки в начале страницы, затем скопируйте и выполните команду в терминале. Начните с небольшого проекта, чтобы познакомиться с движком и процессом работы.</span></p>
+        </details>
+        <details>
+          <summary><span class="en">What does “agent-native” mean?</span><span class="ru">Что значит «нативно агентный»?</span></summary>
+          <p><span class="en">Agents get direct access to engine commands and scene data. They can inspect a scene, make changes and check the result through the engine’s tools, instead of relying on screenshots and mouse clicks.</span><span class="ru">Агенты получают прямой доступ к командам движка и данным сцены. Они могут изучать сцену, вносить изменения и проверять результат через инструменты движка, не полагаясь на скриншоты и клики мышью.</span></p>
+        </details>
+        <details>
+          <summary><span class="en">Which platforms can I use today?</span><span class="ru">Какие платформы доступны сейчас?</span></summary>
+          <p><span class="en">The installers on this page target Windows 10+ x64 and Ubuntu 24.04+ x86-64, with a Vulkan 1.3-capable GPU. Native macOS and browser support are on the <a href="#roadmap">roadmap</a>.</span><span class="ru">На этой странице доступны установщики для Windows 10+ x64 и Ubuntu 24.04+ x86-64. Нужна видеокарта с поддержкой Vulkan 1.3. Нативная macOS и работа в браузере — в <a href="#roadmap">планах развития</a>.</span></p>
+        </details>
+        <details>
+          <summary><span class="en">Can I bring my existing assets and tools?</span><span class="ru">Можно использовать свои ассеты и инструменты?</span></summary>
+          <p><span class="en">SPITE is designed to fit a workflow that uses external content tools. Bring your models and textures into the engine, and extend the tooling around the core. Direct integrations with 3D authoring software are part of the roadmap.</span><span class="ru">SPITE рассчитан на работу с внешними инструментами создания контента. Переносите модели и текстуры в движок и расширяйте инструментарий вокруг ядра. Прямые интеграции с 3D-редакторами входят в планы развития.</span></p>
+        </details>
+        <details>
+          <summary><span class="en">How far along is the engine?</span><span class="ru">На какой стадии находится движок?</span></summary>
+          <p><span class="en">SPITE is in beta. We’re developing the engine and editor, improving the workflow and expanding platform support. Trying it on a real project and sharing what works or gets in your way helps shape what comes next.</span><span class="ru">SPITE находится в бета-версии. Мы развиваем движок и редактор, улучшаем процесс работы и расширяем поддержку платформ. Пробуйте его на реальных проектах и рассказывайте, что работает, а что мешает: это помогает выбирать следующие шаги.</span></p>
+        </details>
+        <details>
+          <summary><span class="en">Can we work together on an integration?</span><span class="ru">Можно вместе поработать над интеграцией?</span></summary>
+          <p><span class="en">Yes. We’re interested in working with game studios, content creators and software teams. <a href="#contact">Contact us</a> with a short description of your project and what you’d like to build with SPITE.</span><span class="ru">Да. Нам интересно сотрудничать с игровыми студиями, авторами контента и командами разработчиков. <a href="#contact">Свяжитесь с нами</a> и кратко расскажите о проекте и о том, что хотите создать со SPITE.</span></p>
+        </details>
+      </div>
+    </div>
+  </section>
+  <section class="wrap technical" id="about-us" aria-labelledby="about-us-title">
+    <div class="info-layout">
+      <div>
+        <div class="section-title"><span class="en">The people behind SPITE</span><span class="ru">Кто делает SPITE</span></div>
+        <h2 id="about-us-title"><span class="en">About us</span><span class="ru">О нас</span></h2>
+        <p class="lead"><span class="en">We’re building an engine for a world where people and agents create together.</span><span class="ru">Мы создаём движок для мира, в котором люди и агенты работают вместе.</span></p>
+        <a class="secondary js-github" href="https://github.com/spiteful-team"><span class="en">SPITE on GitHub</span><span class="ru">SPITE на GitHub</span> ↗</a>
+      </div>
+      <div class="team-copy">
+        <p><span class="en">We’re the team developing SPITE: a game engine focused on performance, direct agent access and the freedom to build your own systems. We want ambitious games and simulations to be easier to create, inspect and improve.</span><span class="ru">Мы — команда разработчиков SPITE: игрового движка, в котором важны скорость, прямой доступ для агентов и свобода создавать собственные системы. Мы хотим, чтобы масштабные игры и симуляции было проще создавать, изучать и улучшать.</span></p>
+        <p><span class="en">The engine is still taking shape. We’re looking for developers and partners who want to try it on real problems and help us understand where it needs to go next.</span><span class="ru">Движок продолжает формироваться. Мы ищем разработчиков и партнёров, готовых пробовать его на реальных задачах и помогать нам понять, куда двигаться дальше.</span></p>
+        <dl class="team-principles">
+          <div><dt><span class="en">Performance</span><span class="ru">Скорость</span></dt><dd><span class="en">Build for demanding worlds. Measure the results.</span><span class="ru">Создавать для сложных миров. Измерять результат.</span></dd></div>
+          <div><dt><span class="en">Agent access</span><span class="ru">Доступ агентов</span></dt><dd><span class="en">Give agents tools to work directly with the engine.</span><span class="ru">Давать агентам инструменты для прямой работы с движком.</span></dd></div>
+          <div><dt><span class="en">Extensibility</span><span class="ru">Расширяемость</span></dt><dd><span class="en">Make room for your tools, modules and ideas.</span><span class="ru">Оставлять место для ваших инструментов, модулей и идей.</span></dd></div>
+        </dl>
+      </div>
+    </div>
   </section>
 </main>
 

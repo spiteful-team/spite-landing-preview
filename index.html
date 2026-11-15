@@ -470,22 +470,21 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
   <section class="wrap technical" id="faq" aria-labelledby="faq-title">
     <div class="info-layout">
       <div>
-        <div class="section-title"><span class="en">Before you build</span><span class="ru">Перед стартом</span></div>
         <h2 id="faq-title"><span class="en">FAQ</span><span class="ru">Вопросы и ответы</span></h2>
         <p class="lead"><span class="en">A few things to know about building with SPITE. Have another question? <a href="#contact">Get in touch.</a></span><span class="ru">Что стоит знать перед началом работы со SPITE. Остались вопросы? <a href="#contact">Свяжитесь с нами.</a></span></p>
       </div>
       <div class="faq-list">
         <details open>
           <summary><span class="en">How do I get started?</span><span class="ru">С чего начать?</span></summary>
-          <p><span class="en">Choose your operating system in the install panel at the top of this page, then copy and run the command in your terminal. Start with a small project to explore the engine and its workflow.</span><span class="ru">Выберите операционную систему в блоке установки в начале страницы, затем скопируйте и выполните команду в терминале. Начните с небольшого проекта, чтобы познакомиться с движком и процессом работы.</span></p>
+        <p><span class="en">Choose your operating system in the install panel at the top of this page, then copy and run the command in your terminal.</span><span class="ru">Выберите операционную систему в блоке установки в начале страницы, затем скопируйте и выполните команду в терминале. </span></p>
         </details>
         <details>
           <summary><span class="en">What does “agent-native” mean?</span><span class="ru">Что значит «нативно агентный»?</span></summary>
-          <p><span class="en">Agents get direct access to engine commands and scene data. They can inspect a scene, make changes and check the result through the engine’s tools, instead of relying on screenshots and mouse clicks.</span><span class="ru">Агенты получают прямой доступ к командам движка и данным сцены. Они могут изучать сцену, вносить изменения и проверять результат через инструменты движка, не полагаясь на скриншоты и клики мышью.</span></p>
+          <p><span class="en">Agents get direct access to engine commands and scene data, without relying on a separate layer or 3rd party tools.</span><span class="ru">Агенты получают прямой доступ к командам движка и данным сцены, без использования дополнительных инструментов.</span></p>
         </details>
         <details>
           <summary><span class="en">Which platforms can I use today?</span><span class="ru">Какие платформы доступны сейчас?</span></summary>
-          <p><span class="en">The installers on this page target Windows 10+ x64 and Ubuntu 24.04+ x86-64, with a Vulkan 1.3-capable GPU. Native macOS and browser support are on the <a href="#roadmap">roadmap</a>.</span><span class="ru">На этой странице доступны установщики для Windows 10+ x64 и Ubuntu 24.04+ x86-64. Нужна видеокарта с поддержкой Vulkan 1.3. Нативная macOS и работа в браузере — в <a href="#roadmap">планах развития</a>.</span></p>
+          <p><span class="en">The installers on this page target Windows 10+ x64 and Linux (tested on Ubuntu 24.04+ x86-64), with a Vulkan 1.3-capable GPU. Native macOS and browser support are on the <a href="#roadmap">roadmap</a>.</span><span class="ru">На этой странице доступны установщики для Windows 10+ x64 и Linux (протестировано на Ubuntu 24.04+ x86-64). Нужна видеокарта с поддержкой Vulkan 1.3. Нативная macOS и работа в браузере — в <a href="#roadmap">планах развития</a>.</span></p>
         </details>
         <details>
           <summary><span class="en">Can I bring my existing assets and tools?</span><span class="ru">Можно использовать свои ассеты и инструменты?</span></summary>
@@ -498,6 +497,10 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
         <details>
           <summary><span class="en">Can we work together on an integration?</span><span class="ru">Можно вместе поработать над интеграцией?</span></summary>
           <p><span class="en">Yes. We’re interested in working with game studios, content creators and software teams. <a href="#contact">Contact us</a> with a short description of your project and what you’d like to build with SPITE.</span><span class="ru">Да. Нам интересно сотрудничать с игровыми студиями, авторами контента и командами разработчиков. <a href="#contact">Свяжитесь с нами</a> и кратко расскажите о проекте и о том, что хотите создать со SPITE.</span></p>
+        </details>
+        <details>
+          <summary><span class="en">Why would i choose SPITE over any other engine?</span><span class="ru">Зачем мне выбирать SPITE среди других движков?</span></summary>
+          <p><span class="en">Though we claim that SPITE outperforms other engines on benchmarks, SPITE is not as mature as other engines, and it lacks various tooling and polish. We don't aim to replace current engine that you are using. We want to augment your development process by providing a fast, lean agentic runtime where you can put together your assets and games buildt with other software.</span><span class="ru">SPITE находится в бета-версии. Мы развиваем движок и редактор, улучшаем процесс работы и расширяем поддержку платформ. Пробуйте его на реальных проектах и рассказывайте, что работает, а что мешает: это помогает выбирать следующие шаги.</span></p>
         </details>
       </div>
     </div>

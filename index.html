@@ -1208,8 +1208,9 @@ const CONFIG = {
     quad(g, right, [[x, y + t], [x + Wd, y], [x + Wd, y + S], [x, y + t + S]]);
   }
 
-  function drawCell(g, c, topOnly) {
-    const rest = L.floor.rest, h = hill(c.i, c.j), gl = Math.round(glow[c.k] * GLOW_STEPS) / GLOW_STEPS, up = Math.min(1, h / HILL), dm = dim[c.k];
+  // At rest the cell is drawn flat and without its trail: that is the cached floor the repaints restore.
+  function drawCell(g, c, topOnly, atRest) {
+    const rest = L.floor.rest, h = atRest ? 0 : hill(c.i, c.j), gl = atRest ? 0 : Math.round(glow[c.k] * GLOW_STEPS) / GLOW_STEPS, up = Math.min(1, h / HILL), dm = dim[c.k];
     const lit = Math.min(1, rest + (1 - rest) * up) * (dm + (1 - dm) * up);
     // Lit is how far the floor has moved from the ground to its own grey. The trail an agent leaves
     // cools in value, from the look's hot stop through the mid stop to the ember, then plain floor again.
@@ -1235,9 +1236,7 @@ const CONFIG = {
   }
   function renderBase() {
     bctx.clearRect(0, 0, W, H);
-    const saved = agents; agents = [];   // the field at rest
-    for (const c of cells) if (!hidden[c.k]) drawCell(bctx, c, false);
-    agents = saved;
+    for (const c of cells) if (!hidden[c.k]) drawCell(bctx, c, false, true);
   }
 
   function markCube(g, x, y, k, lying) {

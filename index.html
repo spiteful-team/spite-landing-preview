@@ -650,7 +650,8 @@ const CONFIG = {
   }
 
   // Times are seconds: STEP per cell driven, ROLL per cell rolled, PLACE per cube carried.
-  const N = 110, NN = N * N, STEP = .1, ROLL = .15, PLACE = .8, EXIT = .6, ENTER = .55, HILL = .62, HILL_R2 = 2.8;
+  // The field reaches 129 cells from the install block corner, so even a 5K-wide hero shows no edge.
+  const N = 260, NN = N * N, STEP = .1, ROLL = .15, PLACE = .8, EXIT = .6, ENTER = .55, HILL = .62, HILL_R2 = 2.8;
   const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const hex = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));
   // Every colour of the scene is read from the current look (LOOKS, the script above). The floor

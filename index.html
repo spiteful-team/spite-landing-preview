@@ -813,9 +813,14 @@ const CONFIG = {
 
   function reset() {
     loose.fill(-1); reserved.fill(0); glow.fill(0); glowQ.fill(0); glowing.clear(); spawnQueue = [];
-    slot.forEach((st) => { st.state = "set"; st.assigned = false; });
+    slot.forEach((_, n) => { slot[n] = { state: "set" }; });
     agents = Array.from({ length: wide ? 6 : 4 }, (_, n) => ({ state: "parked", seed: n * 1.7, path: [], task: -1 }));
-    phase = "rest"; phaseT = 0;
+    time = 0; phase = "rest"; phaseT = 0; restDur = 2.2;
+    dock.flash = hatch.flash = 0;
+    clearTimeout(panel._dock);
+    panel.classList.remove("dock");
+    document.querySelectorAll(".fly-word").forEach((el) => { clearTimeout(el._spawn); el.classList.remove("spawn"); });
+    redrawAll = true;
   }
 
   // ---------- agents and paths
@@ -1395,21 +1400,32 @@ const CONFIG = {
       last = lastTick = nextPaint = performance.now();
       resetSample(last);
       raf = requestAnimationFrame(frame);
+    } else {
+      reset();
+      draw();
     }
   }
   function changeMotion() {
-    syncMotion();
-    time = 0;
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
     reset();
-    dock.flash = hatch.flash = 0;
-    panel.classList.remove("dock");
-    document.querySelectorAll(".fly-word.spawn").forEach((el) => el.classList.remove("spawn"));
     layout(false);
     draw();
+    syncMotion();
   }
   function frame(now) {
     raf = 0;
-    if (!shouldRun()) return;
+    if (!shouldRun()) { syncMotion(); return; }
+    try {
+      animate(now);
+    } catch (error) {
+      // A failed frame has no successor; restore the scene instead of leaving a partial build.
+      quality = "static";
+      changeMotion();
+      console.error("Hero animation stopped:", error);
+    }
+  }
+  function animate(now) {
     const gap = now - lastTick;
     lastTick = now;
     const sampling = now >= sampleStart;

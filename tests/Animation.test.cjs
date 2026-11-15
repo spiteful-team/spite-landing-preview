@@ -6,10 +6,11 @@ const vm = require('node:vm');
 
 const html = readFileSync(join(__dirname, '..', 'index.html'), 'utf8');
 const controller = html.slice(html.indexOf('  let last = 0,'), html.indexOf('\n})();', html.indexOf('  let last = 0,')));
+const resetSource = html.slice(html.indexOf('  function reset() {'), html.indexOf('  // ---------- agents and paths'));
 
 function device(reduced = false) {
   let now = 0, sequence = 0, intersect, preferenceChanged, visibilityChanged;
-  let draws = 0, cost = 0, resets = 0;
+  let draws = 0, cost = 0;
   const pending = new Map();
   const document = {
     hidden: false,
@@ -29,16 +30,22 @@ function device(reduced = false) {
       observe() {}
     },
     update() {}, layout() {},
+    clearTimeout() {}, console: { error() {} },
     draw() { draws++; now += cost; },
-    reset() { resets++; },
   });
-  vm.runInContext(`let quality = 'full'; const motionMode = () => motionPreference.matches ? 'static' : quality; ${controller}`, context);
+  vm.runInContext(`let quality = 'full'; const motionMode = () => motionPreference.matches ? 'static' : quality;
+    const loose = new Int16Array(4), reserved = new Uint8Array(4), glow = new Float32Array(4), glowQ = new Uint8Array(4), glowing = new Set();
+    let spawnQueue = [], slot = [{state:'set'}], agents = [], wide = true, phase = 'rest', phaseT = 0, restDur = 2.2, redrawAll = false;
+    ${resetSource}
+    ${controller}`, context);
   intersect([{ isIntersecting: true }]);
   return {
     get mode() { return document.documentElement.dataset.motion; },
     get draws() { return draws; },
-    get resets() { return resets; },
     get scheduled() { return pending.size; },
+    dirty() { vm.runInContext(`time=10;phase='build';phaseT=5;restDur=4;slot[0]={state:'carried',assigned:true,path:[1]};agents=[{state:'walk',task:0}];spawnQueue=[1];loose.fill(0);reserved.fill(1);glow.fill(1);glowQ.fill(48);glowing.add(0);dock.flash=hatch.flash=1;redrawAll=false;`, context); },
+    clean() { return vm.runInContext(`time===0 && phase==='rest' && phaseT===0 && restDur===2.2 && slot.every(st=>st.state==='set' && !st.assigned) && agents.every(a=>a.state==='parked' && a.task===-1) && !spawnQueue.length && loose.every(v=>v===-1) && reserved.every(v=>v===0) && glow.every(v=>v===0) && glowQ.every(v=>v===0) && !glowing.size && dock.flash===0 && hatch.flash===0 && redrawAll`, context); },
+    failUpdate() { context.update = () => { throw new Error('simulated animation failure'); }; },
     set cost(value) { cost = value; },
     run(duration, interval = 1000 / 60) {
       const end = now + duration;
@@ -58,6 +65,35 @@ function device(reduced = false) {
 
 test('all inline scripts parse', () => {
   for (const [, source] of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) new vm.Script(source);
+});
+
+test('every visibility stop clears the real simulation state and repaints', () => {
+  const d = device();
+  for (const stop of [() => d.hide(true), () => d.intersect(false)]) {
+    d.dirty();
+    const before = d.draws;
+    stop();
+    assert.equal(d.clean(), true);
+    assert.ok(d.draws > before);
+    assert.equal(d.scheduled, 0);
+    d.hide(false); d.intersect(true);
+  }
+});
+
+test('reduced motion clears a partially built scene', () => {
+  const d = device();
+  d.dirty(); d.reduce(true);
+  assert.equal(d.clean(), true);
+  assert.equal(d.scheduled, 0);
+});
+
+test('a failed frame falls back to a clean static scene', () => {
+  const d = device();
+  d.dirty(); d.failUpdate();
+  d.run(100);
+  assert.equal(d.mode, 'static');
+  assert.equal(d.clean(), true);
+  assert.equal(d.scheduled, 0);
 });
 
 test('healthy 60 Hz, 120 Hz and 144 Hz devices stay full with a 60 fps render cap', () => {
@@ -83,7 +119,7 @@ test('persistent slow frames reach an assembled static scene and stop scheduling
   const d = device();
   d.run(15000, 80);
   assert.equal(d.mode, 'static');
-  assert.equal(d.resets, 2);
+  assert.equal(d.clean(), true);
   assert.equal(d.scheduled, 0);
   const before = d.draws;
   d.run(10000);

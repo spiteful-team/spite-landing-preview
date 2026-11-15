@@ -863,6 +863,7 @@ const CONFIG = {
       jL: jd, cell: [Math.round(ic), Math.round(jd + .5)], flash: dock ? dock.flash : 0,
       poly: [[ic - half, jd, 0], [ic + half, jd, 0], [ic + half, jd, 1.6], [ic - half, jd, 1.6]].map(P),
     };
+    dock.mouth = P([ic, jd, .8]);
     // The hatch: the word "fly" on the slogan's face. Agents push out of it and drop to the field.
     const fl = lay(visible(".fly-word")), sr = sl.r;
     const jAt = (x) => sl.jL - (x - sr.l) / s, hAt = (y) => (sr.b - y) / s;

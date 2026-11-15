@@ -57,18 +57,28 @@ html[data-theme="dark"] {
   --text: #f2efed;
   --text-muted: #a9a39f;
   --text-faint: #8a847f;
-  --accent: #f2efed;
-  --accent-hover: #ffffff;
-  --accent-pressed: #cfc9c1;
-  --on-accent: #0d0c0b;
-  --focus-ring: rgba(242, 239, 237, .4);
-  --press-shadow: #57514b;
-  --agent: #f2efed;
-  --agent-wash: rgba(242, 239, 237, .06);
+  --accent: #ff4d2e;
+  --accent-hover: #ff6a4d;
+  --accent-pressed: #e0351a;
+  --on-accent: #1f0603;
+  --focus-ring: rgba(255, 77, 46, .4);
+  --press-shadow: #7a2010;
+  --agent: #b794ff;
+  --agent-wash: rgba(183, 148, 255, .08);
   --hard-shadow: #050404;
   --floor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='32'%3E%3Cpath d='M28 1.5 L54 16 L28 30.5 L2 16Z' fill='%231a1817' stroke='%23252220'/%3E%3C/svg%3E");
   color-scheme: dark;
 }
+/* Dark is the legacy Forge look: orange-red for what is active and interactive, violet for the agent, with their glows. */
+html[data-theme="dark"] .agent-chip { background: var(--agent-wash); color: var(--agent); }
+html[data-theme="dark"] .fly-word.spawn { color: var(--accent); background-color: transparent; text-shadow: 0 0 14px rgba(255, 77, 46, .7); }
+html[data-theme="dark"] .install.dock { box-shadow: 0 0 0 1px var(--accent), 0 0 32px rgba(255, 77, 46, .3); }
+html[data-theme="dark"] .iso .hot { filter: drop-shadow(0 0 5px rgba(255, 77, 46, .6)); }
+html[data-theme="dark"] .log::after { box-shadow: 0 0 10px var(--accent); }
+html[data-theme="dark"] .log-step::before { border-color: var(--agent); }
+html[data-theme="dark"] .log-step.reached::before { border-color: var(--accent); box-shadow: 0 0 10px rgba(255, 77, 46, .45); }
+html[data-theme="dark"] .log-step[data-state="now"]::before { border-color: var(--accent); box-shadow: 0 0 12px rgba(255, 77, 46, .7); }
+html[data-theme="dark"] .log-chip { border-color: rgba(183, 148, 255, .35); }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body { background: var(--ground); color: var(--text); font: 15px/1.6 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
@@ -479,13 +489,17 @@ html.theming *, html.theming *::before, html.theming *::after { transition: none
 //   floor     bg is the colour the floor fades to under text, materials its five greys at full light
 //             (an agent's passing lifts a cell to full), rest the share of that light a quiet cell shows,
 //             shade the factor of the top, left and right faces
-//   heat      the trail behind an agent, from fresh (hot) through mid to ember, a value shift toward the ink
+//   heat      the trail behind an agent, from fresh (hot) through mid to ember. A stop is one colour shaded like
+//             the floor, or three face colours used as they are; the hot stop is the agent's own faces
 //   block     top, side and edge of the slogan and install blocks; chip the same for the tag block
 //   agent, loose   top, left and right faces of an agent cube, and of a mark cube that left the mark
 //   mark      face and seam colour of the assembled SPITE mark
 //   stroke, beam   outline of the dock and the hatch; command beams and the mark's ghost outlines
 //   dock      fill of the garage door
 //   icon      n greys (also the faded g cubes) and a ink for the iso icons, their seam and their dashed outline
+//   halo      dark only: rgb of the radial glow under agents, around the core cube and in the garage mouth
+//   mark.faces, mark.cubes, mark.coreLying   dark only: the Forge mark, a colour per drawn shape of every slot,
+//             the faces of each slot's loose cube, and the core cube lying on the field
 const LOOKS = {
   light: {
     seam: "#ffffff",
@@ -501,66 +515,26 @@ const LOOKS = {
     dock: { fill: "#cfc9c1" },
     icon: { n: ["#cfc9c1", "#a9a39f", "#8a847f"], a: ["#0d0c0b", "#0d0c0b", "#0d0c0b"], seam: "#ffffff", ghost: "#766f69" },
   },
+  // Legacy Forge: graphite floor, orange-red agents and their trail, violet commands and tag, the shaded mark.
   dark: {
     seam: "#141312",
-    floor: { bg: "#000000", rest: .26, materials: ["#928c87", "#78726d", "#b8b2ad", "#a9a39f", "#c8c2bc"], shade: [1, .66, .42] },
-    heat: { ember: "#3c3a38", mid: "#8a8581", hot: "#ece9e6" },
+    floor: { bg: "#000000", rest: .26, materials: ["#a6a9ae", "#8e9196", "#b8babe", "#76797e", "#c8cacd"], shade: [1, .66, .42] },
+    heat: { ember: ["#ff4d2e","#cc3e25","#9e4230"], mid: ["#ff4d2e","#cc3e25","#9e4230"], hot: ["#ff4d2e","#cc3e25","#9e4230"] },
     block: { top: "#2b2826", side: "#1c1a19", edge: "#45413e" },
-    chip: { top: "#f2efed", side: "#f2efed", edge: "#0d0c0b" },
-    agent: ["#f2efed", "#f2efed", "#f2efed"],
-    loose: ["#f2efed", "#f2efed", "#f2efed"],
-    mark: { face: "#f2efed", seam: "#0d0c0b" },
-    stroke: "#f2efed",
-    beam: "#f2efed",
+    chip: { top: "#2c2541", side: "#1d1830", edge: "rgba(183,148,255,.45)" },
+    agent: ["#ff4d2e","#cc3e25","#9e4230"],
+    loose: ["#a9a39f", "#6f6a65", "#45413e"],
+    mark: { face: "#a9a39f", seam: "#141312", coreLying: ["#b8452e", "#8f3b27", "#6a2f22"],
+      faces: [["#141312","#45413e","#6f6a65","#a9a39f"],["#141312","#45413e","#6f6a65","#a9a39f"],["#141312","#45413e","#6f6a65","#a9a39f"],["#141312","#45413e","#6f6a65","#a9a39f"],["#141312","#45413e","#6f6a65","#a9a39f"],["#141312","#45413e","#6f6a65","#a9a39f"],["#141312","#45413e","#6f6a65","#a9a39f"],["#141312","#35322f","#5a5551","#8a847f"],["#141312","#35322f","#5a5551","#8a847f"],["#141312","#35322f","#5a5551","#8a847f"],["#141312","#35322f","#5a5551","#8a847f"],["#141312","#35322f","#5a5551","#8a847f"],["#141312","#35322f","#5a5551","#8a847f"],["#141312","#35322f","#5a5551","#8a847f"],["#141312","#2a2725","#45413e","#6f6a65"],["#141312","#2a2725","#45413e","#6f6a65"],["#141312","#2a2725","#45413e","#6f6a65"],["#141312","#2a2725","#45413e","#6f6a65"],["#141312","#2a2725","#45413e","#6f6a65"],["#141312","#2a2725","#45413e","#6f6a65"],["#141312","#2a2725","#45413e"],["#141312","#9e4230","#cc3e25","#ff4d2e"]],
+      cubes: [["#a9a39f","#6f6a65","#45413e"],["#a9a39f","#6f6a65","#45413e"],["#a9a39f","#6f6a65","#45413e"],["#a9a39f","#6f6a65","#45413e"],["#a9a39f","#6f6a65","#45413e"],["#a9a39f","#6f6a65","#45413e"],["#a9a39f","#6f6a65","#45413e"],["#8a847f","#5a5551","#35322f"],["#8a847f","#5a5551","#35322f"],["#8a847f","#5a5551","#35322f"],["#8a847f","#5a5551","#35322f"],["#8a847f","#5a5551","#35322f"],["#8a847f","#5a5551","#35322f"],["#8a847f","#5a5551","#35322f"],["#6f6a65","#45413e","#2a2725"],["#6f6a65","#45413e","#2a2725"],["#6f6a65","#45413e","#2a2725"],["#6f6a65","#45413e","#2a2725"],["#6f6a65","#45413e","#2a2725"],["#6f6a65","#45413e","#2a2725"],["#6f6a65","#45413e","#2a2725"],["#ff4d2e","#cc3e25","#9e4230"]] },
+    stroke: "#ff4d2e",
+    beam: "#b794ff",
     dock: { fill: "#070706" },
-    icon: { n: ["#a9a39f", "#6f6a65", "#45413e"], a: ["#f2efed", "#f2efed", "#f2efed"], seam: "#141312", ghost: "#8a847f" },
+    halo: "255,106,77",
+    icon: { n: ["#a9a39f", "#6f6a65", "#45413e"], a: ["#ff4d2e","#cc3e25","#9e4230"], seam: "#141312", ghost: "#8a847f" },
   },
 };
 
-// TEMPORARY accent switcher for the dark theme, for review only. Open the page with ?accents to show it.
-// Remove this block, "data-accent" in the two attributeFilter lists, and the mark.core / glow / coreGlow reads in the hero.
-(() => {
-  const VARIANTS = {"M0":{"name":"Сейчас","look":{},"css":""},"M1":{"name":"Глубина","look":{"seam":"#0b0a0a","floor":{"bg":"#000000","rest":0.15,"shade":[1,0.62,0.38]},"heat":{"ember":"#242220","mid":"#6f6a65","hot":"#ffffff"},"block":{"top":"#171615","side":"#0f0e0d","edge":"#2a2725"},"agent":["#ffffff","#ffffff","#ffffff"],"mark":{"face":"#ffffff","seam":"#000000"},"beam":"#ffffff","stroke":"#ffffff"},"css":"html[data-theme=dark]{--ground:#070606;--panel:#0e0d0c;--raised:#161514;--field:#050404;--border:#211f1d;--border-strong:#3a3633;--text-muted:#8f8984;--accent:#ffffff;--agent:#ffffff}"},"M2":{"name":"Белое ядро со свечением","look":{"agent":["#ffffff","#ffffff","#ffffff"],"loose":["#8a847f","#8a847f","#8a847f"],"mark":{"face":"#8a847f","seam":"#0d0c0b","core":"#ffffff"},"glow":"rgba(255,255,255,.65)","heat":{"ember":"#2e2c2a","mid":"#6f6a65","hot":"#d9d5d1"}},"css":"html[data-theme=dark]{--accent:#ffffff}html[data-theme=dark] .primary,html[data-theme=dark] .roof-btn:hover{box-shadow:0 0 18px rgba(255,255,255,.35)}"},"C1":{"name":"Красное ядро","look":{"mark":{"face":"#f2efed","seam":"#0d0c0b","core":"#ff4d2e"},"coreGlow":"rgba(255,77,46,.55)"},"css":"html[data-theme=dark]{--accent:#ff4d2e;--accent-hover:#ff6a4d;--accent-pressed:#e0351a;--focus-ring:rgba(255,77,46,.4)}html[data-theme=dark] .agent-chip{color:#0d0c0b}html[data-theme=dark] .primary{color:#1f0603}"},"C2":{"name":"Forge: красные агенты","look":{"agent":["#ff4d2e","#cc3e25","#9e4230"],"loose":["#a9a39f","#6f6a65","#45413e"],"mark":{"face":"#a9a39f","seam":"#0d0c0b","core":"#ff4d2e"},"glow":"rgba(255,77,46,.55)","heat":{"ember":"#3a1d16","mid":"#9e4230","hot":"#ff6a4d"},"beam":"#ff6a4d","stroke":"#ff4d2e"},"css":"html[data-theme=dark]{--accent:#ff4d2e;--accent-hover:#ff6a4d;--accent-pressed:#e0351a;--focus-ring:rgba(255,77,46,.4)}html[data-theme=dark] .agent-chip{color:#0d0c0b}html[data-theme=dark] .primary{color:#1f0603}"},"C3":{"name":"Forge: красный + фиолетовый","look":{"agent":["#ff4d2e","#cc3e25","#9e4230"],"loose":["#a9a39f","#6f6a65","#45413e"],"mark":{"face":"#a9a39f","seam":"#0d0c0b","core":"#ff4d2e"},"glow":"rgba(255,77,46,.55)","heat":{"ember":"#3a1d16","mid":"#9e4230","hot":"#ff6a4d"},"beam":"#b794ff","stroke":"#ff4d2e","chip":{"top":"#2c2541","side":"#1d1830","edge":"rgba(183,148,255,.45)"}},"css":"html[data-theme=dark]{--accent:#ff4d2e;--accent-hover:#ff6a4d;--accent-pressed:#e0351a;--focus-ring:rgba(255,77,46,.4)}html[data-theme=dark] .agent-chip{background:rgba(183,148,255,.08);border-color:#b794ff;color:#b794ff}html[data-theme=dark] .primary{color:#1f0603}"},"M2+C1":{"name":"Серый трибар, белые агенты, красное ядро","look":{"agent":["#ffffff","#ffffff","#ffffff"],"loose":["#8a847f","#8a847f","#8a847f"],"mark":{"face":"#8a847f","seam":"#0d0c0b","core":"#ff4d2e"},"glow":"rgba(255,255,255,.65)","coreGlow":"rgba(255,77,46,.6)","heat":{"ember":"#2e2c2a","mid":"#6f6a65","hot":"#d9d5d1"}},"css":"html[data-theme=dark]{--accent:#ff4d2e;--accent-hover:#ff6a4d;--accent-pressed:#e0351a;--focus-ring:rgba(255,77,46,.4)}html[data-theme=dark] .agent-chip{color:#0d0c0b}html[data-theme=dark] .primary{color:#1f0603}"}};
-  const BASE = structuredClone(LOOKS.dark), root = document.documentElement;
-  const merge = (t, s) => { for (const k in s) { if (s[k] && typeof s[k] === "object" && !Array.isArray(s[k])) merge(t[k] = t[k] || {}, s[k]); else t[k] = s[k]; } return t; };
-  const read = (k) => { try { return localStorage.getItem(k); } catch (_) { return null; } };
-  const write = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
-  const params = new URLSearchParams(location.search);
-  if (params.has("accents")) write("spite-accents-panel", "1");
-  const style = document.createElement("style");
-  document.head.append(style);
-  function apply(key) {
-    if (!VARIANTS[key]) key = "M0";
-    LOOKS.dark = merge(structuredClone(BASE), VARIANTS[key].look);
-    style.textContent = VARIANTS[key].css;
-    root.dataset.accent = key;
-    document.querySelectorAll(".accent-panel button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.key === key)));
-    const label = document.querySelector(".accent-panel span");
-    if (label) label.textContent = VARIANTS[key].name;
-  }
-  if (read("spite-accents-panel") !== "1") { apply("M0"); return; }
-  apply(VARIANTS[params.get("accents")] ? params.get("accents") : read("spite-accent"));
-  const css = document.createElement("style");
-  css.textContent = ".accent-panel{position:fixed;z-index:50;right:12px;bottom:12px;display:flex;flex-direction:column;gap:6px;max-width:min(320px,calc(100vw - 24px));padding:10px;background:var(--panel);border:1px solid var(--border-strong);border-radius:2px;box-shadow:4px 4px 0 var(--hard-shadow);font:500 11px/1.3 var(--mono);color:var(--text)}.accent-panel b{font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}.accent-panel div{display:flex;flex-wrap:wrap;gap:4px}.accent-panel button{padding:5px 8px;border:1px solid var(--border-strong);border-radius:2px;background:var(--raised);color:var(--text);font:inherit;cursor:pointer}.accent-panel button[aria-pressed=true]{background:var(--text);color:var(--ground);border-color:var(--text)}.accent-panel span{color:var(--text-muted)}.accent-panel a{color:var(--text-muted)}";
-  document.head.append(css);
-  const panel = document.createElement("div");
-  panel.className = "accent-panel";
-  panel.innerHTML = "<b>Акценты тёмной темы · временно</b><div></div><span></span><a href='#'>скрыть панель</a>";
-  for (const key of Object.keys(VARIANTS)) {
-    const b = document.createElement("button");
-    b.type = "button"; b.dataset.key = key; b.textContent = key; b.title = VARIANTS[key].name;
-    b.addEventListener("click", () => {
-      write("spite-accent", key);
-      if (root.dataset.theme !== "dark") { write("spite-theme", "dark"); root.dataset.theme = "dark"; }
-      apply(key);
-    });
-    panel.querySelector("div").append(b);
-  }
-  panel.querySelector("a").addEventListener("click", (e) => { e.preventDefault(); write("spite-accents-panel", "0"); panel.remove(); apply("M0"); });
-  document.body.append(panel);
-  apply(root.dataset.accent);
-})();
-// END TEMPORARY accent switcher
 // The header button flips the theme, remembers the choice, and never animates the change.
 (() => {
   const root = document.documentElement, btn = document.getElementById("theme-toggle");
@@ -682,13 +656,16 @@ const CONFIG = {
   // Every colour of the scene is read from the current look (LOOKS, the script above). The floor
   // is five greys drawn in these weights; useLook() derives the rgb arrays the drawing code reads.
   const MATERIAL_WEIGHTS = [6, 6, 3, 3, 1], TOTAL = MATERIAL_WEIGHTS.reduce((n, w) => n + w, 0);
-  let L, MATERIALS, FLOOR_BG, HEAT, AGENT_RGB, LOOSE_RGB;
+  let L, MATERIALS, FLOOR_BG, HEAT, AGENT_RGB, LOOSE_RGB, SLOT_RGB, CORE_LYING_RGB;
   function useLook() {
     L = LOOKS[document.documentElement.dataset.theme] || LOOKS.light;
     MATERIALS = L.floor.materials.map(hex);
     FLOOR_BG = hex(L.floor.bg);
-    HEAT = { ember: hex(L.heat.ember), mid: hex(L.heat.mid), hot: hex(L.heat.hot) };
+    const stop = (v) => Array.isArray(v) ? v.map(hex) : L.floor.shade.map((k) => hex(v).map((c) => c * k));
+    HEAT = { ember: stop(L.heat.ember), mid: stop(L.heat.mid), hot: stop(L.heat.hot) };
     AGENT_RGB = L.agent.map(hex); LOOSE_RGB = L.loose.map(hex);
+    SLOT_RGB = L.mark.cubes ? L.mark.cubes.map((c) => c.map(hex)) : null;
+    CORE_LYING_RGB = L.mark.coreLying ? L.mark.coreLying.map(hex) : LOOSE_RGB;
   }
   useLook();
   let seed = 7;
@@ -1260,9 +1237,9 @@ const CONFIG = {
     // Lit is how far the floor has moved from the ground to its own grey. The trail an agent leaves
     // cools in value, from the look's hot stop through the mid stop to the ember, then plain floor again.
     const em = clamp((gl - .1) / .9, 0, 1), a = smooth(0, .3, em);
-    const heat = em > .5 ? mix(HEAT.mid, HEAT.hot, (em - .5) * 2) : mix(HEAT.ember, HEAT.mid, em * 2);
-    const base = mix(mix(FLOOR_BG, MATERIALS[mat[c.k]], lit), heat, a);
-    const face = (n) => rgb(base, L.floor.shade[n]);
+    const heat = (n) => em > .5 ? mix(HEAT.mid[n], HEAT.hot[n], (em - .5) * 2) : mix(HEAT.ember[n], HEAT.mid[n], em * 2);
+    const floor = mix(FLOOR_BG, MATERIALS[mat[c.k]], lit);
+    const face = (n) => rgb(mix(floor.map((v) => v * L.floor.shade[n]), heat(n), a), 1);
     const [x, y] = iso(c.i, c.j, h);
     if (topOnly) return topFace(g, x, y, face(0));
     cube(g, x, y, [face(0), face(1), face(2)]);
@@ -1278,25 +1255,37 @@ const CONFIG = {
     g.save(); g.globalAlpha = .5 + .5 * dock.flash;
     g.strokeStyle = L.stroke; g.lineWidth = 1.5; poly(g, dock.poly); g.stroke();
     g.restore();
+    if (dock.flash > 0 && L.halo) { g.save(); poly(g, dock.poly); g.clip(); glowAt(g, ...dock.mouth, s * 1.6, .7 * dock.flash); g.restore(); }
   }
   function renderBase() {
     bctx.clearRect(0, 0, W, H);
     for (const c of cells) if (!hidden[c.k]) drawCell(bctx, c, false, true);
   }
 
-  function markCube(g, x, y, k, lying) {
-    cube(g, x, lying ? y - (k - 1) * s : y, L.loose, k);
+  function glowAt(g, x, y, r, a) {
+    const grad = g.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, `rgba(${L.halo},${a})`); grad.addColorStop(1, `rgba(${L.halo},0)`);
+    g.fillStyle = grad; g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  function looseFaces(n, lying) {
+    if (!L.mark.cubes) return L.loose;
+    return n === LIT && lying ? L.mark.coreLying : L.mark.cubes[n];
+  }
+  function markCube(g, n, x, y, k, lying) {
+    cube(g, x, lying ? y - (k - 1) * s : y, looseFaces(n, lying), k);
   }
   function agentCube(g, x, y, k = 1, alpha = 1) {
-    g.save(); g.globalAlpha = alpha; if (L.glow) { g.shadowColor = L.glow; g.shadowBlur = 14; }
+    g.save(); g.globalAlpha = alpha;
+    if (L.halo) glowAt(g, x, y + s * k / 2, s * 2.4 * k, .38);
     cube(g, x, y, L.agent, k);
     g.restore();
   }
   function drawSlot(n) {
-    const S = SLOTS[n], [x, y] = slotPos(n);
+    const S = SLOTS[n], [x, y] = slotPos(n), edge = MARK_EDGE * logo.sc, colours = L.mark.faces?.[n];
+    if (n === LIT && L.halo) glowAt(ctx, x, y + edge * .7, edge * 2.6, phase === "rest" ? .42 + .14 * Math.sin(time * 2.4) : .4);
     ctx.save(); ctx.translate(x, y); ctx.scale(logo.sc, logo.sc);
-    for (const [face, ...subs] of S.p) {
-      const core = face && n === LIT && L.mark.core; ctx.fillStyle = face ? core || L.mark.face : L.mark.seam; ctx.shadowColor = (core && (L.coreGlow || L.glow)) || "transparent"; ctx.shadowBlur = core && (L.coreGlow || L.glow) ? 22 : 0; ctx.beginPath();
+    for (const [i, [face, ...subs]] of S.p.entries()) {
+      ctx.fillStyle = colours ? colours[i] : face ? L.mark.face : L.mark.seam; ctx.beginPath();
       for (const pts of subs) { ctx.moveTo(pts[0], pts[1]); for (let q = 2; q < pts.length; q += 2) ctx.lineTo(pts[q], pts[q + 1]); ctx.closePath(); }
       ctx.fill();
     }
@@ -1410,10 +1399,10 @@ const CONFIG = {
     slot.forEach((st, n) => {
       if (st.state === "loose") {
         const [i, j] = st.cell, b = st.landed < .6 ? s * .35 * Math.exp(-7 * st.landed) * Math.abs(Math.sin(12 * st.landed)) : 0;
-        items.push({ key: i + j + .5, at: [i, j], draw: (g) => { const [x, y] = iso(i, j, hill(i, j) + 1); markCube(g, x, y - b, SLOTS[n].k, true); } });
+        items.push({ key: i + j + .5, at: [i, j], draw: (g) => { const [x, y] = iso(i, j, hill(i, j) + 1); markCube(g, n, x, y - b, SLOTS[n].k, true); } });
       } else if (st.state === "roll") {
         const r = rollStep(st), [i, j] = st.at;
-        items.push({ key: i + j + (r ? (r.e[0] + r.e[1]) * r.u : 0) + .5, at: [i, j], draw: (g) => solid(g, [i, j, hill(i, j)], SLOTS[n].k, LOOSE_RGB, r && { e: r.e, a: Math.PI / 2 * ease(r.u) }) });
+        items.push({ key: i + j + (r ? (r.e[0] + r.e[1]) * r.u : 0) + .5, at: [i, j], draw: (g) => solid(g, [i, j, hill(i, j)], SLOTS[n].k, SLOT_RGB ? (n === LIT ? CORE_LYING_RGB : SLOT_RGB[n]) : LOOSE_RGB, r && { e: r.e, a: Math.PI / 2 * ease(r.u) }) });
       }
     });
     items.sort((p, q) => p.key - q.key);
@@ -1490,8 +1479,8 @@ const CONFIG = {
 
     if (phase === "build") slot.forEach((st, n) => { if (st.state !== "set") ghostSlot(n); });
     slot.forEach((st, n) => { if (st.state === "set" || (st.state === "fall" && st.t < 0)) drawSlot(n); });
-    slot.forEach((st, n) => { if (st.state === "fall" && st.t >= 0) { const [x, y, k] = fallPose(st, n); markCube(ctx, x, y, k, false); } });
-    for (const [, pose] of places) if (pose.p < .88) markCube(ctx, ...pose.pos, pose.k, false);
+    slot.forEach((st, n) => { if (st.state === "fall" && st.t >= 0) { const [x, y, k] = fallPose(st, n); markCube(ctx, n, x, y, k, false); } });
+    for (const [, pose] of places) if (pose.p < .88) markCube(ctx, pose.n, ...pose.pos, pose.k, false);
     for (const [a, pose] of places) command(P([a.x, a.y, hill(a.x, a.y) + 1]), [pose.pos, pose.slot], [pose.k, kLogo(pose.n)], pose.reach, pose.alpha);
     ctx.restore();
 
@@ -1513,7 +1502,7 @@ const CONFIG = {
   let width = hero.clientWidth;
   function refit(fresh) { layout(fresh); draw(); resetSample(performance.now()); }
   new ResizeObserver(() => { const fresh = hero.clientWidth !== width; width = hero.clientWidth; refit(fresh); }).observe(hero);
-  new MutationObserver(() => { useLook(); refit(false); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang", "data-theme", "data-accent"] });
+  new MutationObserver(() => { useLook(); refit(false); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang", "data-theme"] });
   // Web fonts move the wordmark's baseline and the blocks' widths without changing the hero's size.
   if (document.fonts) document.fonts.ready.then(() => refit(false));
   let last = 0, lastTick = 0, nextPaint = 0, visibleHero = false, raf = 0;
@@ -1616,7 +1605,7 @@ const CONFIG = {
       faces.flat().forEach(([px, py]) => { minX = Math.min(minX, px); maxX = Math.max(maxX, px); minY = Math.min(minY, py); maxY = Math.max(maxY, py); });
       const pts = (f) => f.map((p) => p.map((v) => v.toFixed(1)).join(",")).join(" ");
       if (k === "o") { out += faces.map((f) => `<polygon points="${pts(f)}" fill="none" stroke="${ghost}" stroke-dasharray="3 3"/>`).join(""); continue; }
-      out += `<g opacity="${op}">` + faces.map((f, i) => `<polygon points="${pts(f)}" fill="${pal[k][i]}" stroke="${seam}" stroke-width="1.2" stroke-linejoin="round"/>`).join("") + "</g>";
+      out += `<g opacity="${op}"${k === "a" ? ' class="hot"' : ""}>` + faces.map((f, i) => `<polygon points="${pts(f)}" fill="${pal[k][i]}" stroke="${seam}" stroke-width="1.2" stroke-linejoin="round"/>`).join("") + "</g>";
     }
     const pad = 6, w = maxX - minX + pad * 2, h = maxY - minY + pad * 2;
     return `<svg class="iso" width="${w.toFixed(0)}" height="${h.toFixed(0)}" viewBox="${(minX - pad).toFixed(1)} ${(minY - pad).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}" aria-hidden="true">${out}</svg>`;
@@ -1646,7 +1635,7 @@ const CONFIG = {
   const icons = [...claimIcons, () => { coreIcon.innerHTML = iso([...base, [1, 1, 1, "a"]], 40); }];
   const paintIcons = () => icons.forEach((paint) => paint());
   paintIcons();
-  new MutationObserver(paintIcons).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-accent"] });
+  new MutationObserver(paintIcons).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   // Orthogonal wires: one trunk from the core down to a bus, one branch from the bus to the top centre of each card.
   // Each subpath runs from the card toward the core, so the dash flow reads as data moving into the core.
